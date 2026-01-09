@@ -621,9 +621,13 @@ const QRCodePage = () => {
           ctx.textAlign = 'center';
           ctx.fillText(customization.logoText, canvas.width / 2, 55);
           
-          // Draw title in white
+          // Draw title in white with shadow - increased font size
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 18px system-ui';
+          ctx.font = 'bold 24px system-ui';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
           const titleLines = customization.title.split(' ');
           let titleY = 95;
           if (customization.title.length > 30) {
@@ -631,16 +635,19 @@ const QRCodePage = () => {
             const line1 = titleLines.slice(0, midPoint).join(' ');
             const line2 = titleLines.slice(midPoint).join(' ');
             ctx.fillText(line1, canvas.width / 2, titleY);
-            ctx.fillText(line2, canvas.width / 2, titleY + 22);
-            titleY += 22;
+            ctx.fillText(line2, canvas.width / 2, titleY + 28);
+            titleY += 28;
           } else {
             ctx.fillText(customization.title, canvas.width / 2, titleY);
           }
           
-          // Draw subtitle in white with opacity
-          ctx.font = '16px system-ui';
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
+          // Draw subtitle in white with shadow - increased font size
+          ctx.font = 'bold 20px system-ui';
+          ctx.fillStyle = customization.fgColor;
+          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
           
           // Draw white rounded container for QR code
           const qrContainerSize = qrSize + 32;
@@ -671,23 +678,23 @@ const QRCodePage = () => {
             cameraImg.src = window.location.origin + '/doorvii-camera.png';
           });
           
+          // Warning box - blue dark style matching preview
           const warningY = qrContainerY + qrContainerSize + 20;
-          ctx.fillStyle = '#fef3c7';
+          ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
           ctx.fill();
-          ctx.strokeStyle = '#fbbf24';
+          ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
           ctx.stroke();
           
-          ctx.fillStyle = '#92400e';
-          ctx.font = 'bold 12px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 25);
-          ctx.fillStyle = '#b45309';
-          ctx.font = '12px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 45);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 28);
+          ctx.font = 'bold 16px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 52);
           
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
@@ -1018,8 +1025,13 @@ const QRCodePage = () => {
           ctx.textAlign = 'center';
           ctx.fillText(customization.logoText, canvas.width / 2, 55);
           
+          // Draw title in white with shadow - increased font size
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 18px system-ui';
+          ctx.font = 'bold 24px system-ui';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
           const titleLines = customization.title.split(' ');
           let titleY = 95;
           if (customization.title.length > 30) {
@@ -1027,15 +1039,19 @@ const QRCodePage = () => {
             const line1 = titleLines.slice(0, midPoint).join(' ');
             const line2 = titleLines.slice(midPoint).join(' ');
             ctx.fillText(line1, canvas.width / 2, titleY);
-            ctx.fillText(line2, canvas.width / 2, titleY + 22);
-            titleY += 22;
+            ctx.fillText(line2, canvas.width / 2, titleY + 28);
+            titleY += 28;
           } else {
             ctx.fillText(customization.title, canvas.width / 2, titleY);
           }
           
-          ctx.font = '16px system-ui';
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
+          // Draw subtitle in white with shadow - increased font size
+          ctx.font = 'bold 20px system-ui';
+          ctx.fillStyle = customization.fgColor;
+          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
           
           const qrContainerSize = qrSize + 32;
           const qrContainerX = (canvas.width - qrContainerSize) / 2;
@@ -1063,23 +1079,23 @@ const QRCodePage = () => {
             cameraImg.src = window.location.origin + '/doorvii-camera.png';
           });
           
+          // Warning box - blue dark style matching preview
           const warningY = qrContainerY + qrContainerSize + 20;
-          ctx.fillStyle = '#fef3c7';
+          ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
           ctx.fill();
-          ctx.strokeStyle = '#fbbf24';
+          ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
           ctx.stroke();
           
-          ctx.fillStyle = '#92400e';
-          ctx.font = 'bold 12px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 25);
-          ctx.fillStyle = '#b45309';
-          ctx.font = '12px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 45);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 28);
+          ctx.font = 'bold 16px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 52);
           
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + 80;
