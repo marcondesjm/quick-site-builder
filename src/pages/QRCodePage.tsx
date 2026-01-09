@@ -3,6 +3,7 @@ import doorviiLogo from "@/assets/doorvii-logo.png";
 import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 import doorviiBrandLogo from "@/assets/doorvii-logo-nobg.png";
 import doorviiLogoWhite from "@/assets/doorvii-logo-white.png";
+import cameraIconWarning from "@/assets/camera-icon-warning.png";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -1616,7 +1617,7 @@ const QRCodePage = () => {
                         ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
                       </p>
                       <div className="flex items-center justify-center gap-2 text-sm text-amber-700">
-                        <Camera className="w-4 h-4 text-amber-600" />
+                        <img src={cameraIconWarning} alt="Câmera" className="w-4 h-4 object-contain" />
                         <span>Escaneie o QR Code Usando a Câmera ou um App</span>
                       </div>
                     </div>
