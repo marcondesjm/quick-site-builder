@@ -684,12 +684,12 @@ const QRCodePage = () => {
           const warningBoxHeight = 80;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
           ctx.fill();
           ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
           ctx.stroke();
           
           // Calculate max text width and adjust font if needed
@@ -699,14 +699,14 @@ const QRCodePage = () => {
           ctx.shadowOffsetX = 2;
           ctx.shadowOffsetY = 2;
           
-          // First line - smaller font to fit
-          ctx.font = 'bold 12px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 25);
-          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 42);
+          // First line - increased font
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48);
           
-          // Second line
-          ctx.font = 'bold 13px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
+          // Second line - increased font
+          ctx.font = 'bold 16px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72);
           
           // Reset shadow
           ctx.shadowColor = 'transparent';
@@ -1103,12 +1103,12 @@ const QRCodePage = () => {
           const warningBoxHeight = 80;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
           ctx.fill();
           ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
           ctx.stroke();
           
           // Calculate max text width and adjust font if needed
@@ -1118,14 +1118,14 @@ const QRCodePage = () => {
           ctx.shadowOffsetX = 2;
           ctx.shadowOffsetY = 2;
           
-          // First line - smaller font to fit
-          ctx.font = 'bold 12px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 25);
-          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 42);
+          // First line - increased font
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48);
           
-          // Second line
-          ctx.font = 'bold 13px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
+          // Second line - increased font
+          ctx.font = 'bold 16px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72);
           
           // Reset shadow
           ctx.shadowColor = 'transparent';
@@ -1676,12 +1676,12 @@ const QRCodePage = () => {
                       </div>
                     </div>
                     
-                    <div className="mt-4 p-5 rounded-xl bg-[#003366] border-2 border-[#004080] shadow-lg">
-                      <p className="text-base text-white font-bold mb-3 text-center">
+                    <div className="mt-4 p-6 rounded-xl bg-[#003366] border-2 border-[#004080] shadow-lg">
+                      <p className="text-lg text-white font-bold mb-3 text-center drop-shadow-md">
                         ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
                       </p>
-                      <div className="flex items-center justify-center gap-3 text-lg text-white font-semibold">
-                        <img src={cameraIconWarning} alt="Câmera" className="w-6 h-6 object-contain" />
+                      <div className="flex items-center justify-center gap-3 text-xl text-white font-bold drop-shadow-md">
+                        <img src={cameraIconWarning} alt="Câmera" className="w-7 h-7 object-contain" />
                         <span>Escaneie o QR Code Usando a Câmera ou um App</span>
                       </div>
                     </div>

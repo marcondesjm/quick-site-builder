@@ -119,11 +119,11 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
 
         {/* Warning Box */}
         {showWarning && (
-          <div className="bg-[#003366] border-2 border-[#004080] rounded-xl p-4 mb-4 shadow-lg">
-            <p className="text-white font-bold text-sm mb-2 text-center">
+          <div className="bg-[#003366] border-2 border-[#004080] rounded-xl p-5 mb-4 shadow-lg">
+            <p className="text-white font-bold text-base mb-2 text-center drop-shadow-md">
               ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
             </p>
-            <p className="text-white text-sm font-semibold text-center">
+            <p className="text-white text-base font-bold text-center drop-shadow-md">
               📱 Escaneie o QR Code Usando a Câmera ou um App
             </p>
           </div>
