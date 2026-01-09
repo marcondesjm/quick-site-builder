@@ -1616,7 +1616,7 @@ const QRCodePage = () => {
                         ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
                       </p>
                       <div className="flex items-center justify-center gap-2 text-sm text-amber-700">
-                        <Camera className="w-4 h-4" />
+                        <Camera className="w-4 h-4 text-amber-600" />
                         <span>Escaneie o QR Code Usando a Câmera ou um App</span>
                       </div>
                     </div>
