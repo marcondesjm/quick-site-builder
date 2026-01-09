@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, VideoOff, Bell, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { getSelectedRingtoneUrl } from "./RingtoneConfigDialog";
 
 // WhatsApp icon component
@@ -15,7 +15,7 @@ interface IncomingCallProps {
   callerName: string;
   propertyName: string;
   imageUrl?: string;
-  onAnswer: () => void;
+  onAnswer: () => void | Promise<void>;
   onDecline: () => void;
   isActive?: boolean;
   callDuration?: number;
@@ -24,7 +24,7 @@ interface IncomingCallProps {
   visitorTextMessage?: string | null;
 }
 
-export const IncomingCall = ({
+export const IncomingCall = forwardRef<HTMLDivElement, IncomingCallProps>(({
   callerName,
   propertyName,
   imageUrl,
@@ -35,11 +35,12 @@ export const IncomingCall = ({
   formatDuration = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`,
   ownerPhone,
   visitorTextMessage,
-}: IncomingCallProps) => {
+}, ref) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [showControls, setShowControls] = useState(true);
+  const [isAnswering, setIsAnswering] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Play ringtone when ringing (not active) - keeps playing until answered
@@ -99,6 +100,7 @@ export const IncomingCall = ({
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -303,17 +305,27 @@ export const IncomingCall = ({
               {/* Botão principal Atender */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
-                animate={{ scale: [1, 1.02, 1] }}
+                animate={isAnswering ? {} : { scale: [1, 1.02, 1] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
                 className="w-full"
               >
                 <Button 
                   variant="outline" 
-                  onClick={onAnswer}
-                  className="w-full h-12 rounded-full bg-white text-amber-600 border-white hover:bg-white/90 gap-2 text-base font-semibold"
+                  onClick={async () => {
+                    if (isAnswering) return;
+                    setIsAnswering(true);
+                    try {
+                      await onAnswer();
+                    } catch (error) {
+                      console.error('Error answering call:', error);
+                      setIsAnswering(false);
+                    }
+                  }}
+                  disabled={isAnswering}
+                  className="w-full h-12 rounded-full bg-white text-amber-600 border-white hover:bg-white/90 gap-2 text-base font-semibold disabled:opacity-70"
                 >
                   <Phone className="w-5 h-5" />
-                  Atender
+                  {isAnswering ? 'Conectando...' : 'Atender'}
                 </Button>
               </motion.div>
 
@@ -337,4 +349,6 @@ export const IncomingCall = ({
       </motion.div>
     </motion.div>
   );
-};
+});
+
+IncomingCall.displayName = "IncomingCall";
