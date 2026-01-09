@@ -598,16 +598,17 @@ const QRCodePage = () => {
         
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
       } else {
-        // Classic model download
-        const padding = 40;
-        const qrSize = customization.size;
+        // Classic model download - HIGH QUALITY
+        const scale = 3; // Scale for high quality
+        const padding = 40 * scale;
+        const qrSize = customization.size * scale;
         // Calculate rows for delivery icons (max 4 per row)
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 60 + (iconRows * 75) : 0;
-        const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
-        canvas.width = Math.max(qrSize + padding * 2, 450);
-        canvas.height = qrSize + 340 + deliveryHeight + logoHeight + 50;
+        const deliveryHeight = deliveryIcons.length > 0 ? (60 + (iconRows * 75)) * scale : 0;
+        const logoHeight = (customization.customLogoUrl ? customization.customLogoSize : 50) * scale;
+        canvas.width = Math.max(qrSize + padding * 2, 450 * scale);
+        canvas.height = (qrSize + 340 * scale + deliveryHeight + logoHeight + 50 * scale);
         
         img.onload = async () => {
           if (!ctx) return;
@@ -617,50 +618,50 @@ const QRCodePage = () => {
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // Draw logo emoji
-          ctx.font = '48px system-ui';
+          ctx.font = `${48 * scale}px system-ui`;
           ctx.textAlign = 'center';
-          ctx.fillText(customization.logoText, canvas.width / 2, 55);
+          ctx.fillText(customization.logoText, canvas.width / 2, 55 * scale);
           
           // Draw title in white with shadow - increased font size
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 24px system-ui';
+          ctx.font = `bold ${24 * scale}px system-ui`;
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowBlur = 4 * scale;
+          ctx.shadowOffsetX = 2 * scale;
+          ctx.shadowOffsetY = 2 * scale;
           const titleLines = customization.title.split(' ');
-          let titleY = 95;
+          let titleY = 95 * scale;
           if (customization.title.length > 30) {
             const midPoint = Math.ceil(titleLines.length / 2);
             const line1 = titleLines.slice(0, midPoint).join(' ');
             const line2 = titleLines.slice(midPoint).join(' ');
             ctx.fillText(line1, canvas.width / 2, titleY);
-            ctx.fillText(line2, canvas.width / 2, titleY + 28);
-            titleY += 28;
+            ctx.fillText(line2, canvas.width / 2, titleY + 28 * scale);
+            titleY += 28 * scale;
           } else {
             ctx.fillText(customization.title, canvas.width / 2, titleY);
           }
           
           // Draw subtitle in white with shadow - increased font size
-          ctx.font = 'bold 20px system-ui';
+          ctx.font = `bold ${20 * scale}px system-ui`;
           ctx.fillStyle = customization.fgColor;
-          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30);
+          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30 * scale);
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
           
           // Draw white rounded container for QR code
-          const qrContainerSize = qrSize + 32;
+          const qrContainerSize = qrSize + 32 * scale;
           const qrContainerX = (canvas.width - qrContainerSize) / 2;
-          const qrContainerY = titleY + 50;
+          const qrContainerY = titleY + 50 * scale;
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16);
+          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16 * scale);
           ctx.fill();
           
           // Draw QR code centered in white container
           const qrX = (canvas.width - qrSize) / 2;
-          const qrY = qrContainerY + 16;
+          const qrY = qrContainerY + 16 * scale;
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           // Draw camera logo in center of QR code
@@ -668,7 +669,7 @@ const QRCodePage = () => {
           cameraImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             cameraImg.onload = () => {
-              const cameraSize = 64;
+              const cameraSize = 64 * scale;
               const cameraX = (canvas.width - cameraSize) / 2;
               const cameraY = qrY + (qrSize - cameraSize) / 2;
               ctx.drawImage(cameraImg, cameraX, cameraY, cameraSize, cameraSize);
@@ -679,34 +680,34 @@ const QRCodePage = () => {
           });
           
           // Warning box - blue dark style matching preview
-          const warningY = qrContainerY + qrContainerSize + 20;
+          const warningY = qrContainerY + qrContainerSize + 20 * scale;
           const warningBoxWidth = canvas.width - padding;
-          const warningBoxHeight = 80;
+          const warningBoxHeight = 90 * scale;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12 * scale);
           ctx.fill();
           ctx.strokeStyle = '#004080';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 2 * scale;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12 * scale);
           ctx.stroke();
           
           // Calculate max text width and adjust font if needed
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowBlur = 4 * scale;
+          ctx.shadowOffsetX = 2 * scale;
+          ctx.shadowOffsetY = 2 * scale;
           
           // First line - increased font
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28);
-          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48);
+          ctx.font = `bold ${14 * scale}px system-ui`;
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28 * scale);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48 * scale);
           
           // Second line - increased font
-          ctx.font = 'bold 16px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72);
+          ctx.font = `bold ${16 * scale}px system-ui`;
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72 * scale);
           
           // Reset shadow
           ctx.shadowColor = 'transparent';
@@ -716,30 +717,29 @@ const QRCodePage = () => {
           
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
-            const deliveryY = warningY + 80;
-            const iconsPerRow = 4;
+            const deliveryY = warningY + warningBoxHeight + 10 * scale;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 50 + (iconRows * 70);
+            const sectionHeight = (50 + (iconRows * 70)) * scale;
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12 * scale);
             ctx.fill();
             ctx.strokeStyle = '#bfdbfe';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2 * scale;
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12 * scale);
             ctx.stroke();
             
             ctx.fillStyle = '#1e40af';
-            ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+            ctx.font = `bold ${14 * scale}px system-ui`;
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25 * scale);
             
-            // Load and draw delivery icons in rows
-            const iconWidth = 65;
-            const iconHeight = 52;
-            const iconGap = 12;
+            // Load and draw delivery icons in rows - HIGH QUALITY
+            const iconWidth = 65 * scale;
+            const iconHeight = 52 * scale;
+            const iconGap = 12 * scale;
             
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolve) => {
@@ -753,22 +753,23 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 40 + (row * 68);
+                  const iconY = deliveryY + 40 * scale + (row * 68 * scale);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
-                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.fill();
                   ctx.strokeStyle = '#e2e8f0';
+                  ctx.lineWidth = 1 * scale;
                   ctx.beginPath();
-                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  // Center the icon image inside the container
-                  const imgWidth = iconWidth - 10;
-                  const imgHeight = iconHeight - 4;
-                  ctx.drawImage(iconImg, iconX + 5, iconY + 4, imgWidth, imgHeight);
+                  // Center the icon image inside the container - HIGH QUALITY
+                  const imgWidth = iconWidth - 10 * scale;
+                  const imgHeight = iconHeight - 4 * scale;
+                  ctx.drawImage(iconImg, iconX + 5 * scale, iconY + 4 * scale, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
@@ -782,16 +783,16 @@ const QRCodePage = () => {
           // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
-          let logoEndY = warningY + 90;
+          let logoEndY = warningY + warningBoxHeight + 10 * scale;
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
-              const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+              const logoH = (customization.customLogoUrl ? customization.customLogoSize : 50) * scale;
+              const logoW = (logoImg.width / logoImg.height) * logoH;
               const logoY = deliveryIcons.length > 0 
-                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 25
-                : warningY + 90;
-              ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
-              logoEndY = logoY + logoHeight;
+                ? warningY + warningBoxHeight + 10 * scale + (50 + (Math.ceil(deliveryIcons.length / 4) * 70)) * scale + 25 * scale
+                : warningY + warningBoxHeight + 20 * scale;
+              ctx.drawImage(logoImg, (canvas.width - logoW) / 2, logoY, logoW, logoH);
+              logoEndY = logoY + logoH;
               resolve();
             };
             logoImg.onerror = () => resolve();
@@ -800,9 +801,9 @@ const QRCodePage = () => {
           
           // Draw website URL
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 18px Arial';
+          ctx.font = `bold ${18 * scale}px Arial`;
           ctx.textAlign = 'center';
-          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25);
+          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25 * scale);
           
           // Download
           const link = document.createElement('a');
@@ -1023,15 +1024,16 @@ const QRCodePage = () => {
         
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
       } else {
-        // Classic model PDF
-        const padding = 40;
-        const qrSize = customization.size;
+        // Classic model PDF - HIGH QUALITY
+        const scale = 3;
+        const padding = 40 * scale;
+        const qrSize = customization.size * scale;
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 120 + (iconRows * 75) : 0;
-        const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
-        canvas.width = Math.max(qrSize + padding * 2, 450);
-        canvas.height = qrSize + 340 + deliveryHeight + logoHeight + 50;
+        const deliveryHeight = deliveryIcons.length > 0 ? (120 + (iconRows * 75)) * scale : 0;
+        const logoHeight = (customization.customLogoUrl ? customization.customLogoSize : 50) * scale;
+        canvas.width = Math.max(qrSize + padding * 2, 450 * scale);
+        canvas.height = (qrSize + 340 * scale + deliveryHeight + logoHeight + 50 * scale);
         
         img.onload = async () => {
           if (!ctx) return;
@@ -1039,55 +1041,55 @@ const QRCodePage = () => {
           ctx.fillStyle = customization.bgColor;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          ctx.font = '48px system-ui';
+          ctx.font = `${48 * scale}px system-ui`;
           ctx.textAlign = 'center';
-          ctx.fillText(customization.logoText, canvas.width / 2, 55);
+          ctx.fillText(customization.logoText, canvas.width / 2, 55 * scale);
           
           // Draw title in white with shadow - increased font size
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 24px system-ui';
+          ctx.font = `bold ${24 * scale}px system-ui`;
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowBlur = 4 * scale;
+          ctx.shadowOffsetX = 2 * scale;
+          ctx.shadowOffsetY = 2 * scale;
           const titleLines = customization.title.split(' ');
-          let titleY = 95;
+          let titleY = 95 * scale;
           if (customization.title.length > 30) {
             const midPoint = Math.ceil(titleLines.length / 2);
             const line1 = titleLines.slice(0, midPoint).join(' ');
             const line2 = titleLines.slice(midPoint).join(' ');
             ctx.fillText(line1, canvas.width / 2, titleY);
-            ctx.fillText(line2, canvas.width / 2, titleY + 28);
-            titleY += 28;
+            ctx.fillText(line2, canvas.width / 2, titleY + 28 * scale);
+            titleY += 28 * scale;
           } else {
             ctx.fillText(customization.title, canvas.width / 2, titleY);
           }
           
           // Draw subtitle in white with shadow - increased font size
-          ctx.font = 'bold 20px system-ui';
+          ctx.font = `bold ${20 * scale}px system-ui`;
           ctx.fillStyle = customization.fgColor;
-          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30);
+          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 30 * scale);
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
           
-          const qrContainerSize = qrSize + 32;
+          const qrContainerSize = qrSize + 32 * scale;
           const qrContainerX = (canvas.width - qrContainerSize) / 2;
-          const qrContainerY = titleY + 50;
+          const qrContainerY = titleY + 50 * scale;
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16);
+          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16 * scale);
           ctx.fill();
           
           const qrX = (canvas.width - qrSize) / 2;
-          const qrY = qrContainerY + 16;
+          const qrY = qrContainerY + 16 * scale;
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           const cameraImg = new Image();
           cameraImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             cameraImg.onload = () => {
-              const cameraSize = 64;
+              const cameraSize = 64 * scale;
               const cameraX = (canvas.width - cameraSize) / 2;
               const cameraY = qrY + (qrSize - cameraSize) / 2;
               ctx.drawImage(cameraImg, cameraX, cameraY, cameraSize, cameraSize);
@@ -1098,34 +1100,34 @@ const QRCodePage = () => {
           });
           
           // Warning box - blue dark style matching preview
-          const warningY = qrContainerY + qrContainerSize + 20;
+          const warningY = qrContainerY + qrContainerSize + 20 * scale;
           const warningBoxWidth = canvas.width - padding;
-          const warningBoxHeight = 80;
+          const warningBoxHeight = 90 * scale;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12 * scale);
           ctx.fill();
           ctx.strokeStyle = '#004080';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 2 * scale;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, warningBoxWidth, 90, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12 * scale);
           ctx.stroke();
           
           // Calculate max text width and adjust font if needed
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowBlur = 4 * scale;
+          ctx.shadowOffsetX = 2 * scale;
+          ctx.shadowOffsetY = 2 * scale;
           
           // First line - increased font
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28);
-          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48);
+          ctx.font = `bold ${14 * scale}px system-ui`;
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 28 * scale);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 48 * scale);
           
           // Second line - increased font
-          ctx.font = 'bold 16px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72);
+          ctx.font = `bold ${16 * scale}px system-ui`;
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 72 * scale);
           
           // Reset shadow
           ctx.shadowColor = 'transparent';
@@ -1134,27 +1136,27 @@ const QRCodePage = () => {
           ctx.shadowOffsetY = 0;
           
           if (deliveryIcons.length > 0) {
-            const deliveryY = warningY + 80;
+            const deliveryY = warningY + warningBoxHeight + 10 * scale;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 50 + (iconRows * 70);
+            const sectionHeight = (50 + (iconRows * 70)) * scale;
             
             ctx.fillStyle = '#eff6ff';
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12 * scale);
             ctx.fill();
             ctx.strokeStyle = '#bfdbfe';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2 * scale;
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12 * scale);
             ctx.stroke();
             
             ctx.fillStyle = '#1e40af';
-            ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+            ctx.font = `bold ${14 * scale}px system-ui`;
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25 * scale);
             
-            const iconWidth = 65;
-            const iconHeight = 52;
-            const iconGap = 12;
+            const iconWidth = 65 * scale;
+            const iconHeight = 52 * scale;
+            const iconGap = 12 * scale;
             
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolve) => {
@@ -1168,20 +1170,21 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 40 + (row * 68);
+                  const iconY = deliveryY + 40 * scale + (row * 68 * scale);
                   
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
-                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.fill();
                   ctx.strokeStyle = '#e2e8f0';
+                  ctx.lineWidth = 1 * scale;
                   ctx.beginPath();
-                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  const imgWidth = iconWidth - 10;
-                  const imgHeight = iconHeight - 4;
-                  ctx.drawImage(iconImg, iconX + 5, iconY + 4, imgWidth, imgHeight);
+                  const imgWidth = iconWidth - 10 * scale;
+                  const imgHeight = iconHeight - 4 * scale;
+                  ctx.drawImage(iconImg, iconX + 5 * scale, iconY + 4 * scale, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
@@ -1195,16 +1198,16 @@ const QRCodePage = () => {
           // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
-          let logoEndY = warningY + 90;
+          let logoEndY = warningY + warningBoxHeight + 10 * scale;
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
-              const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+              const logoH = (customization.customLogoUrl ? customization.customLogoSize : 50) * scale;
+              const logoW = (logoImg.width / logoImg.height) * logoH;
               const logoY = deliveryIcons.length > 0 
-                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 25
-                : warningY + 90;
-              ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
-              logoEndY = logoY + logoHeight;
+                ? warningY + warningBoxHeight + 10 * scale + (50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70)) * scale + 25 * scale
+                : warningY + warningBoxHeight + 20 * scale;
+              ctx.drawImage(logoImg, (canvas.width - logoW) / 2, logoY, logoW, logoH);
+              logoEndY = logoY + logoH;
               resolve();
             };
             logoImg.onerror = () => resolve();
@@ -1213,9 +1216,9 @@ const QRCodePage = () => {
           
           // Draw website URL
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 18px Arial';
+          ctx.font = `bold ${18 * scale}px Arial`;
           ctx.textAlign = 'center';
-          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25);
+          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25 * scale);
           
           // Create PDF
           const pdf = new jsPDF({
