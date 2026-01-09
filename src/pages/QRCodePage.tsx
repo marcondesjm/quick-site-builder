@@ -598,8 +598,8 @@ const QRCodePage = () => {
         
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
       } else {
-        // Classic model download - HIGH QUALITY
-        const scale = 3; // Scale for high quality
+      // Classic model download - ULTRA HIGH QUALITY
+        const scale = 4; // Higher scale for ultra quality
         const padding = 40 * scale;
         const qrSize = customization.size * scale;
         // Calculate rows for delivery icons (max 4 per row)
@@ -612,6 +612,10 @@ const QRCodePage = () => {
         
         img.onload = async () => {
           if (!ctx) return;
+          
+          // Enable high quality image rendering
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           
           // Fill background with blue
           ctx.fillStyle = customization.bgColor;
@@ -746,6 +750,10 @@ const QRCodePage = () => {
                 const iconImg = new Image();
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
+                  // Enable high quality for each icon
+                  ctx.imageSmoothingEnabled = true;
+                  ctx.imageSmoothingQuality = 'high';
+                  
                   const row = Math.floor(index / iconsPerRow);
                   const col = index % iconsPerRow;
                   const iconsInThisRow = Math.min(iconsPerRow, deliveryIcons.length - row * iconsPerRow);
@@ -766,10 +774,10 @@ const QRCodePage = () => {
                   ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  // Center the icon image inside the container - HIGH QUALITY
-                  const imgWidth = iconWidth - 10 * scale;
-                  const imgHeight = iconHeight - 4 * scale;
-                  ctx.drawImage(iconImg, iconX + 5 * scale, iconY + 4 * scale, imgWidth, imgHeight);
+                  // Center the icon image inside the container - ULTRA HIGH QUALITY
+                  const imgWidth = iconWidth - 8 * scale;
+                  const imgHeight = iconHeight - 2 * scale;
+                  ctx.drawImage(iconImg, iconX + 4 * scale, iconY + 5 * scale, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
