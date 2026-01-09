@@ -213,6 +213,9 @@ const VisitorCall = () => {
             if ('vibrate' in navigator) {
               navigator.vibrate([200, 100, 200, 100, 200]);
             }
+          } else if (updatedCall.status === 'visitor_audio_response') {
+            // Visitor sent audio response - keep current status, don't cause re-render loop
+            console.log('Visitor audio response received, maintaining current status');
           } else if (updatedCall.status === 'answered') {
             setCallStatus('answered');
             toast.success('Morador atendeu! Aguarde...');
@@ -234,7 +237,7 @@ const VisitorCall = () => {
       console.log('Removing visitor real-time subscription');
       supabase.removeChannel(channel);
     };
-  }, [roomName]);
+  }, [roomName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Notify owner when visitor scans QR code (page loads)
   useEffect(() => {
