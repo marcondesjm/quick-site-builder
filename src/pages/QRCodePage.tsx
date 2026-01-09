@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import doorviiLogo from "@/assets/doorvii-logo.png";
 import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 import doorviiBrandLogo from "@/assets/doorvii-logo-nobg.png";
@@ -1580,7 +1581,15 @@ const QRCodePage = () => {
           <IncomingCall
             callerName="Visitante"
             propertyName={doorbellState.propertyName}
-            onAnswer={() => {
+            onAnswer={async () => {
+              // Update database status to 'answered' before navigating
+              // This ensures the dashboard transitions correctly
+              if (doorbellState.roomName) {
+                await supabase
+                  .from('video_calls')
+                  .update({ status: 'answered' })
+                  .eq('room_name', doorbellState.roomName);
+              }
               dismissDoorbell();
               navigate('/dashboard');
             }}
