@@ -774,11 +774,9 @@ const QRCodePage = () => {
                   ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  // Center the icon image inside the container - FILL ENTIRE BOX
-                  const imgPadding = 4 * scale;
-                  const imgWidth = iconWidth - imgPadding * 2;
-                  const imgHeight = iconHeight + 8 * scale - imgPadding * 2;
-                  ctx.drawImage(iconImg, iconX + imgPadding, iconY + imgPadding, imgWidth, imgHeight);
+                  // Fill icon 100% of the container - NO PADDING
+                  const containerHeight = iconHeight + 8 * scale;
+                  ctx.drawImage(iconImg, iconX, iconY, iconWidth, containerHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
