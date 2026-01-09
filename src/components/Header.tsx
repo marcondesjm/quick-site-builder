@@ -24,8 +24,11 @@ import {
   MessageCircle,
   RefreshCw,
   Shield,
-  ClipboardCheck
+  ClipboardCheck,
+  Sun,
+  Moon
 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -72,6 +75,7 @@ export const Header = () => {
   const { data: isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showJoinMember, setShowJoinMember] = useState(false);
@@ -376,6 +380,14 @@ export const Header = () => {
                   Instalar Aplicativo
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4 mr-3" />
+                  ) : (
+                    <Moon className="w-4 h-4 mr-3" />
+                  )}
+                  {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleClearCache}>
                   <RefreshCw className="w-4 h-4 mr-3" />
                   Limpar Cache
