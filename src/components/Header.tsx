@@ -69,6 +69,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { APP_VERSION } from "@/config/version";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
@@ -261,13 +262,24 @@ export const Header = () => {
                 <circle cx="12" cy="10" r="2" />
               </svg>
             </div>
-            <span className="text-xl font-bold">
-              Door<span className="text-primary">Vii</span> Home
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold">
+                Door<span className="text-primary">Vii</span> Home
+              </span>
+              <span className="text-[10px] text-muted-foreground -mt-1">v{APP_VERSION}</span>
+            </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => window.location.reload()}
+              title="Atualizar aplicativo"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </Button>
             <Button 
               variant="secondary" 
               size="sm" 
