@@ -690,14 +690,8 @@ const VisitorCall = () => {
               className="hidden"
             />
 
-            {/* Visitor Audio Response */}
-            <div className="mt-4 pt-4 border-t border-primary/30">
-              <p className="text-xs text-muted-foreground mb-2 text-center">Responder com áudio</p>
-              <VisitorAudioRecorder 
-                roomName={roomName || ''} 
-                onAudioSent={() => toast.success('Resposta enviada!')}
-              />
-            </div>
+            {/* Visitor Audio Response - placeholder, actual component rendered outside useMemo */}
+            <div id="visitor-audio-recorder-placeholder" className="mt-4 pt-4 border-t border-primary/30" />
           </div>
         );
       
@@ -883,6 +877,17 @@ const VisitorCall = () => {
             <AnimatePresence mode="wait">
               <StatusDisplay key={callStatus} />
             </AnimatePresence>
+
+            {/* Visitor Audio Recorder - rendered outside useMemo to prevent unmounting */}
+            {callStatus === 'audio_message' && (
+              <div className="mt-4 pt-4 border-t border-primary/30 bg-primary/20 rounded-b-xl -mt-6 px-5 pb-5">
+                <p className="text-xs text-muted-foreground mb-2 text-center">Responder com áudio</p>
+                <VisitorAudioRecorder 
+                  roomName={roomName || ''} 
+                  onAudioSent={() => toast.success('Resposta enviada!')}
+                />
+              </div>
+            )}
 
             {callStatus !== 'video_call' && callStatus !== 'ended' && (
               <div className="space-y-3">
