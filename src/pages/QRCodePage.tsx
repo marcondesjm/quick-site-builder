@@ -1612,12 +1612,12 @@ const QRCodePage = () => {
                       </div>
                     </div>
                     
-                    <div className="mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200">
-                      <p className="text-sm text-amber-800 font-semibold mb-2">
+                    <div className="mt-4 p-5 rounded-xl bg-[#003366] border-2 border-[#004080] shadow-lg">
+                      <p className="text-base text-white font-bold mb-3 text-center">
                         ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
                       </p>
-                      <div className="flex items-center justify-center gap-2 text-base text-amber-700 font-medium">
-                        <img src={cameraIconWarning} alt="Câmera" className="w-5 h-5 object-contain" />
+                      <div className="flex items-center justify-center gap-3 text-lg text-[#6699CC] font-semibold">
+                        <img src={cameraIconWarning} alt="Câmera" className="w-6 h-6 object-contain" />
                         <span>Escaneie o QR Code Usando a Câmera ou um App</span>
                       </div>
                     </div>
