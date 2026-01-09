@@ -159,6 +159,42 @@ export const useDoorbellListener = () => {
             }
           }
           
+          // Handle answered - transition to answered state (keep UI open on dashboard)
+          if (payload.new.status === 'answered') {
+            console.log('Call answered - transitioning to answered state');
+            // Stop sounds/vibrations but keep state for dashboard
+            if (doorbellIntervalRef.current) {
+              clearInterval(doorbellIntervalRef.current);
+              doorbellIntervalRef.current = null;
+            }
+            if ('vibrate' in navigator) {
+              navigator.vibrate(0);
+            }
+            setDoorbellState(prev => ({
+              ...prev,
+              isRinging: false,
+              isAnswered: true,
+              propertyName: payload.new.property_name || prev.propertyName,
+              roomName: payload.new.room_name || prev.roomName,
+            }));
+          }
+          
+          // Handle ended - close everything
+          if (payload.new.status === 'ended') {
+            console.log('Call ended - closing doorbell');
+            setDoorbellState(prev => ({
+              ...prev,
+              isRinging: false,
+              isAnswered: false,
+              visitorAudioResponse: null,
+              visitorTextMessage: null,
+            }));
+            if (doorbellIntervalRef.current) {
+              clearInterval(doorbellIntervalRef.current);
+              doorbellIntervalRef.current = null;
+            }
+          }
+          
           // Handle visitor audio response
           if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
             setDoorbellState(prev => ({
