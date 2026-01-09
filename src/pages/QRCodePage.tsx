@@ -693,8 +693,11 @@ const QRCodePage = () => {
           ctx.stroke();
           
           // Calculate max text width and adjust font if needed
-          const maxTextWidth = warningBoxWidth - 20;
           ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
           
           // First line - smaller font to fit
           ctx.font = 'bold 12px system-ui';
@@ -704,6 +707,12 @@ const QRCodePage = () => {
           // Second line
           ctx.font = 'bold 13px system-ui';
           ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
+          
+          // Reset shadow
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
           
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
@@ -1104,6 +1113,10 @@ const QRCodePage = () => {
           
           // Calculate max text width and adjust font if needed
           ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
           
           // First line - smaller font to fit
           ctx.font = 'bold 12px system-ui';
@@ -1113,6 +1126,12 @@ const QRCodePage = () => {
           // Second line
           ctx.font = 'bold 13px system-ui';
           ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
+          
+          // Reset shadow
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
           
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + 80;
