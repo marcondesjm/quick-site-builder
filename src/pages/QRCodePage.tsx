@@ -680,21 +680,30 @@ const QRCodePage = () => {
           
           // Warning box - blue dark style matching preview
           const warningY = qrContainerY + qrContainerSize + 20;
+          const warningBoxWidth = canvas.width - padding;
+          const warningBoxHeight = 80;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
           ctx.fill();
           ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
           ctx.stroke();
           
+          // Calculate max text width and adjust font if needed
+          const maxTextWidth = warningBoxWidth - 20;
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 28);
-          ctx.font = 'bold 16px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 52);
+          
+          // First line - smaller font to fit
+          ctx.font = 'bold 12px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 25);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 42);
+          
+          // Second line
+          ctx.font = 'bold 13px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
           
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
@@ -1081,21 +1090,29 @@ const QRCodePage = () => {
           
           // Warning box - blue dark style matching preview
           const warningY = qrContainerY + qrContainerSize + 20;
+          const warningBoxWidth = canvas.width - padding;
+          const warningBoxHeight = 80;
           ctx.fillStyle = '#003366';
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
           ctx.fill();
           ctx.strokeStyle = '#004080';
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 70, 12);
+          ctx.roundRect(padding / 2, warningY, warningBoxWidth, warningBoxHeight, 12);
           ctx.stroke();
           
+          // Calculate max text width and adjust font if needed
           ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 28);
-          ctx.font = 'bold 16px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 52);
+          
+          // First line - smaller font to fit
+          ctx.font = 'bold 12px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 25);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 42);
+          
+          // Second line
+          ctx.font = 'bold 13px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 62);
           
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + 80;
