@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Send, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -181,122 +180,85 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-      className="flex flex-col items-center gap-3 p-3 bg-secondary/50 rounded-xl"
-    >
-      <AnimatePresence mode="wait">
-        {!isRecording && !audioBlob && (
-          <motion.div
-            key="start"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-2"
+    <div className="flex flex-col items-center gap-3 p-3 bg-secondary/50 rounded-xl">
+      {!isRecording && !audioBlob && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs text-muted-foreground">Gravar resposta</p>
+          <Button
+            variant="default"
+            size="lg"
+            className="rounded-full w-12 h-12 active:scale-95 transition-transform"
+            onClick={startRecording}
           >
-            <p className="text-xs text-muted-foreground">Gravar resposta</p>
-            <motion.div whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="default"
-                size="lg"
-                className="rounded-full w-12 h-12"
-                onClick={startRecording}
-              >
-                <Mic className="w-5 h-5" />
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
+            <Mic className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
 
-        {isRecording && (
-          <motion.div
-            key="recording"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-2"
-          >
-            <motion.div 
-              className="flex items-center gap-2"
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ repeat: Infinity, duration: 1 }}
+      {isRecording && (
+        <div className="flex flex-col items-center gap-2 animate-fade-in">
+          <div className="flex items-center gap-2 animate-pulse">
+            <div className="w-2 h-2 rounded-full bg-destructive" />
+            <span className="font-mono text-sm">{formatTime(recordingTime)}</span>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 active:scale-95 transition-transform"
+              onClick={cancelRecording}
             >
-              <div className="w-2 h-2 rounded-full bg-destructive" />
-              <span className="font-mono text-sm">{formatTime(recordingTime)}</span>
-            </motion.div>
-            
-            <div className="flex gap-2">
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={cancelRecording}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="destructive"
-                  size="lg"
-                  className="rounded-full w-12 h-12"
-                  onClick={stopRecording}
-                >
-                  <Square className="w-5 h-5" />
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
+              <X className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="rounded-full w-12 h-12 active:scale-95 transition-transform"
+              onClick={stopRecording}
+            >
+              <Square className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
-        {audioBlob && !isRecording && (
-          <motion.div
-            key="preview"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-2 w-full"
-          >
-            <audio 
-              src={URL.createObjectURL(audioBlob)} 
-              controls 
-              className="w-full max-w-[200px] h-8"
-            />
-            
-            <div className="flex gap-2">
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={cancelRecording}
-                  disabled={isSending}
-                >
-                  <X className="w-3 h-3 mr-1" />
-                  Cancelar
-                </Button>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="call"
-                  size="sm"
-                  onClick={sendAudio}
-                  disabled={isSending}
-                >
-                  {isSending ? (
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  ) : (
-                    <Send className="w-3 h-3 mr-1" />
-                  )}
-                  {isSending ? 'Enviando...' : 'Enviar'}
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {audioBlob && !isRecording && (
+        <div className="flex flex-col items-center gap-2 w-full animate-fade-in">
+          <audio 
+            src={URL.createObjectURL(audioBlob)} 
+            controls 
+            className="w-full max-w-[200px] h-8"
+          />
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={cancelRecording}
+              disabled={isSending}
+              className="active:scale-95 transition-transform"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Cancelar
+            </Button>
+            <Button
+              variant="call"
+              size="sm"
+              onClick={sendAudio}
+              disabled={isSending}
+              className="active:scale-95 transition-transform"
+            >
+              {isSending ? (
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              ) : (
+                <Send className="w-3 h-3 mr-1" />
+              )}
+              {isSending ? 'Enviando...' : 'Enviar'}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
