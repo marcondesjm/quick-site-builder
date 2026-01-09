@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff, Send } from 'lucide-react';
@@ -184,24 +184,38 @@ const VisitorCall = () => {
           filter: `room_name=eq.${roomName}`,
         },
         (payload) => {
-          console.log('Call updated (visitor):', payload.new);
+          console.log('[VisitorCall] Real-time update received:', payload.new);
           const updatedCall = payload.new as any;
           
-          // Update meet link if it becomes available
+          // CRITICAL: Skip updates that don't require state changes to prevent re-render loops
+          const currentStatus = updatedCall.status;
+          console.log('[VisitorCall] Current DB status:', currentStatus);
+          
+          // Update meet link if it becomes available (only if not already set)
           if (updatedCall.meet_link && !meetLink) {
-            console.log('Meet link received:', updatedCall.meet_link);
+            console.log('[VisitorCall] Meet link received:', updatedCall.meet_link);
             setMeetLink(updatedCall.meet_link);
           }
           
+          // Handle status changes - only update state when necessary
           if (updatedCall.owner_joined) {
-            setCallStatus('video_call');
-            toast.success('Morador iniciou a videochamada! Entre agora.');
-            if ('vibrate' in navigator) {
-              navigator.vibrate([300, 100, 300]);
-            }
-          } else if (updatedCall.status === 'audio_message' && updatedCall.audio_message_url) {
-            setCallStatus('audio_message');
-            // Add new audio message to the list
+            setCallStatus(prev => {
+              if (prev !== 'video_call') {
+                toast.success('Morador iniciou a videochamada! Entre agora.');
+                if ('vibrate' in navigator) navigator.vibrate([300, 100, 300]);
+                return 'video_call';
+              }
+              return prev;
+            });
+          } else if (currentStatus === 'audio_message' && updatedCall.audio_message_url) {
+            setCallStatus(prev => {
+              if (prev !== 'audio_message') {
+                toast.success('Nova mensagem de áudio do morador!');
+                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+              }
+              return 'audio_message';
+            });
+            // Add new audio message to the list (with deduplication)
             setAudioMessages(prev => {
               const exists = prev.some(m => m.url === updatedCall.audio_message_url);
               if (!exists) {
@@ -209,26 +223,29 @@ const VisitorCall = () => {
               }
               return prev;
             });
-            toast.success('Nova mensagem de áudio do morador!');
-            if ('vibrate' in navigator) {
-              navigator.vibrate([200, 100, 200, 100, 200]);
-            }
-          } else if (updatedCall.status === 'visitor_audio_response') {
-            // Visitor sent audio response - keep current status, don't cause re-render loop
-            console.log('Visitor audio response received, maintaining current status');
-          } else if (updatedCall.status === 'answered') {
-            setCallStatus('answered');
-            toast.success('Morador atendeu! Aguarde...');
-            if ('vibrate' in navigator) {
-              navigator.vibrate([200, 100, 200]);
-            }
-          } else if (updatedCall.status === 'ended') {
-            setCallStatus('ended');
-            toast.info('O morador encerrou a chamada.');
-            if ('vibrate' in navigator) {
-              navigator.vibrate([500, 200, 500, 200, 500]);
-            }
+          } else if (currentStatus === 'visitor_audio_response' || currentStatus === 'visitor_text_message') {
+            // Visitor response statuses - DON'T change callStatus, just log
+            console.log('[VisitorCall] Visitor response status, no state change needed');
+          } else if (currentStatus === 'answered') {
+            setCallStatus(prev => {
+              if (prev !== 'answered' && prev !== 'video_call' && prev !== 'audio_message') {
+                toast.success('Morador atendeu! Aguarde...');
+                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+                return 'answered';
+              }
+              return prev;
+            });
+          } else if (currentStatus === 'ended') {
+            setCallStatus(prev => {
+              if (prev !== 'ended') {
+                toast.info('O morador encerrou a chamada.');
+                if ('vibrate' in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
+                return 'ended';
+              }
+              return prev;
+            });
           }
+          // For other statuses like 'pending', 'doorbell_ringing', etc. - no state change
         }
       )
       .subscribe();
@@ -470,32 +487,26 @@ const VisitorCall = () => {
     window.history.back();
   };
 
-  // Status display component
-  const StatusDisplay = () => {
-    console.log('StatusDisplay render - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
+  // Status display component - memoized to prevent unnecessary re-renders
+  const statusDisplayContent = useMemo(() => {
+    console.log('StatusDisplay computing - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
+    
     // If visitor_always_connected is enabled OR ringing, show the connected status
     if (visitorAlwaysConnected || callStatus === 'ringing' || callStatus === 'waiting') {
       const isRinging = callStatus === 'ringing';
-      console.log('isRinging:', isRinging);
       
       return (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+        <div
+          key="connected"
           className="bg-green-500/20 border border-green-500/50 rounded-xl p-5 mb-6"
         >
-          <motion.div 
-            className="flex items-center justify-center gap-2 mb-3"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
+          <div className="flex items-center justify-center gap-2 mb-3">
             {isRinging ? (
               <Bell className="w-8 h-8 text-amber-500 animate-bounce" />
             ) : (
               <CheckCircle className="w-8 h-8 text-green-500" />
             )}
-          </motion.div>
+          </div>
           <h3 className={`font-bold text-lg ${isRinging ? 'text-amber-500' : 'text-green-500'}`}>
             {isRinging ? "Visitante Conectado!" : "Visitante Conectado!"}
           </h3>
@@ -505,26 +516,20 @@ const VisitorCall = () => {
               {isRinging ? "Aguardando..." : "Conectando..."}
             </p>
           </div>
-        </motion.div>
+        </div>
       );
     }
 
     switch (callStatus) {
       case 'answered':
         return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
+            key="answered"
             className="bg-green-500/20 border border-green-500/50 rounded-xl p-5 mb-6"
           >
-            <motion.div 
-              className="flex items-center justify-center gap-2 mb-3"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
+            <div className="flex items-center justify-center gap-2 mb-3">
               <CheckCircle className="w-8 h-8 text-green-500" />
-            </motion.div>
+            </div>
             <h3 className="font-bold text-lg text-green-500 mb-2">Morador atendeu!</h3>
             <div className="flex items-center justify-center gap-2 text-foreground">
               <User className="w-4 h-4" />
@@ -532,71 +537,51 @@ const VisitorCall = () => {
                 O morador está se dirigindo até você ou iniciará uma videochamada em breve.
               </p>
             </div>
-          </motion.div>
+          </div>
         );
       
       case 'video_call':
         return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
+            key="video_call"
             className="bg-primary/20 border border-primary/50 rounded-xl p-5 mb-6"
           >
-            <motion.div 
-              className="flex items-center justify-center gap-2 mb-3"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              <Video className="w-8 h-8 text-primary" />
-            </motion.div>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Video className="w-8 h-8 text-primary animate-pulse" />
+            </div>
             <h3 className="font-bold text-lg text-primary mb-2">Videochamada iniciada!</h3>
             <p className="text-sm text-foreground mb-4">
               O morador está aguardando você na chamada de vídeo.
             </p>
-            <motion.div 
-              whileTap={{ scale: 0.98 }}
-              animate={{ scale: [1, 1.03, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
+            <Button
+              variant="call"
+              size="lg"
+              className="w-full text-lg py-6"
+              onClick={handleJoinCall}
             >
-              <Button
-                variant="call"
-                size="lg"
-                className="w-full text-lg py-6"
-                onClick={handleJoinCall}
-              >
-                <Phone className="w-6 h-6" />
-                Entrar na chamada agora
-              </Button>
-            </motion.div>
-          </motion.div>
+              <Phone className="w-6 h-6" />
+              Entrar na chamada agora
+            </Button>
+          </div>
         );
       
       case 'audio_message':
         return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
+            key="audio_message"
             className="bg-primary/20 border border-primary/50 rounded-xl p-5 mb-6"
           >
-            <motion.div 
-              className="flex items-center justify-center gap-2 mb-3"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
+            <div className="flex items-center justify-center gap-2 mb-3">
               <Volume2 className="w-8 h-8 text-primary" />
-            </motion.div>
+            </div>
             <h3 className="font-bold text-lg text-primary mb-3">
               {audioMessages.length > 1 ? `${audioMessages.length} mensagens do morador` : 'Mensagem do morador'}
             </h3>
             
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {audioMessages.map((message, index) => (
-                <motion.div
+                <div
                   key={message.url}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
                   className={`flex items-center gap-2 p-2 rounded-lg ${
                     currentPlayingIndex === index ? 'bg-primary/30' : 'bg-secondary/50'
                   }`}
@@ -616,12 +601,10 @@ const VisitorCall = () => {
                       }
                       
                       try {
-                        // Create a new Audio element for better mobile compatibility
                         const audio = new Audio();
                         audio.preload = 'auto';
                         audio.crossOrigin = 'anonymous';
                         
-                        // Set up event handlers before setting src
                         audio.oncanplaythrough = async () => {
                           console.log('[Audio] Can play through, starting playback');
                           try {
@@ -629,7 +612,6 @@ const VisitorCall = () => {
                             console.log('[Audio] Playback started successfully');
                             setCurrentPlayingIndex(index);
                             
-                            // Update the ref to control this audio
                             if (audioRef.current) {
                               audioRef.current.pause();
                             }
@@ -651,13 +633,10 @@ const VisitorCall = () => {
                           setCurrentPlayingIndex(null);
                         };
                         
-                        // Set source and load
                         console.log('[Audio] Loading audio from:', message.url);
                         audio.src = message.url;
                         audio.load();
                         
-                        // For some mobile browsers, we need to call play immediately
-                        // after user interaction, even before canplaythrough
                         setTimeout(async () => {
                           if (audio.readyState >= 2) {
                             try {
@@ -689,17 +668,13 @@ const VisitorCall = () => {
                     </p>
                   </div>
                   {currentPlayingIndex === index && (
-                    <motion.div
-                      className="flex gap-0.5"
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ repeat: Infinity, duration: 0.8 }}
-                    >
+                    <div className="flex gap-0.5 animate-pulse">
                       {[1, 2, 3].map(i => (
-                        <div key={i} className="w-1 h-3 bg-primary rounded-full" style={{ height: `${8 + i * 4}px` }} />
+                        <div key={i} className="w-1 bg-primary rounded-full" style={{ height: `${8 + i * 4}px` }} />
                       ))}
-                    </motion.div>
+                    </div>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
             
@@ -723,56 +698,34 @@ const VisitorCall = () => {
                 onAudioSent={() => toast.success('Resposta enviada!')}
               />
             </div>
-          </motion.div>
+          </div>
         );
       
       case 'ended':
         return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+          <div
+            key="ended"
             className="bg-gradient-to-b from-destructive/20 to-destructive/5 border border-destructive/30 rounded-xl p-6 mb-6"
           >
-            {/* Animated icon */}
-            <motion.div 
-              className="flex items-center justify-center mb-4"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            >
+            <div className="flex items-center justify-center mb-4">
               <div className="relative">
-                <motion.div
-                  className="absolute inset-0 bg-destructive/20 rounded-full blur-xl"
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
+                <div className="absolute inset-0 bg-destructive/20 rounded-full blur-xl animate-pulse" />
                 <div className="relative w-16 h-16 rounded-full bg-destructive/20 border-2 border-destructive flex items-center justify-center">
                   <PhoneOff className="w-8 h-8 text-destructive" />
                 </div>
               </div>
-            </motion.div>
+            </div>
             
-            {/* Title and message */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
+            <div>
               <h3 className="font-bold text-xl text-destructive mb-2">Chamada Encerrada</h3>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                 O morador finalizou a chamada.
                 <br />
                 <span className="text-foreground font-medium">Obrigado pela visita!</span>
               </p>
-            </motion.div>
+            </div>
             
-            {/* Action buttons */}
-            <motion.div 
-              className="space-y-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+            <div className="space-y-3">
               <Button
                 variant="default"
                 size="lg"
@@ -800,24 +753,21 @@ const VisitorCall = () => {
                   Enviar mensagem via WhatsApp
                 </Button>
               )}
-            </motion.div>
+            </div>
             
-            {/* Footer message */}
-            <motion.p 
-              className="text-xs text-muted-foreground mt-4 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
+            <p className="text-xs text-muted-foreground mt-4 text-center">
               Você pode tocar a campainha novamente ou entrar em contato pelo WhatsApp
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
         );
       
       default:
         return null;
     }
-  };
+  }, [callStatus, visitorAlwaysConnected, audioMessages, currentPlayingIndex, ownerPhone, roomName, handleJoinCall, handleWhatsApp]);
+
+  // Simple wrapper for the memoized content
+  const StatusDisplay = () => statusDisplayContent;
 
   // Show the visitor call page if we have a roomName (with or without meetLink)
   if (roomName) {
