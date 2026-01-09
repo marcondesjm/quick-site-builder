@@ -78,6 +78,7 @@ const Index = () => {
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
   const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
+  const [connectedVisitors, setConnectedVisitors] = useState<Record<string, string>>({}); // propertyId -> roomName
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -507,6 +508,12 @@ const Index = () => {
     const handleVisitorConnected = async (newData: any, property: any) => {
       console.log('Visitor scanned QR for always-connected property:', property.name);
       
+      // Track connected visitor for this property
+      setConnectedVisitors(prev => ({
+        ...prev,
+        [property.id]: newData.room_name
+      }));
+      
       // Only update property status to online - do NOT trigger doorbell
       // The visitor must explicitly press the doorbell button to notify the owner
       await supabase
@@ -514,7 +521,16 @@ const Index = () => {
         .update({ is_online: true })
         .eq('id', property.id);
       
-      console.log('Property online status updated. Waiting for visitor to ring doorbell.');
+      console.log('Property online status updated. Visitor tracked:', newData.room_name);
+    };
+
+    const handleVisitorDisconnected = (propertyId: string) => {
+      console.log('Visitor disconnected from property:', propertyId);
+      setConnectedVisitors(prev => {
+        const updated = { ...prev };
+        delete updated[propertyId];
+        return updated;
+      });
     };
 
     const channel = supabase
@@ -540,7 +556,7 @@ const Index = () => {
           }
         }
       )
-      // Listen for updates (when visitor joins existing call)
+      // Listen for updates (when visitor joins existing call or call ends)
       .on(
         'postgres_changes',
         {
@@ -559,6 +575,11 @@ const Index = () => {
             if (property) {
               await handleVisitorConnected(newData, property);
             }
+          }
+          
+          // Check if call ended - remove from connected visitors
+          if (newData.status === 'ended' && newData.property_id) {
+            handleVisitorDisconnected(newData.property_id);
           }
         }
       )
@@ -912,6 +933,72 @@ const Index = () => {
     });
   };
 
+  // Start video call directly with connected visitor
+  const handleStartDirectVideoCall = async (propertyId: string, propertyName: string) => {
+    const roomName = connectedVisitors[propertyId];
+    if (!roomName) {
+      toast({
+        title: "Visitante não disponível",
+        description: "O visitante pode ter desconectado. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('Starting direct video call with visitor, room:', roomName);
+
+    // Set the room name for the call
+    setCurrentDoorbellRoomName(roomName);
+    setDoorbellPropertyName(propertyName);
+
+    // Find the active call for this room
+    const { data: existingCall } = await supabase
+      .from('video_calls')
+      .select('*')
+      .eq('room_name', roomName)
+      .neq('status', 'ended')
+      .maybeSingle();
+
+    if (existingCall) {
+      // Use existing call
+      const callData = existingCall as any;
+      
+      // Start the call simulation
+      startIncomingCall(propertyId, propertyName, 'Visitante');
+      answerCall();
+      
+      // Update the active call state
+      if (callData.id) {
+        await supabase
+          .from('video_calls')
+          .update({ status: 'answered', owner_joined: false })
+          .eq('id', callData.id);
+      }
+      
+      // Show QR code panel (which has video call button)
+      setShowVideoCallQR(true);
+
+      toast({
+        title: "Conectando...",
+        description: "Iniciando chamada de vídeo com o visitante",
+      });
+
+      // Add activity
+      addActivity.mutate({
+        property_id: propertyId,
+        type: 'answered',
+        title: 'Chamada de vídeo iniciada pelo proprietário',
+        property_name: propertyName,
+      });
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não foi possível encontrar a sessão do visitante.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleGenerateQR = async () => {
     if (!showQRCode) {
       const firstProperty = properties?.[0];
@@ -1049,9 +1136,11 @@ const Index = () => {
                       address={property.address}
                       isOnline={property.is_online}
                       visitorAlwaysConnected={property.visitor_always_connected}
+                      hasConnectedVisitor={!!connectedVisitors[property.id]}
                       lastActivity={`Adicionada ${formatDistanceToNow(new Date(property.created_at), { locale: ptBR, addSuffix: true })}`}
                       imageUrl={property.image_url || defaultImages[index % defaultImages.length]}
                       onViewLive={() => handleViewLive(property.id, property.name)}
+                      onStartVideoCall={connectedVisitors[property.id] ? () => handleStartDirectVideoCall(property.id, property.name) : undefined}
                       onUpdate={(id, data) => {
                         updateProperty.mutate({ propertyId: id, data });
                         const message = data.visitor_always_connected !== undefined

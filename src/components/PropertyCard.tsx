@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck, QrCode } from "lucide-react";
+import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck, QrCode, Video, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,9 +37,11 @@ interface PropertyCardProps {
   address: string;
   isOnline: boolean;
   visitorAlwaysConnected?: boolean;
+  hasConnectedVisitor?: boolean;
   lastActivity?: string;
   imageUrl?: string;
   onViewLive: () => void;
+  onStartVideoCall?: () => void;
   onUpdate?: (id: string, data: { name?: string; image_url?: string; visitor_always_connected?: boolean }) => void;
   onDelete?: (id: string) => void;
 }
@@ -50,9 +52,11 @@ export const PropertyCard = ({
   address,
   isOnline,
   visitorAlwaysConnected = false,
+  hasConnectedVisitor = false,
   lastActivity,
   imageUrl,
   onViewLive,
+  onStartVideoCall,
   onUpdate,
   onDelete,
 }: PropertyCardProps) => {
@@ -114,7 +118,7 @@ export const PropertyCard = ({
           )}
           
           {/* Status Badge */}
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex flex-col gap-1">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
               visitorAlwaysConnected 
                 ? "bg-success/20 text-success border border-success/30" 
@@ -123,6 +127,12 @@ export const PropertyCard = ({
               <span className={`w-2 h-2 rounded-full ${visitorAlwaysConnected ? "bg-success animate-pulse-soft" : "bg-muted-foreground"}`} />
               {visitorAlwaysConnected ? "Online" : "Offline"}
             </div>
+            {hasConnectedVisitor && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-primary/20 text-primary border border-primary/30 animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-primary" />
+                Visitante conectado
+              </div>
+            )}
           </div>
 
           {/* Quick Actions - Dropdown Menu */}
@@ -198,11 +208,18 @@ export const PropertyCard = ({
           </div>
 
           {/* Live View Button */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-            <Button variant="default" size="sm" onClick={() => navigate(`/qrcode/${id}`)} className="gap-2">
-              <Bell className="w-4 h-4" />
-              Conectar na campainha
-            </Button>
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4 gap-2">
+            {hasConnectedVisitor && onStartVideoCall ? (
+              <Button variant="call" size="sm" onClick={onStartVideoCall} className="gap-2 animate-pulse">
+                <Video className="w-4 h-4" />
+                Iniciar chamada
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" onClick={() => navigate(`/qrcode/${id}`)} className="gap-2">
+                <Bell className="w-4 h-4" />
+                Conectar na campainha
+              </Button>
+            )}
           </div>
         </div>
 
