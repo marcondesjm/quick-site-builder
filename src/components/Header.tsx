@@ -419,6 +419,10 @@ export const Header = () => {
                   <Trash2 className="w-4 h-4 mr-3" />
                   Excluir conta
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-2 text-xs text-muted-foreground text-center">
+                  Versão instalada: <span className="font-medium">v{APP_VERSION}</span>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
             
