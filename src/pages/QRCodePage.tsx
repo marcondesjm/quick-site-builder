@@ -774,10 +774,11 @@ const QRCodePage = () => {
                   ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  // Center the icon image inside the container - ULTRA HIGH QUALITY
-                  const imgWidth = iconWidth - 8 * scale;
-                  const imgHeight = iconHeight - 2 * scale;
-                  ctx.drawImage(iconImg, iconX + 4 * scale, iconY + 5 * scale, imgWidth, imgHeight);
+                  // Center the icon image inside the container - FILL ENTIRE BOX
+                  const imgPadding = 4 * scale;
+                  const imgWidth = iconWidth - imgPadding * 2;
+                  const imgHeight = iconHeight + 8 * scale - imgPadding * 2;
+                  ctx.drawImage(iconImg, iconX + imgPadding, iconY + imgPadding, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
