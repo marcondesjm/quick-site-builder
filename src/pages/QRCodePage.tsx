@@ -1189,9 +1189,9 @@ const QRCodePage = () => {
                   ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8 * scale, 8 * scale);
                   ctx.stroke();
                   
-                  const imgWidth = iconWidth - 10 * scale;
-                  const imgHeight = iconHeight - 4 * scale;
-                  ctx.drawImage(iconImg, iconX + 5 * scale, iconY + 4 * scale, imgWidth, imgHeight);
+                  // Fill icon 100% of the container - NO PADDING
+                  const containerHeight = iconHeight + 8 * scale;
+                  ctx.drawImage(iconImg, iconX, iconY, iconWidth, containerHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
