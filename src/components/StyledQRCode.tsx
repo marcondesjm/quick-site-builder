@@ -77,14 +77,20 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
 
         {/* Title */}
         <h2 
-          className={`font-bold ${compact ? 'text-sm' : 'text-lg'} leading-tight mb-1`}
-          style={{ color: customization.fgColor }}
+          className={`font-extrabold ${compact ? 'text-lg' : 'text-2xl'} leading-tight mb-1 drop-shadow-lg`}
+          style={{ 
+            color: customization.fgColor,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+          }}
         >
           {customization.title}
         </h2>
         <p 
-          className={`${compact ? 'text-xs' : 'text-sm'} mb-4`}
-          style={{ color: customization.fgColor, opacity: 0.9 }}
+          className={`${compact ? 'text-sm' : 'text-lg'} mb-4 font-semibold drop-shadow-md`}
+          style={{ 
+            color: customization.fgColor, 
+            textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+          }}
         >
           {customization.subtitle}
         </p>
@@ -113,11 +119,11 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
 
         {/* Warning Box */}
         {showWarning && (
-          <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-3 mb-4">
-            <p className="text-amber-800 font-semibold text-xs mb-1">
+          <div className="bg-[#003366] border-2 border-[#004080] rounded-xl p-4 mb-4 shadow-lg">
+            <p className="text-white font-bold text-sm mb-2 text-center">
               ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
             </p>
-            <p className="text-amber-700 text-xs">
+            <p className="text-white text-sm font-semibold text-center">
               📱 Escaneie o QR Code Usando a Câmera ou um App
             </p>
           </div>

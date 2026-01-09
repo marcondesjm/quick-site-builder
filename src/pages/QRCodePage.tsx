@@ -1585,10 +1585,22 @@ const QRCodePage = () => {
                     style={{ backgroundColor: customization.bgColor }}
                   >
                     <div className="text-4xl mb-2">{customization.logoText}</div>
-                    <p className="font-bold text-xl mb-1" style={{ color: customization.fgColor }}>
+                    <p 
+                      className="font-extrabold text-2xl mb-1 drop-shadow-lg" 
+                      style={{ 
+                        color: customization.fgColor,
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                      }}
+                    >
                       {customization.title}
                     </p>
-                    <p className="text-sm mb-4 opacity-70" style={{ color: customization.fgColor }}>
+                    <p 
+                      className="text-lg mb-4 font-semibold drop-shadow-md" 
+                      style={{ 
+                        color: customization.fgColor,
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+                      }}
+                    >
                       {customization.subtitle}
                     </p>
                     
