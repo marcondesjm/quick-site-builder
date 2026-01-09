@@ -65,31 +65,37 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
         style={{ backgroundColor: customization.bgColor }}
       >
         {/* Logo */}
-        <div className={`${compact ? 'text-3xl mb-1' : 'text-5xl mb-2'}`}>
+        <div 
+          className={`${compact ? 'text-3xl mb-1' : 'text-5xl mb-2'}`}
+          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.4)' }}
+        >
           {customization.logoText}
         </div>
         <p 
           className={`font-bold ${compact ? 'text-xs' : 'text-sm'} mb-2 tracking-wide`}
-          style={{ color: customization.fgColor }}
+          style={{ 
+            color: customization.fgColor,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+          }}
         >
           CAMPAINHA VIRTUAL
         </p>
 
         {/* Title */}
         <h2 
-          className={`font-extrabold ${compact ? 'text-lg' : 'text-2xl'} leading-tight mb-1 drop-shadow-lg`}
+          className={`font-extrabold ${compact ? 'text-lg' : 'text-2xl'} leading-tight mb-1`}
           style={{ 
             color: customization.fgColor,
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+            textShadow: '3px 3px 6px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3)'
           }}
         >
           {customization.title}
         </h2>
         <p 
-          className={`${compact ? 'text-sm' : 'text-lg'} mb-4 font-semibold drop-shadow-md`}
+          className={`${compact ? 'text-sm' : 'text-lg'} mb-4 font-bold`}
           style={{ 
             color: customization.fgColor, 
-            textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(0,0,0,0.3)'
           }}
         >
           {customization.subtitle}
