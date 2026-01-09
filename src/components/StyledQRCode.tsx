@@ -30,8 +30,12 @@ export const defaultCustomization: QRCustomization = {
 
 export const defaultDeliveryIcons: DeliveryIcon[] = [
   { id: "correios", name: "Correios", url: "/correios-logo.png" },
-  { id: "aliexpress", name: "AliExpress", url: "/aliexpress-logo.jpg" },
+  { id: "aliexpress", name: "AliExpress", url: "/aliexpress-new-logo.png" },
   { id: "mercadolivre", name: "Mercado Livre", url: "/mercadolivre-logo.png" },
+  { id: "shopee", name: "Shopee", url: "/shopee-logo.png" },
+  { id: "amazon", name: "Amazon", url: "/amazon-logo.png" },
+  { id: "ifood", name: "iFood", url: "/ifood-logo.png" },
+  { id: "uber", name: "Uber", url: "/uber-logo.png" },
 ];
 
 interface StyledQRCodeProps {
