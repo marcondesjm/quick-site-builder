@@ -1681,7 +1681,7 @@ const QRCodePage = () => {
                         ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
                       </p>
                       <div className="flex items-center justify-center gap-3 text-xl text-white font-bold drop-shadow-md">
-                        <img src={cameraIconWarning} alt="Câmera" className="w-7 h-7 object-contain" />
+                        <img src={cameraIconWarning} alt="Câmera" className="w-7 h-7 object-contain brightness-0 invert" />
                         <span>Escaneie o QR Code Usando a Câmera ou um App</span>
                       </div>
                     </div>
