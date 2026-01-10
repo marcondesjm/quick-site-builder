@@ -177,3 +177,30 @@ export function useUpdateTrial() {
     },
   });
 }
+
+export function useAutoDeactivateExpired() {
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('admin-auto-deactivate', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { 
+        success: boolean; 
+        message: string; 
+        deactivatedCount: number;
+        deactivatedUsers: Array<{ user_id: string; full_name: string | null; trial_ends_at: string }>;
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+    },
+  });
+}
