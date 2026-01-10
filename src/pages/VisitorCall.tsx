@@ -80,6 +80,7 @@ const VisitorCall = () => {
   const [protocolNumber, setProtocolNumber] = useState<string | null>(null);
   const [showProtocolDialog, setShowProtocolDialog] = useState(false);
   const [protocolCopied, setProtocolCopied] = useState(false);
+  const [ringingCountdown, setRingingCountdown] = useState(60);
   
   // Chat states
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -625,7 +626,7 @@ const VisitorCall = () => {
     }
   };
 
-  // Manage ringing timeout - start when ringing, clear when answered
+  // Manage ringing timeout and countdown - start when ringing, clear when answered
   useEffect(() => {
     // Clear timeout if call was answered
     if (callStatus === 'answered' || callStatus === 'video_call' || callStatus === 'audio_message' || callStatus === 'ended') {
@@ -634,28 +635,37 @@ const VisitorCall = () => {
         clearTimeout(ringingTimeoutRef.current);
         ringingTimeoutRef.current = null;
       }
+      setRingingCountdown(60); // Reset countdown
     }
     
-    // Start timeout if ringing and no timeout exists
-    if (callStatus === 'ringing' && !ringingTimeoutRef.current) {
-      console.log('Starting 60 second timeout for not_answered');
-      ringingTimeoutRef.current = setTimeout(async () => {
-        console.log('Timeout reached - showing not answered dialog');
-        setCallStatus('not_answered');
-        setShowNotAnsweredDialog(true);
-        
-        // Update database status to stop doorbell on owner's panel
-        if (roomName) {
-          await supabase
-            .from('video_calls')
-            .update({ status: 'not_answered' })
-            .eq('room_name', roomName);
-        }
-      }, 60000); // 60 seconds
+    // Start countdown if ringing
+    if (callStatus === 'ringing') {
+      setRingingCountdown(60); // Reset to 60 seconds when ringing starts
+      
+      const countdownInterval = setInterval(() => {
+        setRingingCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            // Trigger not answered
+            setCallStatus('not_answered');
+            setShowNotAnsweredDialog(true);
+            
+            // Update database status to stop doorbell on owner's panel
+            if (roomName) {
+              supabase
+                .from('video_calls')
+                .update({ status: 'not_answered' })
+                .eq('room_name', roomName);
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(countdownInterval);
     }
-    
-    // Cleanup only on unmount, not on every re-render
-  }, [callStatus]);
+  }, [callStatus, roomName]);
   
   // Separate cleanup effect for unmount only
   useEffect(() => {
@@ -1196,7 +1206,7 @@ const VisitorCall = () => {
                     ) : callStatus === 'ringing' ? (
                       <>
                         <Bell className="w-6 h-6 animate-bounce" />
-                        <span>Aguardando...</span>
+                        <span>Aguardando... ({Math.floor(ringingCountdown / 60)}:{(ringingCountdown % 60).toString().padStart(2, '0')})</span>
                       </>
                     ) : (
                       <>
