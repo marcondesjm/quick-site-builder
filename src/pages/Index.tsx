@@ -9,6 +9,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { ActivityItem } from "@/components/ActivityItem";
 import { AllActivitiesDialog } from "@/components/AllActivitiesDialog";
 import { CallHistoryDialog } from "@/components/CallHistoryDialog";
+import { AssistantSettingsDialog } from "@/components/AssistantSettingsDialog";
 import { StatsCard } from "@/components/StatsCard";
 import { QRCodeAccess } from "@/components/QRCodeAccess";
 import { IncomingCall } from "@/components/IncomingCall";
@@ -1230,7 +1231,8 @@ const Index = () => {
             <motion.section variants={itemVariants}>
               <div className="flex items-center justify-between gap-2 mb-4">
                 <h2 className="text-xl sm:text-2xl font-semibold">Atividade Recente</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <AssistantSettingsDialog />
                   <CallHistoryDialog />
                   <AllActivitiesDialog />
                 </div>
