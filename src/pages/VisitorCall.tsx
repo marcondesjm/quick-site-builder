@@ -48,6 +48,13 @@ const getBaseAudioUrl = (url: string): string => {
   }
 };
 
+interface ChatMessage {
+  id: string;
+  text: string;
+  sender: 'visitor' | 'bot';
+  timestamp: number;
+}
+
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const [searchParams] = useSearchParams();
@@ -73,6 +80,14 @@ const VisitorCall = () => {
   const [protocolNumber, setProtocolNumber] = useState<string | null>(null);
   const [showProtocolDialog, setShowProtocolDialog] = useState(false);
   const [protocolCopied, setProtocolCopied] = useState(false);
+  
+  // Chat states
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [showChatDialog, setShowChatDialog] = useState(false);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastPlayedAudioRef = useRef<string | null>(null);
@@ -197,6 +212,62 @@ const VisitorCall = () => {
     const message = encodeURIComponent(`Olá! Estou na porta - ${decodeURIComponent(propertyName)}`);
     const url = phone ? `https://wa.me/${phone}?text=${message}` : `https://wa.me/?text=${message}`;
     window.open(url, '_blank');
+  };
+
+  // Scroll to bottom when new chat messages arrive
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  // Send message to chatbot via n8n webhook
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || isSendingChat) return;
+
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      text: chatInput.trim(),
+      sender: 'visitor',
+      timestamp: Date.now(),
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsSendingChat(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chatbot-webhook', {
+        body: {
+          message: userMessage.text,
+          roomName,
+          propertyName: decodeURIComponent(propertyName),
+        },
+      });
+
+      if (error) throw error;
+
+      const botResponse: ChatMessage = {
+        id: crypto.randomUUID(),
+        text: data?.response || 'Resposta recebida',
+        sender: 'bot',
+        timestamp: Date.now(),
+      };
+
+      setChatMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      toast.error('Erro ao enviar mensagem');
+      
+      // Add error message to chat
+      const errorMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        text: 'Desculpe, não consegui processar sua mensagem. Tente novamente.',
+        sender: 'bot',
+        timestamp: Date.now(),
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSendingChat(false);
+    }
   };
 
   // Subscribe to real-time updates for owner join status and meet link
@@ -1112,6 +1183,19 @@ const VisitorCall = () => {
                   onVideoSent={() => toast.success('Vídeo enviado!')}
                 />
 
+                {/* Chat button */}
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full font-semibold text-base py-5 border-primary/30 hover:bg-primary/10"
+                    onClick={() => setShowChatDialog(true)}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span>Conversar com Assistente</span>
+                  </Button>
+                </motion.div>
+
                 {(callStatus === 'answered' || callStatus === 'ringing') && (
                   <div className="border-t border-border my-4 pt-4">
                     <p className="text-xs text-muted-foreground mb-3">
@@ -1159,6 +1243,92 @@ const VisitorCall = () => {
             </p>
           </div>
         </motion.div>
+
+        {/* Chat Dialog */}
+        <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+          <DialogContent className="max-w-md max-h-[80vh] flex flex-col p-0">
+            <DialogHeader className="p-4 pb-2 border-b">
+              <DialogTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-primary" />
+                Assistente Virtual
+              </DialogTitle>
+            </DialogHeader>
+            
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[300px] max-h-[400px]">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">Olá! Como posso ajudá-lo?</p>
+                  <p className="text-xs mt-1">Digite sua mensagem abaixo para iniciar.</p>
+                </div>
+              ) : (
+                chatMessages.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${msg.sender === 'visitor' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                        msg.sender === 'visitor'
+                          ? 'bg-primary text-primary-foreground rounded-br-sm'
+                          : 'bg-muted rounded-bl-sm'
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                      <p className={`text-[10px] mt-1 ${msg.sender === 'visitor' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+              {isSendingChat && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={chatMessagesEndRef} />
+            </div>
+
+            {/* Chat Input */}
+            <div className="p-4 pt-2 border-t">
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleSendChatMessage(); }}
+                className="flex gap-2"
+              >
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 px-4 py-2 rounded-full border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  disabled={isSendingChat}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="rounded-full h-10 w-10"
+                  disabled={!chatInput.trim() || isSendingChat}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Not Answered Dialog */}
         <AlertDialog open={showNotAnsweredDialog} onOpenChange={setShowNotAnsweredDialog}>
