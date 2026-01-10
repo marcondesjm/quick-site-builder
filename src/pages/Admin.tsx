@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
+import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser } from '@/hooks/useAdmin';
+import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser, useSetUserRole } from '@/hooks/useAdmin';
 import { SystemChecklist } from '@/components/SystemChecklist';
 
 const Admin = () => {
@@ -34,6 +34,7 @@ const Admin = () => {
   const { data: users, isLoading: usersLoading, refetch } = useAllUsers();
   const toggleUserActive = useToggleUserActive();
   const deleteUser = useDeleteUser();
+  const setUserRole = useSetUserRole();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
@@ -139,6 +140,24 @@ const Admin = () => {
     }
   };
 
+  const handleSetRole = async (userId: string, role: 'admin' | 'user') => {
+    try {
+      await setUserRole.mutateAsync({ userId, role });
+      toast({
+        title: role === 'admin' ? 'Administrador definido' : 'Usuário normal definido',
+        description: role === 'admin' 
+          ? 'O usuário agora é um administrador.'
+          : 'O usuário agora é um usuário normal.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error?.message || 'Não foi possível alterar o papel do usuário.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <motion.header
@@ -234,73 +253,113 @@ const Admin = () => {
                         <TableHead>WhatsApp</TableHead>
                         <TableHead>Criado em</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Tipo</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.map((profile) => (
-                        <TableRow key={profile.id}>
-                          <TableCell className="font-medium">
-                            {profile.full_name || 'Sem nome'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {profile.email || '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {profile.phone || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {format(new Date(profile.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {profile.is_admin && (
-                                <Badge variant="outline" className="border-primary text-primary">
-                                  <Shield className="w-3 h-3 mr-1" />
-                                  Admin
-                                </Badge>
-                              )}
+                      {filteredUsers.map((profile) => {
+                        const isCurrentUser = profile.user_id === user?.id;
+                        const isPending = toggleUserActive.isPending || deleteUser.isPending || setUserRole.isPending;
+                        
+                        return (
+                          <TableRow key={profile.id}>
+                            <TableCell className="font-medium">
+                              {profile.full_name || 'Sem nome'}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {profile.email || '-'}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {profile.phone || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(profile.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </TableCell>
+                            <TableCell>
                               <Badge variant={profile.is_active ? 'default' : 'destructive'}>
                                 {profile.is_active ? 'Ativo' : 'Inativo'}
                               </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {profile.is_admin ? (
-                              <span className="text-xs text-muted-foreground">Protegido</span>
-                            ) : (
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  variant={profile.is_active ? 'destructive' : 'default'}
-                                  size="sm"
-                                  onClick={() => handleToggleActive(profile.user_id, profile.is_active)}
-                                  disabled={toggleUserActive.isPending || deleteUser.isPending}
-                                >
-                                  {profile.is_active ? (
-                                    <>
-                                      <PowerOff className="w-4 h-4 mr-1" />
-                                      Desativar
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Power className="w-4 h-4 mr-1" />
-                                      Ativar
-                                    </>
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setUserToDelete({ id: profile.user_id, email: profile.email || 'Usuário' })}
-                                  disabled={toggleUserActive.isPending || deleteUser.isPending}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>
+                              {isCurrentUser ? (
+                                <Badge variant="outline" className="border-primary text-primary">
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Você (Admin)
+                                </Badge>
+                              ) : profile.is_admin ? (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="border-primary text-primary">
+                                    <Crown className="w-3 h-3 mr-1" />
+                                    Admin
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleSetRole(profile.user_id, 'user')}
+                                    disabled={isPending}
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    <User className="w-3 h-3 mr-1" />
+                                    Tornar Usuário
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary">
+                                    <User className="w-3 h-3 mr-1" />
+                                    Usuário
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleSetRole(profile.user_id, 'admin')}
+                                    disabled={isPending}
+                                    className="h-7 px-2 text-xs"
+                                  >
+                                    <Crown className="w-3 h-3 mr-1" />
+                                    Tornar Admin
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isCurrentUser ? (
+                                <span className="text-xs text-muted-foreground">Protegido</span>
+                              ) : (
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    variant={profile.is_active ? 'destructive' : 'default'}
+                                    size="sm"
+                                    onClick={() => handleToggleActive(profile.user_id, profile.is_active)}
+                                    disabled={isPending}
+                                  >
+                                    {profile.is_active ? (
+                                      <>
+                                        <PowerOff className="w-4 h-4 mr-1" />
+                                        Desativar
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Power className="w-4 h-4 mr-1" />
+                                        Ativar
+                                      </>
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setUserToDelete({ id: profile.user_id, email: profile.email || 'Usuário' })}
+                                    disabled={isPending}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>

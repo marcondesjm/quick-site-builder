@@ -110,3 +110,26 @@ export function useDeleteUser() {
     },
   });
 }
+
+export function useSetUserRole() {
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: 'admin' | 'user' }) => {
+      const { data, error } = await supabase.functions.invoke('admin-set-role', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        body: { userId, role }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+    },
+  });
+}
