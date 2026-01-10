@@ -63,6 +63,73 @@ const DEFAULT_FAQ_RESPONSES: FaqResponse[] = [
   }
 ];
 
+// Keywords that indicate the owner should be notified with high priority
+const NOTIFY_OWNER_KEYWORDS = [
+  'vou avisar o morador',
+  'vou notificar o morador',
+  'notificando o morador',
+  'avisando o morador',
+  'morador foi notificado',
+  'vou avisar o proprietário',
+  'aguarde enquanto notifico',
+  'aguarde enquanto aviso'
+];
+
+// Check if response should trigger owner notification
+function shouldNotifyOwner(response: string): boolean {
+  const lowerResponse = response.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return NOTIFY_OWNER_KEYWORDS.some(keyword => {
+    const normalizedKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return lowerResponse.includes(normalizedKeyword);
+  });
+}
+
+// Send high priority push notification to owner
+async function sendOwnerNotification(
+  supabase: any,
+  ownerId: string,
+  propertyName: string,
+  visitorMessage: string,
+  visitorName?: string
+) {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    
+    const notificationTitle = '🔔 Visitante aguardando!';
+    const notificationBody = visitorName 
+      ? `${visitorName} está na porta de ${propertyName}: "${visitorMessage.substring(0, 50)}${visitorMessage.length > 50 ? '...' : ''}"`
+      : `Visitante na porta de ${propertyName}: "${visitorMessage.substring(0, 50)}${visitorMessage.length > 50 ? '...' : ''}"`;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+      },
+      body: JSON.stringify({
+        userId: ownerId,
+        title: notificationTitle,
+        body: notificationBody,
+        data: {
+          type: 'assistant_alert',
+          priority: 'high',
+          propertyName,
+          visitorName,
+          visitorMessage
+        }
+      }),
+    });
+
+    if (response.ok) {
+      console.log('High priority notification sent to owner:', ownerId);
+    } else {
+      console.error('Failed to send notification:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error sending owner notification:', error);
+  }
+}
+
 // Find the best matching response
 function findBestResponse(
   message: string, 
@@ -127,6 +194,7 @@ serve(async (req) => {
 
     // Fetch custom responses from the owner
     let customResponses: FaqResponse[] = [];
+    let ownerId: string | null = null;
     
     if (roomName) {
       // Get owner_id from video_calls
@@ -139,6 +207,8 @@ serve(async (req) => {
         .maybeSingle();
 
       if (videoCall?.owner_id) {
+        ownerId = videoCall.owner_id;
+        
         // Fetch custom responses from assistant_responses table
         const { data: responses } = await supabase
           .from('assistant_responses')
@@ -158,6 +228,18 @@ serve(async (req) => {
     const chatbotResponse = findBestResponse(message, customResponses, propertyName, visitorName);
     
     console.log('FAQ response:', chatbotResponse);
+
+    // Check if response should trigger high-priority owner notification
+    if (ownerId && shouldNotifyOwner(chatbotResponse)) {
+      console.log('Response triggers owner notification, sending push...');
+      await sendOwnerNotification(
+        supabase,
+        ownerId,
+        propertyName || 'sua propriedade',
+        message,
+        visitorName
+      );
+    }
 
     return new Response(
       JSON.stringify({ 
