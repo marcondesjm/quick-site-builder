@@ -3,24 +3,38 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 export function useIsAdmin() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   
   return useQuery({
     queryKey: ['is-admin', user?.id],
     queryFn: async () => {
       if (!user?.id) return false;
       
-      const { data, error } = await supabase
-        .rpc('is_admin' as any);
-      
-      if (error) {
-        console.error('Error checking admin status:', error);
-        return false;
+      // First check user_metadata directly (faster, no DB call)
+      const metadataIsAdmin = user.user_metadata?.is_admin === 'true' || user.user_metadata?.is_admin === true;
+      if (metadataIsAdmin) {
+        console.log('User is admin via metadata');
+        return true;
       }
       
-      return data === true;
+      // Fallback to RPC check
+      try {
+        const { data, error } = await supabase.rpc('is_admin' as any);
+        
+        if (error) {
+          console.error('Error checking admin status via RPC:', error);
+          return false;
+        }
+        
+        console.log('RPC is_admin result:', data);
+        return data === true;
+      } catch (e) {
+        console.error('Exception checking admin status:', e);
+        return false;
+      }
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!session,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
 
