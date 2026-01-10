@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      video_calls: {
+        Row: {
+          audio_message_url: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          meet_link: string | null
+          owner_id: string
+          owner_joined: boolean | null
+          owner_status_message: string | null
+          owner_text_message: string | null
+          property_id: string | null
+          property_name: string
+          protocol_number: string | null
+          room_name: string
+          status: string
+          visitor_audio_url: string | null
+          visitor_joined: boolean | null
+          visitor_text_message: string | null
+        }
+        Insert: {
+          audio_message_url?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          meet_link?: string | null
+          owner_id: string
+          owner_joined?: boolean | null
+          owner_status_message?: string | null
+          owner_text_message?: string | null
+          property_id?: string | null
+          property_name: string
+          protocol_number?: string | null
+          room_name: string
+          status?: string
+          visitor_audio_url?: string | null
+          visitor_joined?: boolean | null
+          visitor_text_message?: string | null
+        }
+        Update: {
+          audio_message_url?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          meet_link?: string | null
+          owner_id?: string
+          owner_joined?: boolean | null
+          owner_status_message?: string | null
+          owner_text_message?: string | null
+          property_id?: string | null
+          property_name?: string
+          protocol_number?: string | null
+          room_name?: string
+          status?: string
+          visitor_audio_url?: string | null
+          visitor_joined?: boolean | null
+          visitor_text_message?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
