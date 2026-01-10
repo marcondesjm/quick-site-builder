@@ -6,13 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Pre-formatted responses (FAQ) - no AI tokens consumed
+// Default pre-formatted responses (FAQ) - no AI tokens consumed
 interface FaqResponse {
   keywords: string[];
   response: string;
 }
 
-const FAQ_RESPONSES: FaqResponse[] = [
+const DEFAULT_FAQ_RESPONSES: FaqResponse[] = [
   {
     keywords: ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'hello', 'hi'],
     response: 'Olá! Sou o assistente virtual do DoorVii. Como posso ajudar? Você pode deixar um recado, informar uma entrega ou aguardar o morador.'
@@ -64,15 +64,33 @@ const FAQ_RESPONSES: FaqResponse[] = [
 ];
 
 // Find the best matching response
-function findBestResponse(message: string, propertyName?: string, visitorName?: string): string {
+function findBestResponse(
+  message: string, 
+  customResponses: FaqResponse[], 
+  propertyName?: string, 
+  visitorName?: string
+): string {
   const lowerMessage = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
-  // Check each FAQ for keyword matches
-  for (const faq of FAQ_RESPONSES) {
+  // First check custom responses (user-defined)
+  for (const faq of customResponses) {
     for (const keyword of faq.keywords) {
       const normalizedKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       if (lowerMessage.includes(normalizedKeyword)) {
-        // Personalize response with visitor name if available
+        let response = faq.response;
+        if (visitorName) {
+          response = response.replace('Olá!', `Olá, ${visitorName}!`);
+        }
+        return response;
+      }
+    }
+  }
+  
+  // Then check default responses
+  for (const faq of DEFAULT_FAQ_RESPONSES) {
+    for (const keyword of faq.keywords) {
+      const normalizedKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (lowerMessage.includes(normalizedKeyword)) {
         let response = faq.response;
         if (visitorName) {
           response = response.replace('Olá!', `Olá, ${visitorName}!`);
@@ -103,8 +121,41 @@ serve(async (req) => {
     
     console.log('Received chat message (FAQ mode):', { message, roomName, propertyName, visitorName });
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch custom responses from the owner
+    let customResponses: FaqResponse[] = [];
+    
+    if (roomName) {
+      // Get owner_id from video_calls
+      const { data: videoCall } = await supabase
+        .from('video_calls')
+        .select('owner_id')
+        .eq('room_name', roomName)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (videoCall?.owner_id) {
+        // Fetch custom responses from assistant_responses table
+        const { data: responses } = await supabase
+          .from('assistant_responses')
+          .select('keywords, response')
+          .eq('user_id', videoCall.owner_id)
+          .eq('is_enabled', true)
+          .order('display_order', { ascending: true });
+
+        if (responses && responses.length > 0) {
+          customResponses = responses as FaqResponse[];
+          console.log(`Loaded ${customResponses.length} custom responses for owner`);
+        }
+      }
+    }
+
     // Generate response using FAQ matching (no AI tokens consumed)
-    const chatbotResponse = findBestResponse(message, propertyName, visitorName);
+    const chatbotResponse = findBestResponse(message, customResponses, propertyName, visitorName);
     
     console.log('FAQ response:', chatbotResponse);
 
