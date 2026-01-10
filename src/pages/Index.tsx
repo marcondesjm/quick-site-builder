@@ -21,6 +21,7 @@ import { InstallAppDialog } from "@/components/InstallAppDialog";
 import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
 import { NotificationStatusBanner } from "@/components/NotificationStatusBanner";
 import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
+import { TrialExpiringWarning } from "@/components/TrialExpiringWarning";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -1129,6 +1130,11 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Notification Status Banner - shows if notifications are not enabled */}
         <NotificationStatusBanner />
+        
+        {/* Trial Expiring Warning - shows 3 days before trial expires */}
+        {trialStatus?.isInTrial && !trialStatus?.isAdmin && (
+          <TrialExpiringWarning daysRemaining={trialStatus.daysRemaining} />
+        )}
         <motion.div
           variants={containerVariants}
           initial="hidden"
