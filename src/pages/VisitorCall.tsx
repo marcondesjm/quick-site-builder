@@ -70,6 +70,9 @@ const VisitorCall = () => {
   const [emergencyCountdown, setEmergencyCountdown] = useState(5);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const [hasAutoRung, setHasAutoRung] = useState(false);
+  const [protocolNumber, setProtocolNumber] = useState<string | null>(null);
+  const [showProtocolDialog, setShowProtocolDialog] = useState(false);
+  const [protocolCopied, setProtocolCopied] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastPlayedAudioRef = useRef<string | null>(null);
@@ -340,6 +343,11 @@ const VisitorCall = () => {
               return prev;
             });
           } else if (currentStatus === 'ended') {
+            // Get the protocol number when call ends
+            if (updatedCall.protocol_number) {
+              setProtocolNumber(updatedCall.protocol_number);
+              setShowProtocolDialog(true);
+            }
             setCallStatus(prev => {
               if (prev !== 'ended') {
                 toast.info('O morador encerrou a chamada.');
@@ -851,6 +859,41 @@ const VisitorCall = () => {
                 <span className="text-foreground font-medium">Obrigado pela visita!</span>
               </p>
             </div>
+
+            {/* Protocol Number Display */}
+            {protocolNumber && (
+              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">Número do Protocolo</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <code className="bg-background px-3 py-2 rounded-lg text-sm font-mono font-bold text-foreground">
+                    {protocolNumber}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(protocolNumber);
+                        setProtocolCopied(true);
+                        toast.success('Protocolo copiado!');
+                        setTimeout(() => setProtocolCopied(false), 2000);
+                      } catch {
+                        toast.error('Erro ao copiar');
+                      }
+                    }}
+                  >
+                    {protocolCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Guarde este número para referência futura
+                </p>
+              </div>
+            )}
             
             <div className="space-y-3">
               <Button
@@ -863,6 +906,7 @@ const VisitorCall = () => {
                   setMeetLink(null);
                   setNotified(false);
                   setHasAutoRung(false);
+                  setProtocolNumber(null);
                 }}
               >
                 <Bell className="w-5 h-5 mr-2" />
