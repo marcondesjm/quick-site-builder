@@ -134,3 +134,26 @@ export function useSetUserRole() {
     },
   });
 }
+
+export function useUpdateTrial() {
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ userId, action, days }: { userId: string; action: 'extend' | 'remove' | 'reset'; days?: number }) => {
+      const { data, error } = await supabase.functions.invoke('admin-update-trial', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        body: { userId, action, days }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+    },
+  });
+}

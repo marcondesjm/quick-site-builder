@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User, Clock } from 'lucide-react';
+import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User, Clock, CalendarPlus, CalendarX, RotateCcw, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -23,7 +23,15 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser, useSetUserRole } from '@/hooks/useAdmin';
+import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser, useSetUserRole, useUpdateTrial } from '@/hooks/useAdmin';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { SystemChecklist } from '@/components/SystemChecklist';
 
 const Admin = () => {
@@ -35,6 +43,7 @@ const Admin = () => {
   const toggleUserActive = useToggleUserActive();
   const deleteUser = useDeleteUser();
   const setUserRole = useSetUserRole();
+  const updateTrial = useUpdateTrial();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
@@ -158,6 +167,27 @@ const Admin = () => {
     }
   };
 
+  const handleUpdateTrial = async (userId: string, action: 'extend' | 'remove' | 'reset', days?: number) => {
+    try {
+      await updateTrial.mutateAsync({ userId, action, days });
+      const messages = {
+        extend: `Período de teste estendido em ${days || 7} dias.`,
+        remove: 'Trial removido. Usuário agora tem plano ativo.',
+        reset: 'Período de teste resetado para 7 dias.',
+      };
+      toast({
+        title: 'Trial atualizado',
+        description: messages[action],
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error?.message || 'Não foi possível atualizar o trial.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <motion.header
@@ -261,7 +291,7 @@ const Admin = () => {
                     <TableBody>
                       {filteredUsers.map((profile) => {
                         const isCurrentUser = profile.user_id === user?.id;
-                        const isPending = toggleUserActive.isPending || deleteUser.isPending || setUserRole.isPending;
+                        const isPending = toggleUserActive.isPending || deleteUser.isPending || setUserRole.isPending || updateTrial.isPending;
                         
                         // Calculate trial status
                         const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
@@ -290,22 +320,57 @@ const Admin = () => {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {profile.is_admin ? (
+                              {profile.is_admin || isCurrentUser ? (
                                 <span className="text-xs text-muted-foreground">-</span>
-                              ) : isInTrial ? (
-                                <Badge variant="outline" className="border-orange-500 text-orange-600 bg-orange-50">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'} restante{daysRemaining !== 1 ? 's' : ''}
-                                </Badge>
-                              ) : trialExpired ? (
-                                <Badge variant="destructive" className="bg-red-100 text-red-600 border-red-200">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Expirado
-                                </Badge>
                               ) : (
-                                <Badge variant="secondary" className="bg-green-100 text-green-600 border-green-200">
-                                  Plano Ativo
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  {isInTrial ? (
+                                    <Badge variant="outline" className="border-orange-500 text-orange-600 bg-orange-50">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
+                                    </Badge>
+                                  ) : trialExpired ? (
+                                    <Badge variant="destructive" className="bg-red-100 text-red-600 border-red-200">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      Expirado
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="secondary" className="bg-green-100 text-green-600 border-green-200">
+                                      Plano Ativo
+                                    </Badge>
+                                  )}
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={isPending}>
+                                        <MoreHorizontal className="w-4 h-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Gerenciar Trial</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleUpdateTrial(profile.user_id, 'extend', 7)}>
+                                        <CalendarPlus className="w-4 h-4 mr-2" />
+                                        Estender +7 dias
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateTrial(profile.user_id, 'extend', 30)}>
+                                        <CalendarPlus className="w-4 h-4 mr-2" />
+                                        Estender +30 dias
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleUpdateTrial(profile.user_id, 'reset')}>
+                                        <RotateCcw className="w-4 h-4 mr-2" />
+                                        Resetar (7 dias)
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem 
+                                        onClick={() => handleUpdateTrial(profile.user_id, 'remove')}
+                                        className="text-green-600"
+                                      >
+                                        <CalendarX className="w-4 h-4 mr-2" />
+                                        Remover Trial (Ativar Plano)
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               )}
                             </TableCell>
                             <TableCell>
