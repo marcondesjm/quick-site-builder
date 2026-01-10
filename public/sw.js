@@ -1,6 +1,6 @@
 // Service Worker for DoorVii PWA - Complete Offline Support
-const SW_VERSION = '4.0.0';
-const CACHE = 'doorvii-pwa-v4';
+const SW_VERSION = '4.1.0';
+const CACHE = 'doorvii-pwa-v4.1';
 
 // Offline fallback page
 const offlineFallbackPage = '/offline.html';
