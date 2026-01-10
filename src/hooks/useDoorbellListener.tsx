@@ -145,6 +145,22 @@ export const useDoorbellListener = () => {
               description: `Visitante na porta - ${record.property_name}`,
               duration: 10000,
             });
+            
+            // Show browser notification if permission granted (works in foreground too)
+            if ('Notification' in window && Notification.permission === 'granted') {
+              const notification = new Notification('🔔 Campainha tocando!', {
+                body: `Visitante na porta - ${record.property_name}`,
+                icon: '/pwa-192x192.png',
+                tag: 'doorbell-ring',
+                requireInteraction: true,
+              });
+              
+              // Auto-close after 30 seconds
+              setTimeout(() => notification.close(), 30000);
+            } else if ('Notification' in window && Notification.permission === 'default') {
+              // Request permission if not yet granted
+              Notification.requestPermission();
+            }
           }
           
           // Handle not answered - stop doorbell ringing
