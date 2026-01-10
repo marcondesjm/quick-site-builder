@@ -676,6 +676,7 @@ const VisitorCall = () => {
     if (callStatus === 'ringing') {
       setRingingCountdown(60); // Reset to 60 seconds when ringing starts
       
+      // Countdown interval (every second)
       const countdownInterval = setInterval(() => {
         setRingingCountdown(prev => {
           if (prev <= 1) {
@@ -697,9 +698,17 @@ const VisitorCall = () => {
         });
       }, 1000);
       
-      return () => clearInterval(countdownInterval);
+      // Repeat doorbell sound every 15 seconds
+      const soundInterval = setInterval(() => {
+        playDoorbellSound();
+      }, 15000);
+      
+      return () => {
+        clearInterval(countdownInterval);
+        clearInterval(soundInterval);
+      };
     }
-  }, [callStatus, roomName]);
+  }, [callStatus, roomName, playDoorbellSound]);
   
   // Separate cleanup effect for unmount only
   useEffect(() => {
