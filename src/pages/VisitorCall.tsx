@@ -698,10 +698,10 @@ const VisitorCall = () => {
         });
       }, 1000);
       
-      // Repeat doorbell sound every 15 seconds
+      // Repeat doorbell sound every 5 seconds
       const soundInterval = setInterval(() => {
         playDoorbellSound();
-      }, 15000);
+      }, 5000);
       
       return () => {
         clearInterval(countdownInterval);
