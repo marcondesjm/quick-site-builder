@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, 
@@ -13,7 +13,10 @@ import {
   PhoneOff,
   Home,
   Copy,
-  Check
+  Check,
+  Download,
+  Upload,
+  Trash2
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,12 +28,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useCallHistory, CallHistoryItem } from "@/hooks/useCallHistory";
+import { useCallHistory, CallHistoryItem, useDeleteCall, useDeleteAllCalls } from "@/hooks/useCallHistory";
 import { useToast } from "@/hooks/use-toast";
 
 interface GroupedCalls {
@@ -55,7 +68,12 @@ export function CallHistoryDialog() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [copiedProtocol, setCopiedProtocol] = useState<string | null>(null);
-  const { data: calls, isLoading } = useCallHistory();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: calls, isLoading, refetch } = useCallHistory();
+  const deleteCall = useDeleteCall();
+  const deleteAllCalls = useDeleteAllCalls();
   const { toast } = useToast();
 
   // Filter calls based on search term
@@ -130,6 +148,132 @@ export function CallHistoryDialog() {
     }
   };
 
+  // Export to CSV
+  const handleExport = () => {
+    if (!calls || calls.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = [
+      "Protocolo",
+      "Propriedade",
+      "Status",
+      "Data/Hora",
+      "Mensagem do Visitante",
+      "URL Áudio Visitante",
+      "URL Áudio Proprietário"
+    ];
+
+    const rows = calls.map(call => [
+      call.protocol_number || "",
+      call.property_name || "",
+      call.status || "",
+      call.created_at ? format(parseISO(call.created_at), "dd/MM/yyyy HH:mm:ss") : "",
+      call.visitor_text_message || "",
+      call.visitor_audio_url || "",
+      call.audio_message_url || ""
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
+    ].join("\n");
+
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `historico_chamadas_${format(new Date(), "yyyy-MM-dd_HH-mm")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exportação concluída!",
+      description: `${calls.length} registros exportados`,
+    });
+  };
+
+  // Import from CSV
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split("\n").filter(line => line.trim());
+        
+        if (lines.length <= 1) {
+          toast({
+            title: "Arquivo vazio ou inválido",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // For now, just show a preview of imported data
+        const recordCount = lines.length - 1; // minus header
+        toast({
+          title: "Arquivo lido com sucesso!",
+          description: `${recordCount} registros encontrados. Importação de dados externos não é suportada por questões de segurança.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Erro ao ler arquivo",
+          description: "Verifique se o arquivo está no formato correto",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Delete single call
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCall.mutateAsync(id);
+      toast({
+        title: "Registro excluído",
+        description: "O registro foi removido do histórico",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        variant: "destructive",
+      });
+    }
+    setDeleteId(null);
+  };
+
+  // Delete all calls
+  const handleDeleteAll = async () => {
+    try {
+      await deleteAllCalls.mutateAsync();
+      toast({
+        title: "Histórico limpo",
+        description: "Todos os registros foram excluídos",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        variant: "destructive",
+      });
+    }
+    setShowDeleteAllConfirm(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -145,6 +289,48 @@ export function CallHistoryDialog() {
             Histórico de Chamadas e Protocolos
           </DialogTitle>
         </DialogHeader>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExport}
+            disabled={!calls || calls.length === 0}
+          >
+            <Download className="w-4 h-4" />
+            Baixar CSV
+          </Button>
+          
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="w-4 h-4" />
+            Importar
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-destructive hover:text-destructive"
+            onClick={() => setShowDeleteAllConfirm(true)}
+            disabled={!calls || calls.length === 0}
+          >
+            <Trash2 className="w-4 h-4" />
+            Excluir tudo
+          </Button>
+        </div>
 
         {/* Search bar */}
         <div className="relative">
@@ -301,6 +487,19 @@ export function CallHistoryDialog() {
                                   </div>
                                 )}
                               </div>
+
+                              {/* Delete button */}
+                              <div className="mt-3 flex justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 text-xs text-muted-foreground hover:text-destructive"
+                                  onClick={() => setDeleteId(call.id)}
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Excluir
+                                </Button>
+                              </div>
                             </motion.div>
                           );
                         })}
@@ -321,6 +520,48 @@ export function CallHistoryDialog() {
           )}
         </ScrollArea>
       </DialogContent>
+
+      {/* Delete single confirmation */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O registro será permanentemente removido do histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && handleDelete(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete all confirmation */}
+      <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir todo o histórico?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todos os registros de chamadas serão permanentemente excluídos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir tudo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
