@@ -72,6 +72,8 @@ const VisitorCall = () => {
   const [hasAutoRung, setHasAutoRung] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastPlayedAudioRef = useRef<string | null>(null);
+  const autoPlayAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Format elapsed time
   const formatElapsedTime = useCallback((ms: number): string => {
@@ -90,6 +92,64 @@ const VisitorCall = () => {
 
     return () => clearInterval(interval);
   }, [waitStartTime, formatElapsedTime]);
+
+  // Auto-play new audio messages when they arrive
+  useEffect(() => {
+    if (audioMessages.length === 0) return;
+    
+    const lastMessage = audioMessages[audioMessages.length - 1];
+    
+    // Skip if we already played this audio
+    if (lastPlayedAudioRef.current === lastMessage.url) return;
+    
+    console.log('[AutoPlay] New audio detected, attempting to play:', lastMessage.url);
+    lastPlayedAudioRef.current = lastMessage.url;
+    
+    // Stop any currently playing audio
+    if (autoPlayAudioRef.current) {
+      autoPlayAudioRef.current.pause();
+      autoPlayAudioRef.current = null;
+    }
+    
+    // Create and play new audio
+    const audio = new Audio(lastMessage.url);
+    audio.preload = 'auto';
+    audio.volume = 1.0;
+    autoPlayAudioRef.current = audio;
+    
+    const playAudio = async () => {
+      try {
+        await audio.play();
+        console.log('[AutoPlay] Audio playing successfully');
+        setCurrentPlayingIndex(audioMessages.length - 1);
+        toast.success('Reproduzindo mensagem do morador...');
+      } catch (e) {
+        console.log('[AutoPlay] Autoplay blocked:', e);
+        toast.info('Toque na mensagem para ouvir', { duration: 5000 });
+      }
+    };
+    
+    audio.oncanplaythrough = playAudio;
+    audio.onended = () => {
+      console.log('[AutoPlay] Audio ended');
+      setCurrentPlayingIndex(null);
+      autoPlayAudioRef.current = null;
+    };
+    audio.onerror = (e) => {
+      console.error('[AutoPlay] Audio error:', e);
+      autoPlayAudioRef.current = null;
+    };
+    
+    audio.load();
+    
+    // Try immediate play as well (for mobile)
+    setTimeout(() => {
+      if (audio.readyState >= 2) {
+        playAudio();
+      }
+    }, 200);
+    
+  }, [audioMessages]);
 
   // Fetch owner phone number
   useEffect(() => {
