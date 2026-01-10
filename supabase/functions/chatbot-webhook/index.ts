@@ -5,6 +5,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const SYSTEM_PROMPT = `Você é o assistente virtual do DoorVii, um sistema de portaria inteligente. 
+Seu papel é ajudar visitantes que estão na porta de uma propriedade.
+
+Instruções:
+- Seja educado, prestativo e conciso nas respostas
+- Você pode ajudar com informações básicas sobre o sistema
+- Se o visitante quiser deixar um recado, anote e confirme
+- Se for uma entrega, pergunte qual empresa (Correios, iFood, Mercado Livre, etc.)
+- Sempre pergunte se pode ajudar em mais alguma coisa
+- Responda SEMPRE em português brasileiro
+- Mantenha as respostas curtas (máximo 2-3 frases)`;
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,31 +26,52 @@ serve(async (req) => {
   try {
     const { message, roomName, propertyName } = await req.json();
     
-    console.log('Sending message to n8n webhook:', { message, roomName, propertyName });
+    console.log('Received chat message:', { message, roomName, propertyName });
 
-    const webhookUrl = 'https://doorvii.app.n8n.cloud/webhook/receber';
-    
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message,
-        roomName,
-        propertyName,
-        timestamp: new Date().toISOString(),
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { 
+            role: "user", 
+            content: `[Propriedade: ${propertyName || 'Não identificada'}]\n\nMensagem do visitante: ${message}` 
+          },
+        ],
       }),
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns segundos." }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Serviço temporariamente indisponível." }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       const errorText = await response.text();
-      console.error('Webhook error:', errorText);
-      throw new Error(`Webhook responded with status ${response.status}`);
+      console.error('AI gateway error:', response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    // Get the chatbot response
-    const chatbotResponse = await response.text();
+    const data = await response.json();
+    const chatbotResponse = data.choices?.[0]?.message?.content || "Desculpe, não consegui processar sua mensagem.";
+    
     console.log('Chatbot response:', chatbotResponse);
 
     return new Response(
