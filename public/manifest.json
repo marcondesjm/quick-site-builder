@@ -1,13 +1,14 @@
 {
-  "name": "DoorVii Home - Portaria Inteligente",
+  "name": "DoorVii",
   "short_name": "DoorVii",
-  "description": "Sua portaria na palma da mão. Atenda visitantes de qualquer lugar com videochamadas instantâneas.",
+  "description": "Sua portaria na palma da mão",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#14b8a6",
+  "orientation": "any",
+  "dir": "ltr",
   "scope": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -27,7 +28,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "categories": ["utilities", "lifestyle"],
-  "lang": "pt-BR"
+  ]
 }
