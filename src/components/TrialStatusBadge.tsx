@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Clock, Sparkles, MessageCircle, Timer } from 'lucide-react';
+import { Sparkles, Timer, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface TrialStatusBadgeProps {
   daysRemaining: number;
@@ -8,9 +9,10 @@ interface TrialStatusBadgeProps {
 }
 
 export function TrialStatusBadge({ daysRemaining, isAdmin }: TrialStatusBadgeProps) {
-  const handleContactWhatsApp = () => {
-    const message = encodeURIComponent(`Olá! Estou usando o Doorvii em período de teste e gostaria de saber mais sobre os planos disponíveis.`);
-    window.open(`https://wa.me/5548996029392?text=${message}`, '_blank');
+  const navigate = useNavigate();
+
+  const handleNavigateToPlans = () => {
+    navigate('/plans');
   };
 
   // Admins don't see trial badge
@@ -104,10 +106,10 @@ export function TrialStatusBadge({ daysRemaining, isAdmin }: TrialStatusBadgePro
         
         <Button
           size="lg"
-          onClick={handleContactWhatsApp}
-          className="gap-2 bg-white hover:bg-white/90 text-green-600 font-bold shadow-xl hover:scale-105 transition-transform"
+          onClick={handleNavigateToPlans}
+          className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-xl hover:scale-105 transition-transform"
         >
-          <MessageCircle className="w-5 h-5" />
+          <Crown className="w-5 h-5" />
           <span className="hidden sm:inline">Assinar Agora</span>
           <span className="sm:hidden">Assinar</span>
         </Button>
