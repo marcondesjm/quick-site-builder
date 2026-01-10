@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User } from 'lucide-react';
+import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -253,6 +253,7 @@ const Admin = () => {
                         <TableHead>WhatsApp</TableHead>
                         <TableHead>Criado em</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Período de Teste</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
@@ -261,6 +262,13 @@ const Admin = () => {
                       {filteredUsers.map((profile) => {
                         const isCurrentUser = profile.user_id === user?.id;
                         const isPending = toggleUserActive.isPending || deleteUser.isPending || setUserRole.isPending;
+                        
+                        // Calculate trial status
+                        const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+                        const now = new Date();
+                        const isInTrial = trialEndsAt && trialEndsAt > now;
+                        const trialExpired = trialEndsAt && trialEndsAt <= now;
+                        const daysRemaining = trialEndsAt ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
                         
                         return (
                           <TableRow key={profile.id}>
@@ -280,6 +288,25 @@ const Admin = () => {
                               <Badge variant={profile.is_active ? 'default' : 'destructive'}>
                                 {profile.is_active ? 'Ativo' : 'Inativo'}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {profile.is_admin ? (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              ) : isInTrial ? (
+                                <Badge variant="outline" className="border-orange-500 text-orange-600 bg-orange-50">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'} restante{daysRemaining !== 1 ? 's' : ''}
+                                </Badge>
+                              ) : trialExpired ? (
+                                <Badge variant="destructive" className="bg-red-100 text-red-600 border-red-200">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Expirado
+                                </Badge>
+                              ) : (
+                                <Badge variant="secondary" className="bg-green-100 text-green-600 border-green-200">
+                                  Plano Ativo
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell>
                               {isCurrentUser ? (
