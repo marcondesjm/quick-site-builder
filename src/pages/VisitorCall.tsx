@@ -62,7 +62,7 @@ const VisitorCall = () => {
   const [meetLink, setMeetLink] = useState<string | null>(initialMeetLink);
   const [visitorAlwaysConnected, setVisitorAlwaysConnected] = useState(false);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
-  const [waitStartTime] = useState<number>(Date.now());
+  const [callAnsweredTime, setCallAnsweredTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState<string>('00:00');
   const [showNotAnsweredDialog, setShowNotAnsweredDialog] = useState(false);
   const [showMessageSentDialog, setShowMessageSentDialog] = useState(false);
@@ -83,15 +83,24 @@ const VisitorCall = () => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, []);
 
-  // Timer for elapsed time
+  // Timer for elapsed time - only starts when call is answered
   useEffect(() => {
+    if (!callAnsweredTime) return;
+    
     const interval = setInterval(() => {
-      const elapsed = Date.now() - waitStartTime;
+      const elapsed = Date.now() - callAnsweredTime;
       setElapsedTime(formatElapsedTime(elapsed));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [waitStartTime, formatElapsedTime]);
+  }, [callAnsweredTime, formatElapsedTime]);
+
+  // Set answered time when call status changes to answered/audio_message/video_call
+  useEffect(() => {
+    if ((callStatus === 'answered' || callStatus === 'audio_message' || callStatus === 'video_call') && !callAnsweredTime) {
+      setCallAnsweredTime(Date.now());
+    }
+  }, [callStatus, callAnsweredTime]);
 
   // Auto-play new audio messages when they arrive
   useEffect(() => {
@@ -979,17 +988,17 @@ const VisitorCall = () => {
             <h1 className="text-2xl font-bold mb-2">{decodeURIComponent(propertyName)}</h1>
             <p className="text-muted-foreground mb-2">Portaria Virtual</p>
             
-            {/* Wait time counter */}
-            {callStatus !== 'ended' && (
+            {/* Call time counter and recording warning - only when answered */}
+            {callAnsweredTime && callStatus !== 'ended' && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center gap-2 mb-4"
               >
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-green-600">
                   <Clock className="w-4 h-4" />
-                  <span className="text-sm font-mono">{elapsedTime}</span>
-                  <span className="text-xs">de espera</span>
+                  <span className="text-sm font-mono font-semibold">{elapsedTime}</span>
+                  <span className="text-xs">em atendimento</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-amber-500">
                   <span className="font-bold">!</span>
