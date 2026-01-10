@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck, QrCode, Video, Phone } from "lucide-react";
+import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck, QrCode, Video, Phone, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PropertyMembersDialog } from "./PropertyMembersDialog";
 
 interface PropertyCardProps {
   id: string;
@@ -63,6 +64,7 @@ export const PropertyCard = ({
   const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showMembersDialog, setShowMembersDialog] = useState(false);
   const [editName, setEditName] = useState(name);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -176,6 +178,15 @@ export const PropertyCard = ({
                 <DropdownMenuItem 
                   onClick={(e) => {
                     e.stopPropagation();
+                    setShowMembersDialog(true);
+                  }}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Gerenciar moradores
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (onUpdate) {
                       onUpdate(id, { visitor_always_connected: !visitorAlwaysConnected });
                     }
@@ -186,7 +197,7 @@ export const PropertyCard = ({
                   {visitorAlwaysConnected ? "Desativar" : "Ativar"} visitante sempre conectado
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowDeleteDialog(true);
@@ -300,6 +311,14 @@ export const PropertyCard = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Members Dialog */}
+      <PropertyMembersDialog
+        open={showMembersDialog}
+        onOpenChange={setShowMembersDialog}
+        propertyId={id}
+        propertyName={name}
+      />
     </>
   );
 };
