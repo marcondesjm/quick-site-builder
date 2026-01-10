@@ -85,13 +85,21 @@ serve(async (req) => {
     // Create a map of existing profiles by user_id
     const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || [])
 
-    // Get all admin user IDs from user_roles table
-    const { data: adminRoles } = await supabaseAdmin
-      .from('user_roles')
-      .select('user_id')
-      .eq('role', 'admin')
-    
-    const adminUserIds = new Set(adminRoles?.map(r => r.user_id) || [])
+    // Try to get admin user IDs from user_roles table (may not exist)
+    let adminUserIds = new Set<string>()
+    try {
+      const { data: adminRoles, error: rolesError } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin')
+      
+      if (!rolesError && adminRoles) {
+        adminUserIds = new Set(adminRoles.map(r => r.user_id))
+      }
+    } catch (e) {
+      // user_roles table may not exist, that's okay
+      console.log('user_roles table not found, using metadata only for admin check')
+    }
 
     // Merge auth users with profiles - include ALL auth users even if they don't have a profile
     const usersWithEmails = authUsers.users.map(authUser => {
