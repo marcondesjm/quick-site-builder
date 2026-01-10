@@ -16,7 +16,7 @@ serve(async (req) => {
     
     console.log('Sending message to n8n webhook:', { message, roomName, propertyName });
 
-    const webhookUrl = 'https://doorvii.app.n8n.cloud/webhook-test/receber';
+    const webhookUrl = 'https://doorvii.app.n8n.cloud/webhook/receber';
     
     const response = await fetch(webhookUrl, {
       method: 'POST',
