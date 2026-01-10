@@ -1548,11 +1548,6 @@ const Index = () => {
                             controls
                             autoPlay
                             playsInline
-                            muted
-                            onClick={(e) => {
-                              const video = e.currentTarget;
-                              video.muted = false;
-                            }}
                             src={visitorAudioResponse}
                             className="w-full rounded-lg max-h-48"
                           />
@@ -1661,11 +1656,6 @@ const Index = () => {
                   controls 
                   autoPlay
                   playsInline
-                  muted
-                  onClick={(e) => {
-                    const video = e.currentTarget;
-                    video.muted = false;
-                  }}
                   className="w-full rounded-lg max-h-64"
                 />
               ) : (
