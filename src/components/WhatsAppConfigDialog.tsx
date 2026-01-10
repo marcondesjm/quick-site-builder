@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Check, User } from "lucide-react";
+import { Loader2, Check, User, Camera, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -32,8 +33,11 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
   const [fullName, setFullName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open && user) {
@@ -47,7 +51,7 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('phone, cpf, full_name')
+        .select('phone, cpf, full_name, avatar_url')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -63,6 +67,9 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
         }
         if (data.full_name) {
           setFullName(data.full_name);
+        }
+        if (data.avatar_url) {
+          setAvatarUrl(data.avatar_url);
         }
       }
     } catch (err) {
@@ -111,6 +118,113 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
     setCpf(formatted);
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to visitor-media bucket (already exists and is public)
+      const { error: uploadError } = await supabase.storage
+        .from('visitor-media')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('visitor-media')
+        .getPublicUrl(fileName);
+
+      // Add timestamp to force refresh
+      const urlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+      setAvatarUrl(urlWithTimestamp);
+
+      toast({
+        title: "Foto atualizada!",
+        description: "Sua foto de perfil foi carregada com sucesso.",
+      });
+    } catch (err) {
+      console.error('Error uploading avatar:', err);
+      toast({
+        title: "Erro ao enviar foto",
+        description: "Não foi possível enviar a foto. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingAvatar(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    
+    setUploadingAvatar(true);
+    try {
+      // List and delete avatar files
+      const { data: files } = await supabase.storage
+        .from('visitor-media')
+        .list(user.id);
+
+      if (files) {
+        const avatarFiles = files.filter(f => f.name.startsWith('avatar'));
+        for (const file of avatarFiles) {
+          await supabase.storage
+            .from('visitor-media')
+            .remove([`${user.id}/${file.name}`]);
+        }
+      }
+
+      setAvatarUrl(null);
+      
+      // Update profile to remove avatar_url
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('user_id', user.id);
+
+      toast({
+        title: "Foto removida",
+        description: "Sua foto de perfil foi removida.",
+      });
+    } catch (err) {
+      console.error('Error removing avatar:', err);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!user) return;
     
@@ -143,7 +257,7 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
         .eq('user_id', user.id)
         .maybeSingle();
 
-      const profileData: { phone?: string; cpf?: string; full_name?: string } = {};
+      const profileData: { phone?: string; cpf?: string; full_name?: string; avatar_url?: string | null } = {};
       
       if (phoneDigits.length >= 10) {
         profileData.phone = `+55${phoneDigits}`;
@@ -154,6 +268,8 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
       if (fullName.trim()) {
         profileData.full_name = fullName.trim();
       }
+      // Always update avatar_url (can be null to remove)
+      profileData.avatar_url = avatarUrl;
 
       if (existingProfile) {
         // Update existing profile
@@ -192,13 +308,22 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5 text-primary" />
-            Meu Perfil
+            Minha Conta
           </DialogTitle>
           <DialogDescription>
             Configure suas informações pessoais. O CPF será informado aos entregadores quando solicitado.
@@ -212,6 +337,48 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
             </div>
           ) : (
             <>
+              {/* Avatar Section */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative">
+                  <Avatar className="w-24 h-24 border-4 border-primary/20">
+                    <AvatarImage src={avatarUrl || undefined} alt="Foto de perfil" />
+                    <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                      {fullName ? getInitials(fullName) : <User className="w-10 h-10" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <button
+                    onClick={handleAvatarClick}
+                    disabled={uploadingAvatar}
+                    className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    {uploadingAvatar ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
+                  </button>
+                  {avatarUrl && (
+                    <button
+                      onClick={handleRemoveAvatar}
+                      disabled={uploadingAvatar}
+                      className="absolute top-0 right-0 p-1 bg-destructive text-destructive-foreground rounded-full shadow-lg hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Clique na câmera para adicionar uma foto
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nome Completo</Label>
                 <Input
@@ -221,20 +388,6 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
                   onChange={(e) => setFullName(e.target.value)}
                   maxLength={100}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cpf">CPF</Label>
-                <Input
-                  id="cpf"
-                  placeholder="000.000.000-00"
-                  value={cpf}
-                  onChange={handleCpfChange}
-                  maxLength={14}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Será informado aos entregadores para confirmar entregas
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -258,6 +411,20 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Receba notificações quando a campainha tocar
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={handleCpfChange}
+                  maxLength={14}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Será informado aos entregadores para confirmar entregas
                 </p>
               </div>
 
