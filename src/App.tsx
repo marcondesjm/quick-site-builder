@@ -15,6 +15,7 @@ import QRCodePage from "./pages/QRCodePage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
 import WhatsAppButton from "./components/WhatsAppButton";
+import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <CookieConsent />
           <BrowserRouter>
             <ConditionalWhatsAppButton />
             <Routes>
