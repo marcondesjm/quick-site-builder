@@ -302,32 +302,50 @@ export const IncomingCall = forwardRef<HTMLDivElement, IncomingCallProps>(({
             </>
           ) : (
             <>
-              {/* Botão principal Atender */}
-              <motion.div 
-                whileTap={{ scale: 0.95 }}
-                animate={isAnswering ? {} : { scale: [1, 1.02, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="w-full"
-              >
-                <Button 
-                  variant="outline" 
-                  onClick={async () => {
-                    if (isAnswering) return;
-                    setIsAnswering(true);
-                    try {
-                      await onAnswer();
-                    } catch (error) {
-                      console.error('Error answering call:', error);
-                      setIsAnswering(false);
-                    }
-                  }}
-                  disabled={isAnswering}
-                  className="w-full h-12 rounded-full bg-white text-amber-600 border-white hover:bg-white/90 gap-2 text-base font-semibold disabled:opacity-70"
+              {/* Botões Atender e Não Atender */}
+              <div className="flex gap-3 w-full">
+                {/* Botão Não Atender */}
+                <motion.div 
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1"
                 >
-                  <Phone className="w-5 h-5" />
-                  {isAnswering ? 'Conectando...' : 'Atender'}
-                </Button>
-              </motion.div>
+                  <Button 
+                    variant="outline" 
+                    onClick={onDecline}
+                    className="w-full h-12 rounded-full bg-white/20 text-white border-white/40 hover:bg-white/30 gap-2 text-base font-semibold"
+                  >
+                    <PhoneOff className="w-5 h-5" />
+                    Recusar
+                  </Button>
+                </motion.div>
+
+                {/* Botão Atender */}
+                <motion.div 
+                  whileTap={{ scale: 0.95 }}
+                  animate={isAnswering ? {} : { scale: [1, 1.02, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="flex-1"
+                >
+                  <Button 
+                    variant="outline" 
+                    onClick={async () => {
+                      if (isAnswering) return;
+                      setIsAnswering(true);
+                      try {
+                        await onAnswer();
+                      } catch (error) {
+                        console.error('Error answering call:', error);
+                        setIsAnswering(false);
+                      }
+                    }}
+                    disabled={isAnswering}
+                    className="w-full h-12 rounded-full bg-white text-amber-600 border-white hover:bg-white/90 gap-2 text-base font-semibold disabled:opacity-70"
+                  >
+                    <Phone className="w-5 h-5" />
+                    {isAnswering ? '...' : 'Atender'}
+                  </Button>
+                </motion.div>
+              </div>
 
               {/* Botão Enviar áudio */}
               <motion.div 
