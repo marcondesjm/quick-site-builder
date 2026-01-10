@@ -13,9 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { roomName, propertyName, chatHistory, protocolNumber } = await req.json();
+    const { roomName, propertyName, chatHistory, protocolNumber, visitorName, visitorCpf } = await req.json();
     
-    console.log('Saving chat history:', { roomName, propertyName, messagesCount: chatHistory?.length });
+    console.log('Saving chat history:', { roomName, propertyName, messagesCount: chatHistory?.length, visitorName });
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -43,12 +43,32 @@ serve(async (req) => {
       );
     }
 
+    // Build visitor identification header
+    let visitorInfo = '';
+    if (visitorName || visitorCpf) {
+      visitorInfo = '--- IDENTIFICAÇÃO DO ENTREGADOR ---\n';
+      if (visitorName) visitorInfo += `Nome: ${visitorName}\n`;
+      if (visitorCpf) {
+        // Mask CPF for privacy (show only last 4 digits)
+        const maskedCpf = visitorCpf.length >= 4 
+          ? `***.***.*${visitorCpf.slice(-4, -2)}-${visitorCpf.slice(-2)}`
+          : visitorCpf;
+        visitorInfo += `CPF: ${maskedCpf}\n`;
+      }
+      visitorInfo += '-----------------------------------\n\n';
+    }
+
     // Format chat history as readable text
-    const formattedChat = chatHistory.map((msg: { sender: string; text: string; timestamp: number }) => {
+    const formattedChat = visitorInfo + chatHistory.map((msg: { sender: string; text: string; timestamp: number }) => {
       const time = new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       const sender = msg.sender === 'visitor' ? '👤 Visitante' : '🤖 Assistente';
       return `[${time}] ${sender}: ${msg.text}`;
     }).join('\n');
+
+    // Create activity title with visitor name if available
+    const activityTitle = visitorName 
+      ? `💬 Conversa com ${visitorName} - ${propertyName}`
+      : `💬 Conversa com Assistente - ${propertyName}`;
 
     // Create activity log entry for the chat
     const { data: activity, error: activityError } = await supabase
@@ -57,7 +77,7 @@ serve(async (req) => {
         user_id: videoCall.owner_id,
         property_id: videoCall.property_id,
         type: 'doorbell',
-        title: `💬 Conversa com Assistente - ${propertyName}`,
+        title: activityTitle,
         property_name: propertyName,
         protocol_number: protocolNumber,
         media_type: null,
