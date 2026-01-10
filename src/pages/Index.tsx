@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { PropertyCard } from "@/components/PropertyCard";
 import { ActivityItem } from "@/components/ActivityItem";
 import { AllActivitiesDialog } from "@/components/AllActivitiesDialog";
+import { CallHistoryDialog } from "@/components/CallHistoryDialog";
 import { StatsCard } from "@/components/StatsCard";
 import { QRCodeAccess } from "@/components/QRCodeAccess";
 import { IncomingCall } from "@/components/IncomingCall";
@@ -1215,9 +1216,12 @@ const Index = () => {
 
             {/* Activity Section */}
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between gap-2 mb-6">
+              <div className="flex items-center justify-between gap-2 mb-4">
                 <h2 className="text-xl sm:text-2xl font-semibold">Atividade Recente</h2>
-                <AllActivitiesDialog />
+                <div className="flex items-center gap-2">
+                  <CallHistoryDialog />
+                  <AllActivitiesDialog />
+                </div>
               </div>
 
               <PullToRefresh 
