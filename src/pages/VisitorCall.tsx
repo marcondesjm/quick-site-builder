@@ -208,6 +208,8 @@ const VisitorCall = () => {
               return prev;
             });
           } else if (currentStatus === 'audio_message' && updatedCall.audio_message_url) {
+            const audioUrl = updatedCall.audio_message_url;
+            
             setCallStatus(prev => {
               if (prev !== 'audio_message') {
                 toast.success('Nova mensagem de áudio do morador!');
@@ -217,9 +219,24 @@ const VisitorCall = () => {
             });
             // Add new audio message to the list (with deduplication)
             setAudioMessages(prev => {
-              const exists = prev.some(m => m.url === updatedCall.audio_message_url);
+              const exists = prev.some(m => m.url === audioUrl);
               if (!exists) {
-                return [...prev, { url: updatedCall.audio_message_url, timestamp: Date.now() }];
+                // Auto-play new audio message
+                setTimeout(() => {
+                  const audio = new Audio(audioUrl);
+                  audio.preload = 'auto';
+                  audio.oncanplaythrough = async () => {
+                    try {
+                      await audio.play();
+                      console.log('[Audio] Auto-playing new message');
+                    } catch (e) {
+                      console.log('[Audio] Autoplay blocked, user interaction needed');
+                    }
+                  };
+                  audio.load();
+                }, 300);
+                
+                return [...prev, { url: audioUrl, timestamp: Date.now() }];
               }
               return prev;
             });
