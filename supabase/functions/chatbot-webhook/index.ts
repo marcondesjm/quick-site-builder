@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,7 +25,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, roomName, propertyName } = await req.json();
+    const { message, roomName, propertyName, conversationHistory } = await req.json();
     
     console.log('Received chat message:', { message, roomName, propertyName });
 
@@ -32,6 +33,27 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
+
+    // Build messages array with conversation history
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+    ];
+
+    // Add conversation history if provided
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      for (const msg of conversationHistory) {
+        messages.push({
+          role: msg.sender === 'visitor' ? 'user' : 'assistant',
+          content: msg.text
+        });
+      }
+    }
+
+    // Add current message
+    messages.push({ 
+      role: "user", 
+      content: `[Propriedade: ${propertyName || 'Não identificada'}]\n\nMensagem do visitante: ${message}` 
+    });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -41,13 +63,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { 
-            role: "user", 
-            content: `[Propriedade: ${propertyName || 'Não identificada'}]\n\nMensagem do visitante: ${message}` 
-          },
-        ],
+        messages,
       }),
     });
 
