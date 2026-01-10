@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff, Send } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff, Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -1225,7 +1225,7 @@ const VisitorCall = () => {
                     className="w-full font-semibold text-base py-5 border-primary/30 hover:bg-primary/10"
                     onClick={() => setShowChatDialog(true)}
                   >
-                    <MessageCircle className="w-5 h-5" />
+                    <Bot className="w-5 h-5" />
                     <span>Conversar com Assistente</span>
                   </Button>
                 </motion.div>
