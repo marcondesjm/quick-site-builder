@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,16 +6,17 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `Você é o assistente virtual do DoorVii, um sistema de portaria inteligente. 
-Seu papel é ajudar visitantes que estão na porta de uma propriedade.
+Seu papel é ajudar visitantes e entregadores que estão na porta de uma propriedade.
 
 Instruções:
 - Seja educado, prestativo e conciso nas respostas
 - Você pode ajudar com informações básicas sobre o sistema
 - Se o visitante quiser deixar um recado, anote e confirme
-- Se for uma entrega, pergunte qual empresa (Correios, iFood, Mercado Livre, etc.)
+- Se for uma entrega, confirme os dados do entregador e pergunte detalhes da entrega
 - Sempre pergunte se pode ajudar em mais alguma coisa
 - Responda SEMPRE em português brasileiro
-- Mantenha as respostas curtas (máximo 2-3 frases)`;
+- Mantenha as respostas curtas (máximo 2-3 frases)
+- Se o visitante se identificou com nome e CPF, use o nome dele nas respostas`;
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -25,13 +25,21 @@ serve(async (req) => {
   }
 
   try {
-    const { message, roomName, propertyName, conversationHistory } = await req.json();
+    const { message, roomName, propertyName, conversationHistory, visitorName, visitorCpf } = await req.json();
     
-    console.log('Received chat message:', { message, roomName, propertyName });
+    console.log('Received chat message:', { message, roomName, propertyName, visitorName, visitorCpf: visitorCpf ? '***' : undefined });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Build context with visitor identification
+    let visitorContext = '';
+    if (visitorName || visitorCpf) {
+      visitorContext = '\n\n[Dados do Entregador/Visitante]';
+      if (visitorName) visitorContext += `\nNome: ${visitorName}`;
+      if (visitorCpf) visitorContext += `\nCPF: ***.***.***-${visitorCpf.slice(-2)}`;
     }
 
     // Build messages array with conversation history
@@ -49,10 +57,10 @@ serve(async (req) => {
       }
     }
 
-    // Add current message
+    // Add current message with context
     messages.push({ 
       role: "user", 
-      content: `[Propriedade: ${propertyName || 'Não identificada'}]\n\nMensagem do visitante: ${message}` 
+      content: `[Propriedade: ${propertyName || 'Não identificada'}]${visitorContext}\n\nMensagem: ${message}` 
     });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
