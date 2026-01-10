@@ -60,7 +60,6 @@ export function useCallHistory() {
         .from('video_calls')
         .select('*')
         .eq('owner_id', user.id)
-        .not('protocol_number', 'is', null)
         .order('created_at', { ascending: false });
       
       if (error) {

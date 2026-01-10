@@ -64,6 +64,16 @@ export const useVideoCalls = () => {
   }, [activeCall?.id, toast]);
 
   // Create a new video call session
+  // Generate protocol number at call creation time
+  const generateProtocolNumber = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `DV${year}${month}${day}-${random}`;
+  };
+
   const createCall = useCallback(async (propertyId: string | null, propertyName: string) => {
     if (!user) {
       console.error('No user logged in');
@@ -71,6 +81,7 @@ export const useVideoCalls = () => {
     }
 
     const roomName = `${propertyName}_${Date.now()}`.replace(/\s+/g, '_');
+    const protocolNumber = generateProtocolNumber();
 
     try {
       const { data, error } = await supabase
@@ -81,6 +92,7 @@ export const useVideoCalls = () => {
           property_name: propertyName,
           owner_id: user.id,
           status: 'pending',
+          protocol_number: protocolNumber,
         })
         .select()
         .single();
@@ -95,7 +107,7 @@ export const useVideoCalls = () => {
         return null;
       }
 
-      console.log('Video call created:', data);
+      console.log('Video call created with protocol:', protocolNumber, data);
       setActiveCall(data);
       setVisitorJoinedCall(false);
       return data;
