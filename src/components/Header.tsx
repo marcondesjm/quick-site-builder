@@ -161,7 +161,7 @@ export const Header = () => {
   const handleHelp = () => {
     toast({
       title: "Central de Ajuda",
-      description: "Entre em contato pelo email: suporte@doorvi.app",
+      description: "Entre em contato pelo email: suporte.doorvii@gmail.com",
     });
   };
 

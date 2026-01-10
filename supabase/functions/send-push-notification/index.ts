@@ -193,7 +193,7 @@ async function createVapidJwt(
   const claims = {
     aud: audience,
     exp: now + 12 * 60 * 60,
-    sub: 'mailto:porteirovirtual@app.com',
+    sub: 'mailto:suporte.doorvii@gmail.com',
   };
 
   const headerB64 = uint8ArrayToBase64Url(new TextEncoder().encode(JSON.stringify(header)));
