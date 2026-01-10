@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
-import { Eye, EyeOff, Home, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PhoneInput } from '@/components/PhoneInput';
+import doorviiLogo from '@/assets/doorvii-logo-white.png';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
@@ -146,29 +147,44 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-primary/10 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-primary/10 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Home className="w-8 h-8 text-primary" />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="text-center mb-8"
+        >
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl animate-pulse" />
+            <div className="relative bg-gradient-to-br from-primary to-primary/80 p-5 rounded-2xl shadow-2xl">
+              <img 
+                src={doorviiLogo} 
+                alt="DoorVii" 
+                className="h-16 w-auto mx-auto drop-shadow-lg"
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold gradient-text">Portaria Digital</h1>
-          <p className="text-muted-foreground mt-2">
-            {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+            DoorVii
+          </h1>
+          <p className="text-lg text-muted-foreground mt-1">Portaria Digital Inteligente</p>
+          <p className="text-sm text-muted-foreground/80 mt-3">
+            {isLogin ? 'Entre na sua conta' : 'Crie sua conta grátis'}
           </p>
-        </div>
+        </motion.div>
 
         {/* Form Card */}
         <div className="glass rounded-2xl p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
