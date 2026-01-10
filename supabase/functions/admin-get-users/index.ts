@@ -18,33 +18,42 @@ serve(async (req) => {
     
     // Verify the user is authenticated
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.log('Missing or invalid authorization header')
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Create client with user's token to verify authentication
+    const token = authHeader.replace('Bearer ', '')
+
+    // Create client with user's token to verify authentication using getClaims
     const supabaseClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } }
     })
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-    if (userError || !user) {
+    // Use getClaims to verify the JWT
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token)
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error('Error verifying token:', claimsError)
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Create admin client
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    })
+    const userId = claimsData.claims.sub
+    const userMetadata = claimsData.claims.user_metadata as Record<string, unknown> | undefined
 
-    // Check if user is admin using their metadata
-    const isAdmin = user.user_metadata?.is_admin === 'true' || user.user_metadata?.is_admin === true
+    console.log('User ID:', userId)
+    console.log('User metadata:', JSON.stringify(userMetadata))
+
+    // Check if user is admin using their metadata from the token
+    const isAdmin = userMetadata?.is_admin === 'true' || userMetadata?.is_admin === true
+
+    console.log('Is admin:', isAdmin)
 
     if (!isAdmin) {
       return new Response(
@@ -52,6 +61,11 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Create admin client
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    })
 
     // Fetch user emails from auth.users first
     const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers()
