@@ -12,7 +12,7 @@ export function TrialStatusBadge({ daysRemaining, isAdmin }: TrialStatusBadgePro
   const navigate = useNavigate();
 
   const handleNavigateToPlans = () => {
-    navigate('/plans');
+    navigate('/planos');
   };
 
   // Admins don't see trial badge
