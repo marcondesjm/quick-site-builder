@@ -85,28 +85,16 @@ export function SystemChecklist() {
       ));
     }
 
-    // Check Google Client ID
-    try {
-      const { data, error } = await supabase.functions.invoke('get-google-client-id');
-      
-      setChecks(prev => prev.map(c => 
-        c.id === 'google' 
-          ? { 
-              ...c, 
-              status: data?.clientId ? 'ok' : 'error',
-              message: data?.clientId 
-                ? 'Google Client ID configurado' 
-                : 'Google Client ID não configurado'
-            } 
-          : c
-      ));
-    } catch (error) {
-      setChecks(prev => prev.map(c => 
-        c.id === 'google' 
-          ? { ...c, status: 'error', message: 'Erro ao verificar Google Client ID' } 
-          : c
-      ));
-    }
+    // Check Google Client ID - Currently disabled
+    setChecks(prev => prev.map(c => 
+      c.id === 'google' 
+        ? { 
+            ...c, 
+            status: 'ok',
+            message: 'Google Meet desabilitado (opcional)'
+          } 
+        : c
+    ));
 
     // Check Properties
     try {
