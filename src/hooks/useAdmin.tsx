@@ -35,6 +35,7 @@ export interface UserProfile {
   updated_at: string;
   email?: string;
   is_admin?: boolean;
+  trial_ends_at?: string | null;
 }
 
 export function useAllUsers() {

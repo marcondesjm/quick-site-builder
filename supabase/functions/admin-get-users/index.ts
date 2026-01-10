@@ -109,7 +109,8 @@ serve(async (req) => {
         created_at: profile?.created_at || authUser.created_at,
         updated_at: profile?.updated_at || authUser.updated_at || authUser.created_at,
         email: authUser.email || 'Email não disponível',
-        is_admin: isAdminFromRoles || isAdminFromMetadata
+        is_admin: isAdminFromRoles || isAdminFromMetadata,
+        trial_ends_at: profile?.trial_ends_at || null
       }
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
