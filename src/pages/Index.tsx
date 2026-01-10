@@ -22,6 +22,7 @@ import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
 import { NotificationStatusBanner } from "@/components/NotificationStatusBanner";
 import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
 import { TrialExpiringWarning } from "@/components/TrialExpiringWarning";
+import { TrialStatusBadge } from "@/components/TrialStatusBadge";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -1131,8 +1132,13 @@ const Index = () => {
         {/* Notification Status Banner - shows if notifications are not enabled */}
         <NotificationStatusBanner />
         
-        {/* Trial Expiring Warning - shows 3 days before trial expires */}
+        {/* Trial Status Badge - shows days remaining in trial */}
         {trialStatus?.isInTrial && !trialStatus?.isAdmin && (
+          <TrialStatusBadge daysRemaining={trialStatus.daysRemaining} />
+        )}
+        
+        {/* Trial Expiring Warning - shows 3 days before trial expires (dismissible) */}
+        {trialStatus?.isInTrial && !trialStatus?.isAdmin && trialStatus.daysRemaining <= 3 && (
           <TrialExpiringWarning daysRemaining={trialStatus.daysRemaining} />
         )}
         <motion.div
