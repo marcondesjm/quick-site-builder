@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,7 +17,8 @@ Instruções:
 - Sempre pergunte se pode ajudar em mais alguma coisa
 - Responda SEMPRE em português brasileiro
 - Mantenha as respostas curtas (máximo 2-3 frases)
-- Se o visitante se identificou com nome e CPF, use o nome dele nas respostas`;
+- Se o visitante se identificou com nome e CPF, use o nome dele nas respostas
+- IMPORTANTE: Se o entregador perguntar o CPF do destinatário/morador, forneça o CPF cadastrado do proprietário`;
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -27,19 +29,59 @@ serve(async (req) => {
   try {
     const { message, roomName, propertyName, conversationHistory, visitorName, visitorCpf } = await req.json();
     
-    console.log('Received chat message:', { message, roomName, propertyName, visitorName, visitorCpf: visitorCpf ? '***' : undefined });
+    console.log('Received chat message:', { message, roomName, propertyName, visitorName });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Build context with visitor identification
-    let visitorContext = '';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch owner's CPF from the video call and profile
+    let ownerCpf = '';
+    let ownerName = '';
+    
+    if (roomName) {
+      const { data: videoCall } = await supabase
+        .from('video_calls')
+        .select('owner_id')
+        .eq('room_name', roomName)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (videoCall?.owner_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('cpf, full_name')
+          .eq('user_id', videoCall.owner_id)
+          .maybeSingle();
+
+        if (profile) {
+          ownerCpf = profile.cpf || '';
+          ownerName = profile.full_name || '';
+        }
+      }
+    }
+
+    // Build context with visitor identification and owner info
+    let contextInfo = `\n\n[Propriedade: ${propertyName || 'Não identificada'}]`;
+    
+    // Add owner information for the AI
+    if (ownerName || ownerCpf) {
+      contextInfo += '\n\n[Dados do Morador/Destinatário]';
+      if (ownerName) contextInfo += `\nNome: ${ownerName}`;
+      if (ownerCpf) contextInfo += `\nCPF: ${ownerCpf}`;
+    }
+
+    // Add visitor identification
     if (visitorName || visitorCpf) {
-      visitorContext = '\n\n[Dados do Entregador/Visitante]';
-      if (visitorName) visitorContext += `\nNome: ${visitorName}`;
-      if (visitorCpf) visitorContext += `\nCPF: ***.***.***-${visitorCpf.slice(-2)}`;
+      contextInfo += '\n\n[Dados do Entregador/Visitante]';
+      if (visitorName) contextInfo += `\nNome: ${visitorName}`;
+      if (visitorCpf) contextInfo += `\nCPF: ***.***.***-${visitorCpf.slice(-2)}`;
     }
 
     // Build messages array with conversation history
@@ -60,7 +102,7 @@ serve(async (req) => {
     // Add current message with context
     messages.push({ 
       role: "user", 
-      content: `[Propriedade: ${propertyName || 'Não identificada'}]${visitorContext}\n\nMensagem: ${message}` 
+      content: `${contextInfo}\n\nMensagem do visitante: ${message}` 
     });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

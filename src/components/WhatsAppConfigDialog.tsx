@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, MessageCircle, Check } from "lucide-react";
+import { Loader2, Check, User } from "lucide-react";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -30,30 +30,43 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
   const { user } = useAuth();
   const { toast } = useToast();
   const [phone, setPhone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open && user) {
-      loadPhone();
+      loadProfile();
     }
   }, [open, user]);
 
-  const loadPhone = async () => {
+  const loadProfile = async () => {
     if (!user) return;
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('phone')
+        .select('phone, cpf, full_name')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!error && data?.phone) {
-        setPhone(data.phone);
+      if (!error && data) {
+        if (data.phone) {
+          // Remove +55 prefix for display
+          const phoneDigits = data.phone.replace(/\D/g, '');
+          const displayPhone = phoneDigits.startsWith('55') ? phoneDigits.slice(2) : phoneDigits;
+          setPhone(formatPhone(displayPhone));
+        }
+        if (data.cpf) {
+          setCpf(formatCpf(data.cpf));
+        }
+        if (data.full_name) {
+          setFullName(data.full_name);
+        }
       }
     } catch (err) {
-      console.error('Error loading phone:', err);
+      console.error('Error loading profile:', err);
     } finally {
       setLoading(false);
     }
@@ -75,19 +88,47 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
     }
   };
 
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 3) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    } else if (digits.length <= 9) {
+      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    } else {
+      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+    }
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhone(e.target.value);
     setPhone(formatted);
   };
 
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCpf(e.target.value);
+    setCpf(formatted);
+  };
+
   const handleSave = async () => {
     if (!user) return;
     
-    const digits = phone.replace(/\D/g, '');
-    if (digits.length < 10 || digits.length > 11) {
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length > 0 && (phoneDigits.length < 10 || phoneDigits.length > 11)) {
       toast({
         title: "Número inválido",
         description: "Digite um número de telefone válido com DDD",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const cpfDigits = cpf.replace(/\D/g, '');
+    if (cpfDigits.length > 0 && cpfDigits.length !== 11) {
+      toast({
+        title: "CPF inválido",
+        description: "Digite um CPF válido com 11 dígitos",
         variant: "destructive",
       });
       return;
@@ -102,11 +143,23 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
         .eq('user_id', user.id)
         .maybeSingle();
 
+      const profileData: { phone?: string; cpf?: string; full_name?: string } = {};
+      
+      if (phoneDigits.length >= 10) {
+        profileData.phone = `+55${phoneDigits}`;
+      }
+      if (cpfDigits.length === 11) {
+        profileData.cpf = cpfDigits;
+      }
+      if (fullName.trim()) {
+        profileData.full_name = fullName.trim();
+      }
+
       if (existingProfile) {
         // Update existing profile
         const { error } = await supabase
           .from('profiles')
-          .update({ phone: `+55${digits}` })
+          .update(profileData)
           .eq('user_id', user.id);
 
         if (error) throw error;
@@ -116,22 +169,22 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
           .from('profiles')
           .insert({ 
             user_id: user.id, 
-            phone: `+55${digits}` 
+            ...profileData
           });
 
         if (error) throw error;
       }
 
       toast({
-        title: "WhatsApp salvo!",
-        description: "Você receberá notificações neste número quando a campainha tocar.",
+        title: "Perfil salvo!",
+        description: "Suas informações foram atualizadas com sucesso.",
       });
       onOpenChange(false);
     } catch (err) {
-      console.error('Error saving phone:', err);
+      console.error('Error saving profile:', err);
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o número. Tente novamente.",
+        description: "Não foi possível salvar o perfil. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -144,11 +197,11 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
-            Configurar WhatsApp
+            <User className="w-5 h-5 text-primary" />
+            Meu Perfil
           </DialogTitle>
           <DialogDescription>
-            Cadastre seu número para receber notificações no WhatsApp quando visitantes tocarem a campainha.
+            Configure suas informações pessoais. O CPF será informado aos entregadores quando solicitado.
           </DialogDescription>
         </DialogHeader>
         
@@ -160,7 +213,35 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
           ) : (
             <>
               <div className="space-y-2">
-                <Label htmlFor="phone">Número do WhatsApp</Label>
+                <Label htmlFor="fullName">Nome Completo</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Seu nome completo"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={handleCpfChange}
+                  maxLength={14}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Será informado aos entregadores para confirmar entregas
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                  WhatsApp
+                </Label>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 px-3 py-2 bg-secondary rounded-md text-sm">
                     <span>🇧🇷</span>
@@ -176,22 +257,22 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Digite seu número com DDD
+                  Receba notificações quando a campainha tocar
                 </p>
               </div>
 
               <div className="bg-secondary/50 rounded-lg p-3 space-y-2">
                 <div className="flex items-start gap-2 text-sm">
                   <Check className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Receba alertas quando a campainha tocar</span>
+                  <span>CPF informado ao entregador pelo assistente</span>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5" />
+                  <span>Alertas de campainha no WhatsApp</span>
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <Check className="w-4 h-4 text-green-500 mt-0.5" />
                   <span>Funciona mesmo com o app fechado</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Integração direta com WhatsApp</span>
                 </div>
               </div>
             </>
@@ -205,7 +286,7 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
           <Button 
             onClick={handleSave} 
             disabled={saving || loading}
-            className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white"
+            className="flex-1"
           >
             {saving ? (
               <>
@@ -213,10 +294,7 @@ export const WhatsAppConfigDialog = ({ open, onOpenChange }: WhatsAppConfigDialo
                 Salvando...
               </>
             ) : (
-              <>
-                <WhatsAppIcon className="w-4 h-4 mr-2" />
-                Salvar
-              </>
+              "Salvar Perfil"
             )}
           </Button>
         </div>
