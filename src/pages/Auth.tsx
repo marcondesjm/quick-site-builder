@@ -167,20 +167,10 @@ export default function Auth() {
           transition={{ delay: 0.1 }}
           className="text-center mb-8"
         >
-          <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 bg-primary/30 rounded-full blur-2xl animate-pulse" />
-            <div className="relative bg-gradient-to-br from-primary to-primary/80 p-5 rounded-2xl shadow-2xl">
-              <img 
-                src={doorviiLogo} 
-                alt="DoorVii" 
-                className="h-16 w-auto mx-auto drop-shadow-lg"
-              />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent mb-2">
             DoorVii
           </h1>
-          <p className="text-lg text-muted-foreground mt-1">Portaria Digital Inteligente</p>
+          <p className="text-lg text-muted-foreground">Portaria Digital Inteligente</p>
           <p className="text-sm text-muted-foreground/80 mt-3">
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta grátis'}
           </p>
