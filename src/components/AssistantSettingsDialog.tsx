@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot,
@@ -11,7 +11,9 @@ import {
   MessageSquare,
   Tag,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Download,
+  Upload
 } from "lucide-react";
 
 import {
@@ -60,8 +62,9 @@ export function AssistantSettingsDialog() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState<EditingResponse>({ keywords: "", response: "" });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: responses, isLoading } = useAssistantResponses();
+  const { data: responses, isLoading, refetch } = useAssistantResponses();
   const addResponse = useAddAssistantResponse();
   const updateResponse = useUpdateAssistantResponse();
   const deleteResponse = useDeleteAssistantResponse();
@@ -158,6 +161,142 @@ export function AssistantSettingsDialog() {
     setFormData({ keywords: "", response: "" });
   };
 
+  // Export to CSV
+  const handleExport = () => {
+    if (!responses || responses.length === 0) {
+      toast({
+        title: "Nenhuma resposta para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ["Palavras-chave", "Resposta", "Ativo"];
+    const rows = responses.map(r => [
+      r.keywords.join(", "),
+      r.response,
+      r.is_enabled ? "Sim" : "Não"
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
+    ].join("\n");
+
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `respostas_assistente_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exportação concluída!",
+      description: `${responses.length} respostas exportadas`,
+    });
+  };
+
+  // Import from CSV
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split("\n").filter(line => line.trim());
+
+        if (lines.length <= 1) {
+          toast({
+            title: "Arquivo vazio ou inválido",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Parse CSV (skip header)
+        let imported = 0;
+        let errors = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          // Parse CSV with semicolon separator
+          const matches = line.match(/(?:^|;)("(?:[^"]*(?:""[^"]*)*)"|[^;]*)/g);
+          
+          if (!matches || matches.length < 2) {
+            errors++;
+            continue;
+          }
+
+          // Clean up the values
+          const cleanValue = (val: string) => {
+            return val
+              .replace(/^;?"|"$/g, '') // Remove leading semicolon/quote and trailing quote
+              .replace(/""/g, '"')     // Unescape double quotes
+              .trim();
+          };
+
+          const keywordsStr = cleanValue(matches[0]);
+          const response = cleanValue(matches[1]);
+
+          if (!keywordsStr || !response) {
+            errors++;
+            continue;
+          }
+
+          const keywords = keywordsStr.split(",").map(k => k.trim().toLowerCase()).filter(k => k);
+
+          if (keywords.length === 0) {
+            errors++;
+            continue;
+          }
+
+          try {
+            await addResponse.mutateAsync({
+              keywords,
+              response,
+              display_order: (responses?.length || 0) + imported + 1
+            });
+            imported++;
+          } catch {
+            errors++;
+          }
+        }
+
+        await refetch();
+
+        if (imported > 0) {
+          toast({
+            title: "Importação concluída!",
+            description: `${imported} respostas importadas${errors > 0 ? `, ${errors} erros` : ''}`,
+          });
+        } else {
+          toast({
+            title: "Nenhuma resposta importada",
+            description: "Verifique o formato do arquivo CSV",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erro ao importar",
+          description: "Verifique se o arquivo está no formato correto",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -178,20 +317,51 @@ export function AssistantSettingsDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        {/* Add button */}
-        {!isAdding && !editingId && (
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {!isAdding && !editingId && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                setIsAdding(true);
+                setFormData({ keywords: "", response: "" });
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Adicionar
+            </Button>
+          )}
+
           <Button
             variant="outline"
+            size="sm"
             className="gap-2"
-            onClick={() => {
-              setIsAdding(true);
-              setFormData({ keywords: "", response: "" });
-            }}
+            onClick={handleExport}
+            disabled={!responses || responses.length === 0}
           >
-            <Plus className="w-4 h-4" />
-            Adicionar Resposta
+            <Download className="w-4 h-4" />
+            Exportar CSV
           </Button>
-        )}
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="w-4 h-4" />
+            Importar CSV
+          </Button>
+        </div>
 
         {/* Add/Edit Form */}
         {(isAdding || editingId) && (
