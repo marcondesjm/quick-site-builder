@@ -46,8 +46,11 @@ export type Database = {
           created_at: string
           duration: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
           property_id: string | null
           property_name: string
+          protocol_number: string | null
           title: string
           type: string
           user_id: string
@@ -56,8 +59,11 @@ export type Database = {
           created_at?: string
           duration?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           property_id?: string | null
           property_name: string
+          protocol_number?: string | null
           title: string
           type: string
           user_id: string
@@ -66,8 +72,11 @@ export type Database = {
           created_at?: string
           duration?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           property_id?: string | null
           property_name?: string
+          protocol_number?: string | null
           title?: string
           type?: string
           user_id?: string
