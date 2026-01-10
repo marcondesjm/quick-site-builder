@@ -6,19 +6,91 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SYSTEM_PROMPT = `Você é o assistente virtual do DoorVii, um sistema de portaria inteligente. 
-Seu papel é ajudar visitantes e entregadores que estão na porta de uma propriedade.
+// Pre-formatted responses (FAQ) - no AI tokens consumed
+interface FaqResponse {
+  keywords: string[];
+  response: string;
+}
 
-Instruções:
-- Seja educado, prestativo e conciso nas respostas
-- Você pode ajudar com informações básicas sobre o sistema
-- Se o visitante quiser deixar um recado, anote e confirme
-- Se for uma entrega, confirme os dados do entregador e pergunte detalhes da entrega
-- Sempre pergunte se pode ajudar em mais alguma coisa
-- Responda SEMPRE em português brasileiro
-- Mantenha as respostas curtas (máximo 2-3 frases)
-- Se o visitante se identificou com nome e CPF, use o nome dele nas respostas
-- IMPORTANTE: Se o entregador perguntar o CPF do destinatário/morador, forneça o CPF cadastrado do proprietário`;
+const FAQ_RESPONSES: FaqResponse[] = [
+  {
+    keywords: ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'hello', 'hi'],
+    response: 'Olá! Sou o assistente virtual do DoorVii. Como posso ajudar? Você pode deixar um recado, informar uma entrega ou aguardar o morador.'
+  },
+  {
+    keywords: ['entrega', 'pacote', 'encomenda', 'correios', 'sedex', 'mercado livre', 'amazon', 'shopee', 'ifood', 'delivery'],
+    response: 'Entendi que você tem uma entrega! Por favor, toque a campainha e aguarde. Caso o morador não atenda, você pode gravar um áudio ou vídeo informando sobre a entrega.'
+  },
+  {
+    keywords: ['cpf', 'documento', 'identificação', 'identidade'],
+    response: 'Para informações sobre CPF ou documentos do destinatário, por favor aguarde o morador atender a chamada. Por segurança, não posso fornecer esses dados.'
+  },
+  {
+    keywords: ['recado', 'mensagem', 'avisar', 'aviso', 'deixar'],
+    response: 'Claro! Você pode deixar um recado gravando um áudio ou vídeo. O morador receberá a notificação assim que possível.'
+  },
+  {
+    keywords: ['morador', 'proprietário', 'dono', 'atender', 'atende'],
+    response: 'O morador foi notificado! Por favor, aguarde alguns instantes. Caso não haja resposta, você pode gravar um áudio ou vídeo.'
+  },
+  {
+    keywords: ['obrigado', 'obrigada', 'valeu', 'agradeço', 'thanks'],
+    response: 'Por nada! Estou aqui para ajudar. Tenha um ótimo dia!'
+  },
+  {
+    keywords: ['ajuda', 'help', 'como funciona', 'o que fazer'],
+    response: 'Você pode: 1) Tocar a campainha para chamar o morador; 2) Gravar um áudio ou vídeo com seu recado; 3) Aguardar o morador atender. Posso ajudar em algo mais?'
+  },
+  {
+    keywords: ['tchau', 'adeus', 'até logo', 'bye', 'falou'],
+    response: 'Até logo! Obrigado por usar o DoorVii. Tenha um ótimo dia!'
+  },
+  {
+    keywords: ['problema', 'erro', 'não funciona', 'bug'],
+    response: 'Desculpe pelo inconveniente! Tente tocar a campainha novamente ou gravar um áudio/vídeo para o morador. Se o problema persistir, entre em contato com o suporte.'
+  },
+  {
+    keywords: ['horário', 'hora', 'quando', 'disponível'],
+    response: 'O sistema DoorVii funciona 24 horas. O morador será notificado sempre que alguém tocar a campainha.'
+  },
+  {
+    keywords: ['endereço', 'local', 'lugar', 'aqui'],
+    response: 'Você está no endereço correto! Toque a campainha para chamar o morador ou deixe um recado em áudio/vídeo.'
+  },
+  {
+    keywords: ['urgente', 'emergência', 'emergencia', 'importante'],
+    response: 'Entendo que é urgente! Recomendo tocar a campainha várias vezes ou gravar um vídeo explicando a situação. O morador receberá uma notificação.'
+  }
+];
+
+// Find the best matching response
+function findBestResponse(message: string, propertyName?: string, visitorName?: string): string {
+  const lowerMessage = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  // Check each FAQ for keyword matches
+  for (const faq of FAQ_RESPONSES) {
+    for (const keyword of faq.keywords) {
+      const normalizedKeyword = keyword.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (lowerMessage.includes(normalizedKeyword)) {
+        // Personalize response with visitor name if available
+        let response = faq.response;
+        if (visitorName) {
+          response = response.replace('Olá!', `Olá, ${visitorName}!`);
+        }
+        return response;
+      }
+    }
+  }
+  
+  // Default response if no match
+  const defaultResponses = [
+    `Entendi! ${propertyName ? `Você está em ${propertyName}. ` : ''}Posso ajudar com informações sobre entregas, deixar recados ou chamar o morador. O que você precisa?`,
+    'Como posso ajudar? Você pode tocar a campainha, deixar um recado em áudio/vídeo, ou me perguntar sobre entregas.',
+    'Estou aqui para ajudar! Toque a campainha para chamar o morador ou me diga se precisa de algo específico.'
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -29,116 +101,12 @@ serve(async (req) => {
   try {
     const { message, roomName, propertyName, conversationHistory, visitorName, visitorCpf } = await req.json();
     
-    console.log('Received chat message:', { message, roomName, propertyName, visitorName });
+    console.log('Received chat message (FAQ mode):', { message, roomName, propertyName, visitorName });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Fetch owner's CPF from the video call and profile
-    let ownerCpf = '';
-    let ownerName = '';
+    // Generate response using FAQ matching (no AI tokens consumed)
+    const chatbotResponse = findBestResponse(message, propertyName, visitorName);
     
-    if (roomName) {
-      const { data: videoCall } = await supabase
-        .from('video_calls')
-        .select('owner_id')
-        .eq('room_name', roomName)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (videoCall?.owner_id) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('cpf, full_name')
-          .eq('user_id', videoCall.owner_id)
-          .maybeSingle();
-
-        if (profile) {
-          ownerCpf = profile.cpf || '';
-          ownerName = profile.full_name || '';
-        }
-      }
-    }
-
-    // Build context with visitor identification and owner info
-    let contextInfo = `\n\n[Propriedade: ${propertyName || 'Não identificada'}]`;
-    
-    // Add owner information for the AI
-    if (ownerName || ownerCpf) {
-      contextInfo += '\n\n[Dados do Morador/Destinatário]';
-      if (ownerName) contextInfo += `\nNome: ${ownerName}`;
-      if (ownerCpf) contextInfo += `\nCPF: ${ownerCpf}`;
-    }
-
-    // Add visitor identification
-    if (visitorName || visitorCpf) {
-      contextInfo += '\n\n[Dados do Entregador/Visitante]';
-      if (visitorName) contextInfo += `\nNome: ${visitorName}`;
-      if (visitorCpf) contextInfo += `\nCPF: ***.***.***-${visitorCpf.slice(-2)}`;
-    }
-
-    // Build messages array with conversation history
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-    ];
-
-    // Add conversation history if provided
-    if (conversationHistory && Array.isArray(conversationHistory)) {
-      for (const msg of conversationHistory) {
-        messages.push({
-          role: msg.sender === 'visitor' ? 'user' : 'assistant',
-          content: msg.text
-        });
-      }
-    }
-
-    // Add current message with context
-    messages.push({ 
-      role: "user", 
-      content: `${contextInfo}\n\nMensagem do visitante: ${message}` 
-    });
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages,
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns segundos." }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Serviço temporariamente indisponível." }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const chatbotResponse = data.choices?.[0]?.message?.content || "Desculpe, não consegui processar sua mensagem.";
-    
-    console.log('Chatbot response:', chatbotResponse);
+    console.log('FAQ response:', chatbotResponse);
 
     return new Response(
       JSON.stringify({ 
