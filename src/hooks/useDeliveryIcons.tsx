@@ -105,7 +105,8 @@ export const useDeliveryIcons = () => {
           name,
           url,
           display_order: maxOrder,
-        })
+          icon_url: url, // Use url as icon_url for compatibility
+        } as any)
         .select()
         .single();
 

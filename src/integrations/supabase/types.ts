@@ -213,6 +213,7 @@ export type Database = {
           id: string
           property_id: string
           role: string
+          status: string | null
           user_id: string
         }
         Insert: {
@@ -221,6 +222,7 @@ export type Database = {
           id?: string
           property_id: string
           role?: string
+          status?: string | null
           user_id: string
         }
         Update: {
@@ -229,30 +231,37 @@ export type Database = {
           id?: string
           property_id?: string
           role?: string
+          status?: string | null
           user_id?: string
         }
         Relationships: []
       }
       push_subscriptions: {
         Row: {
+          auth: string | null
           created_at: string
           endpoint: string
           id: string
           keys: Json
+          p256dh: string | null
           user_id: string
         }
         Insert: {
+          auth?: string | null
           created_at?: string
           endpoint: string
           id?: string
           keys: Json
+          p256dh?: string | null
           user_id: string
         }
         Update: {
+          auth?: string | null
           created_at?: string
           endpoint?: string
           id?: string
           keys?: Json
+          p256dh?: string | null
           user_id?: string
         }
         Relationships: []

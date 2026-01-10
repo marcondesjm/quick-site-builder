@@ -108,9 +108,10 @@ export function usePushNotifications() {
         .upsert({
           user_id: user.id,
           endpoint: subscriptionJson.endpoint!,
+          keys: subscriptionJson.keys as any,
           p256dh: subscriptionJson.keys!.p256dh,
           auth: subscriptionJson.keys!.auth,
-        }, {
+        } as any, {
           onConflict: 'endpoint',
         });
 
