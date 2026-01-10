@@ -309,6 +309,21 @@ export const Header = () => {
               )}
             </Button>
             
+            {/* Theme Toggle Button */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+              className="relative"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700" />
+              )}
+            </Button>
+            
             {/* Settings Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
