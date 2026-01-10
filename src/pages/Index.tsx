@@ -19,6 +19,7 @@ import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialog";
 import { InstallAppDialog } from "@/components/InstallAppDialog";
 import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
+import { NotificationStatusBanner } from "@/components/NotificationStatusBanner";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -1109,6 +1110,8 @@ const Index = () => {
       <KeepAppOpenAlert />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Notification Status Banner - shows if notifications are not enabled */}
+        <NotificationStatusBanner />
         <motion.div
           variants={containerVariants}
           initial="hidden"
