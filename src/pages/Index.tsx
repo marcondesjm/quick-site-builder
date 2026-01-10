@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -22,6 +22,7 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -666,20 +667,26 @@ const Index = () => {
     }
   };
 
-  // Close the doorbell interface completely
+  // Close the doorbell interface completely and generate protocol
   const handleCloseDoorbell = async () => {
     // First, update the call status to 'ended' using the correct room name
-    // This ensures the visitor is notified in real-time
+    // Generate protocol number and save it
     if (currentDoorbellRoomName) {
       try {
+        const protocolNumber = generateProtocolNumber();
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString()
+            ended_at: new Date().toISOString(),
+            protocol_number: protocolNumber
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Call ended, visitor notified via room:', currentDoorbellRoomName);
+        console.log('Call ended with protocol:', protocolNumber);
+        
+        // Show protocol number to user
+        setLastProtocolNumber(protocolNumber);
+        setShowProtocolDialog(true);
       } catch (error) {
         console.error('Error ending call:', error);
       }
@@ -834,17 +841,22 @@ const Index = () => {
     setWaitingForApproval(false);
     setVisitorTextMessage(null);
     
-    // Notify visitor via the correct room name
+    // Notify visitor via the correct room name and generate protocol
     if (currentDoorbellRoomName) {
       try {
+        const protocolNumber = generateProtocolNumber();
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString()
+            ended_at: new Date().toISOString(),
+            protocol_number: protocolNumber
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Decline: visitor notified via room:', currentDoorbellRoomName);
+        console.log('Decline with protocol:', protocolNumber);
+        
+        setLastProtocolNumber(protocolNumber);
+        setShowProtocolDialog(true);
       } catch (error) {
         console.error('Error updating call status:', error);
       }
@@ -879,17 +891,22 @@ const Index = () => {
     setMeetLink(null);
     setWaitingForApproval(false);
     
-    // Notify visitor via the correct room name
+    // Notify visitor via the correct room name and generate protocol
     if (currentDoorbellRoomName) {
       try {
+        const protocolNumber = generateProtocolNumber();
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString()
+            ended_at: new Date().toISOString(),
+            protocol_number: protocolNumber
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Meet ended: visitor notified via room:', currentDoorbellRoomName);
+        console.log('Meet ended with protocol:', protocolNumber);
+        
+        setLastProtocolNumber(protocolNumber);
+        setShowProtocolDialog(true);
       } catch (error) {
         console.error('Error updating call status:', error);
       }
@@ -1693,6 +1710,49 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Protocol Number Dialog */}
+      <Dialog open={showProtocolDialog} onOpenChange={setShowProtocolDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Protocolo da Chamada
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Esta chamada foi registrada com o seguinte número de protocolo para consultas futuras:
+            </p>
+            <div className="flex items-center gap-2 p-4 bg-secondary/50 rounded-lg">
+              <code className="flex-1 text-lg font-mono font-bold text-primary">
+                {lastProtocolNumber}
+              </code>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(lastProtocolNumber || '');
+                  toast({
+                    title: "Copiado!",
+                    description: "Número de protocolo copiado para a área de transferência",
+                  });
+                }}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Guarde este número para referência futura. Você pode consultá-lo no histórico de atividades.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowProtocolDialog(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       {/* Notification Permission Dialog */}
       <EnableNotificationsDialog />

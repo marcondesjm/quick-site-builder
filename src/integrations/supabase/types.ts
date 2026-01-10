@@ -77,21 +77,30 @@ export type Database = {
       delivery_icons: {
         Row: {
           created_at: string
+          display_order: number | null
           icon_url: string
           id: string
           name: string
+          url: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          display_order?: number | null
           icon_url: string
           id?: string
           name: string
+          url?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          display_order?: number | null
           icon_url?: string
           id?: string
           name?: string
+          url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -161,6 +170,90 @@ export type Database = {
         }
         Relationships: []
       }
+      property_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          max_uses: number | null
+          property_id: string
+          uses_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          max_uses?: number | null
+          property_id: string
+          uses_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          max_uses?: number | null
+          property_id?: string
+          uses_count?: number | null
+        }
+        Relationships: []
+      }
+      property_members: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          property_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          property_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          property_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          keys: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          keys: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          keys?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_calls: {
         Row: {
           audio_message_url: string | null
@@ -226,7 +319,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
