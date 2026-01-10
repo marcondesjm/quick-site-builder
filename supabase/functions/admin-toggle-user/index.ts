@@ -64,12 +64,28 @@ serve(async (req) => {
     }
 
     // Check if target user is an admin - prevent modifying admins
-    const { data: targetIsAdmin } = await supabaseAdmin
+    // Check via is_admin RPC
+    const { data: targetIsAdminRpc } = await supabaseAdmin
       .rpc('is_admin', { _user_id: userId })
+
+    // Also check via user metadata directly
+    const { data: targetUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const targetIsAdminMeta = targetUser?.user?.user_metadata?.is_admin === 'true' || 
+                              targetUser?.user?.user_metadata?.is_admin === true
+
+    // Also check user_roles table
+    const { data: targetRoles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    const targetIsAdmin = targetIsAdminRpc || targetIsAdminMeta || !!targetRoles
 
     if (targetIsAdmin) {
       return new Response(
-        JSON.stringify({ error: 'Cannot modify an admin account' }),
+        JSON.stringify({ error: 'Não é possível modificar uma conta de administrador' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
