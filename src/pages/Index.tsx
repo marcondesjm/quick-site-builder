@@ -89,6 +89,8 @@ const Index = () => {
   const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const [connectedVisitors, setConnectedVisitors] = useState<Record<string, string>>({}); // propertyId -> roomName
+  const [lastProtocolNumber, setLastProtocolNumber] = useState<string | null>(null);
+  const [showProtocolDialog, setShowProtocolDialog] = useState(false);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();

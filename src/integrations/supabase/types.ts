@@ -14,6 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          property_id: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          property_id?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          property_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      activity_logs: {
+        Row: {
+          created_at: string
+          duration: string | null
+          id: string
+          property_id: string | null
+          property_name: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: string | null
+          id?: string
+          property_id?: string | null
+          property_name: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration?: string | null
+          id?: string
+          property_id?: string | null
+          property_name?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      delivery_icons: {
+        Row: {
+          created_at: string
+          icon_url: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          icon_url: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_online: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+          visitor_always_connected: boolean | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_online?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+          visitor_always_connected?: boolean | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_online?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+          visitor_always_connected?: boolean | null
+        }
+        Relationships: []
+      }
       video_calls: {
         Row: {
           audio_message_url: string | null
