@@ -1,1 +1,34 @@
 project_id = "eujwiufgjtcnokjicswy"
+
+[functions.admin-get-users]
+verify_jwt = false
+
+[functions.admin-toggle-user]
+verify_jwt = false
+
+[functions.admin-delete-user]
+verify_jwt = false
+
+[functions.admin-set-role]
+verify_jwt = false
+
+[functions.admin-update-trial]
+verify_jwt = false
+
+[functions.chatbot-webhook]
+verify_jwt = false
+
+[functions.create-google-meet]
+verify_jwt = false
+
+[functions.get-google-client-id]
+verify_jwt = false
+
+[functions.get-vapid-keys]
+verify_jwt = false
+
+[functions.save-chat-history]
+verify_jwt = false
+
+[functions.send-push-notification]
+verify_jwt = false
