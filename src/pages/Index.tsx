@@ -62,15 +62,7 @@ const isVideoUrl = (url: string): boolean => {
   return isVideo;
 };
 
-// Generate a unique protocol number for calls
-const generateProtocolNumber = (): string => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `DV${year}${month}${day}-${random}`;
-};
+// Protocol number is now generated in useVideoCalls hook at call creation
 
 const Index = () => {
   const { user } = useAuth();
@@ -671,23 +663,28 @@ const Index = () => {
   // Close the doorbell interface completely and generate protocol
   const handleCloseDoorbell = async () => {
     // First, update the call status to 'ended' using the correct room name
-    // Generate protocol number and save it
+    // Protocol number is already set at call creation, just fetch it
     if (currentDoorbellRoomName) {
       try {
-        const protocolNumber = generateProtocolNumber();
+        const { data: callData } = await supabase
+          .from('video_calls')
+          .select('protocol_number')
+          .eq('room_name', currentDoorbellRoomName)
+          .single();
+        
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString(),
-            protocol_number: protocolNumber
+            ended_at: new Date().toISOString()
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Call ended with protocol:', protocolNumber);
         
-        // Show protocol number to user
-        setLastProtocolNumber(protocolNumber);
-        setShowProtocolDialog(true);
+        if (callData?.protocol_number) {
+          console.log('Call ended with protocol:', callData.protocol_number);
+          setLastProtocolNumber(callData.protocol_number);
+          setShowProtocolDialog(true);
+        }
       } catch (error) {
         console.error('Error ending call:', error);
       }
@@ -845,19 +842,25 @@ const Index = () => {
     // Notify visitor via the correct room name and generate protocol
     if (currentDoorbellRoomName) {
       try {
-        const protocolNumber = generateProtocolNumber();
+        const { data: callData } = await supabase
+          .from('video_calls')
+          .select('protocol_number')
+          .eq('room_name', currentDoorbellRoomName)
+          .single();
+        
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString(),
-            protocol_number: protocolNumber
+            ended_at: new Date().toISOString()
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Decline with protocol:', protocolNumber);
         
-        setLastProtocolNumber(protocolNumber);
-        setShowProtocolDialog(true);
+        if (callData?.protocol_number) {
+          console.log('Decline with protocol:', callData.protocol_number);
+          setLastProtocolNumber(callData.protocol_number);
+          setShowProtocolDialog(true);
+        }
       } catch (error) {
         console.error('Error updating call status:', error);
       }
@@ -895,19 +898,25 @@ const Index = () => {
     // Notify visitor via the correct room name and generate protocol
     if (currentDoorbellRoomName) {
       try {
-        const protocolNumber = generateProtocolNumber();
+        const { data: callData } = await supabase
+          .from('video_calls')
+          .select('protocol_number')
+          .eq('room_name', currentDoorbellRoomName)
+          .single();
+        
         await supabase
           .from('video_calls')
           .update({ 
             status: 'ended',
-            ended_at: new Date().toISOString(),
-            protocol_number: protocolNumber
+            ended_at: new Date().toISOString()
           })
           .eq('room_name', currentDoorbellRoomName);
-        console.log('Meet ended with protocol:', protocolNumber);
         
-        setLastProtocolNumber(protocolNumber);
-        setShowProtocolDialog(true);
+        if (callData?.protocol_number) {
+          console.log('Meet ended with protocol:', callData.protocol_number);
+          setLastProtocolNumber(callData.protocol_number);
+          setShowProtocolDialog(true);
+        }
       } catch (error) {
         console.error('Error updating call status:', error);
       }
