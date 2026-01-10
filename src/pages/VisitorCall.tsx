@@ -1240,33 +1240,6 @@ const VisitorCall = () => {
                   </>
                 )}
 
-                {(callStatus === 'answered' || callStatus === 'ringing') && (
-                  <div className="border-t border-border my-4 pt-4">
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Se o morador iniciar videochamada:
-                    </p>
-                    
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full"
-                      onClick={handleJoinCall}
-                    >
-                      <ExternalLink className="w-5 h-5" />
-                      Entrar na chamada
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full mt-2"
-                      onClick={handleCopyLink}
-                    >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {copied ? 'Copiado!' : 'Copiar link'}
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
 
