@@ -38,16 +38,15 @@ serve(async (req) => {
       )
     }
 
-    // Create admin client to check if user is admin
+    // Create admin client
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     })
 
-    // Check if user is admin
-    const { data: isAdmin, error: adminError } = await supabaseAdmin
-      .rpc('is_admin', { _user_id: user.id })
+    // Check if user is admin using their metadata
+    const isAdmin = user.user_metadata?.is_admin === 'true' || user.user_metadata?.is_admin === true
 
-    if (adminError || !isAdmin) {
+    if (!isAdmin) {
       return new Response(
         JSON.stringify({ error: 'Access denied. Admin only.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

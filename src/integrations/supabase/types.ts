@@ -269,6 +269,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vapid_keys: {
+        Row: {
+          created_at: string | null
+          id: string
+          private_key: string
+          public_key: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          private_key: string
+          public_key: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          private_key?: string
+          public_key?: string
+        }
+        Relationships: []
+      }
       video_calls: {
         Row: {
           audio_message_url: string | null
