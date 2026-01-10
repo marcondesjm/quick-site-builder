@@ -14,8 +14,12 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "robots.txt"],
+      injectRegister: "auto",
+      includeAssets: ["favicon.ico", "robots.txt", "pwa-*.png"],
       manifest: {
         name: "DoorVii Home - Portaria Inteligente",
         short_name: "DoorVii",
@@ -47,24 +51,12 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}"],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2}"]
+      },
+      devOptions: {
+        enabled: true,
+        type: "module"
       }
     })
   ].filter(Boolean),
