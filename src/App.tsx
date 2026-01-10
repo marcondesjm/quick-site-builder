@@ -14,6 +14,7 @@ import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
+import CookiePolicy from "./pages/CookiePolicy";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="/planos" element={<Plans />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/politica-cookies" element={<CookiePolicy />} />
               <Route path="/call/:roomName" element={<VisitorCall />} />
               <Route path="/qrcode" element={
                 <ProtectedRoute>
