@@ -1207,22 +1207,7 @@ const VisitorCall = () => {
                   </Button>
                 </motion.div>
 
-                {/* Video recorder button in a box */}
-                <VisitorVideoRecorder 
-                  roomName={roomName || ''} 
-                  onVideoSent={() => toast.success('Vídeo enviado!')}
-                />
-
-                {/* Audio recorder button in a box */}
-                <div className="border border-border rounded-xl p-4 bg-card shadow-sm">
-                  <p className="text-sm text-muted-foreground text-center mb-3">Envie uma mensagem em áudio</p>
-                  <VisitorAudioRecorder 
-                    roomName={roomName || ''} 
-                    onAudioSent={() => toast.success('Áudio enviado!')}
-                  />
-                </div>
-
-                {/* Chat button */}
+                {/* Chat button - always visible next to doorbell */}
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     variant="outline"
@@ -1234,6 +1219,26 @@ const VisitorCall = () => {
                     <span>Conversar com Assistente</span>
                   </Button>
                 </motion.div>
+
+                {/* Video/Audio recording options - only show after owner answers */}
+                {(callStatus === 'answered' || callStatus === 'audio_message') && (
+                  <>
+                    {/* Video recorder button in a box */}
+                    <VisitorVideoRecorder 
+                      roomName={roomName || ''} 
+                      onVideoSent={() => toast.success('Vídeo enviado!')}
+                    />
+
+                    {/* Audio recorder button in a box */}
+                    <div className="border border-border rounded-xl p-4 bg-card shadow-sm">
+                      <p className="text-sm text-muted-foreground text-center mb-3">Envie uma mensagem em áudio</p>
+                      <VisitorAudioRecorder 
+                        roomName={roomName || ''} 
+                        onAudioSent={() => toast.success('Áudio enviado!')}
+                      />
+                    </div>
+                  </>
+                )}
 
                 {(callStatus === 'answered' || callStatus === 'ringing') && (
                   <div className="border-t border-border my-4 pt-4">
