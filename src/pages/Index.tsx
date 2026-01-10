@@ -20,6 +20,7 @@ import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialo
 import { InstallAppDialog } from "@/components/InstallAppDialog";
 import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
 import { NotificationStatusBanner } from "@/components/NotificationStatusBanner";
+import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -29,6 +30,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { useProperties, useUpdateProperty, useDeleteProperty } from "@/hooks/useProperties";
 import { useActivities, useAddActivity } from "@/hooks/useActivities";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
@@ -68,6 +70,7 @@ const isVideoUrl = (url: string): boolean => {
 
 const Index = () => {
   const { user } = useAuth();
+  const { data: trialStatus, isLoading: trialLoading } = useTrialStatus();
   const { toast } = useToast();
   const [showQRCode, setShowQRCode] = useState(false);
   const [showGoogleMeet, setShowGoogleMeet] = useState(false);
@@ -1103,6 +1106,20 @@ const Index = () => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
+
+  // Show loading while checking trial status
+  if (trialLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Block access if trial expired (non-admins only)
+  if (trialStatus?.trialExpired && !trialStatus?.isAdmin) {
+    return <TrialExpiredBlock />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
