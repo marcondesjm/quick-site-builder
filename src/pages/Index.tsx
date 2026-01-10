@@ -243,31 +243,34 @@ const Index = () => {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'video_calls',
           filter: `owner_id=eq.${user.id}`,
         },
         async (payload) => {
-          if (payload.new.status === 'doorbell_ringing') {
+          const record = payload.new as Record<string, any>;
+          if (!record || !record.status) return;
+          
+          if (record.status === 'doorbell_ringing') {
             setDoorbellRinging(true);
-            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
-            setCurrentDoorbellRoomName(payload.new.room_name || null);
+            setDoorbellPropertyName(record.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(record.room_name || null);
             
             // Update property status to online when doorbell rings
-            if (payload.new.property_id) {
+            if (record.property_id) {
               await supabase
                 .from('properties')
                 .update({ is_online: true })
-                .eq('id', payload.new.property_id);
+                .eq('id', record.property_id);
             }
             
             // Register activity log for doorbell
             addActivity.mutate({
-              property_id: payload.new.property_id || undefined,
+              property_id: record.property_id || undefined,
               type: 'doorbell',
               title: 'Campainha tocou',
-              property_name: payload.new.property_name || 'Propriedade',
+              property_name: record.property_name || 'Propriedade',
             });
             
             // Vibrate phone if supported
@@ -290,13 +293,13 @@ const Index = () => {
 
             toast({
               title: "🔔 Campainha tocando!",
-              description: `Visitante na porta - ${payload.new.property_name}`,
+              description: `Visitante na porta - ${record.property_name}`,
               duration: 10000,
             });
           }
           
           // Handle not answered - stop doorbell ringing
-          if (payload.new.status === 'not_answered') {
+          if (record.status === 'not_answered') {
             console.log('Call not answered - stopping doorbell');
             setDoorbellRinging(false);
             if (doorbellIntervalRef.current) {
@@ -306,10 +309,10 @@ const Index = () => {
           }
           
           // Handle visitor audio response
-          if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
-            setVisitorAudioResponse(payload.new.visitor_audio_url);
-            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
-            setCurrentDoorbellRoomName(payload.new.room_name || null);
+          if (record.status === 'visitor_audio_response' && record.visitor_audio_url) {
+            setVisitorAudioResponse(record.visitor_audio_url);
+            setDoorbellPropertyName(record.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(record.room_name || null);
             
             // Show the doorbell alert with the audio/video response
             setDoorbellRinging(true);
@@ -351,15 +354,15 @@ const Index = () => {
               navigator.vibrate([300, 100, 300]);
             }
             
-            const isVideo = isVideoUrl(payload.new.visitor_audio_url);
+            const isVideo = isVideoUrl(record.visitor_audio_url);
             
             // Register activity with media
             addActivity.mutate({
-              property_id: payload.new.property_id || undefined,
+              property_id: record.property_id || undefined,
               type: 'incoming',
               title: isVideo ? 'Mensagem de vídeo recebida' : 'Mensagem de áudio recebida',
-              property_name: payload.new.property_name || 'Propriedade',
-              media_url: payload.new.visitor_audio_url,
+              property_name: record.property_name || 'Propriedade',
+              media_url: record.visitor_audio_url,
               media_type: isVideo ? 'video' : 'audio'
             });
             
@@ -371,10 +374,10 @@ const Index = () => {
           }
           
           // Handle visitor text message
-          if (payload.new.status === 'visitor_text_message' && payload.new.visitor_text_message) {
-            setVisitorTextMessage(payload.new.visitor_text_message);
-            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
-            setCurrentDoorbellRoomName(payload.new.room_name || null);
+          if (record.status === 'visitor_text_message' && record.visitor_text_message) {
+            setVisitorTextMessage(record.visitor_text_message);
+            setDoorbellPropertyName(record.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(record.room_name || null);
             
             // Show the doorbell alert with the text message
             setDoorbellRinging(true);
@@ -417,10 +420,10 @@ const Index = () => {
             
             // Register activity
             addActivity.mutate({
-              property_id: payload.new.property_id || undefined,
+              property_id: record.property_id || undefined,
               type: 'incoming',
               title: 'Mensagem de texto recebida',
-              property_name: payload.new.property_name || 'Propriedade',
+              property_name: record.property_name || 'Propriedade',
             });
             
             toast({
