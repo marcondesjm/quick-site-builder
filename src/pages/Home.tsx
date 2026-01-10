@@ -16,6 +16,7 @@ import {
   Star,
   Quote
 } from "lucide-react";
+import { ScrollDownIndicator } from "@/components/ScrollDownIndicator";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -112,6 +113,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
+      <ScrollDownIndicator />
       {/* Header */}
       <motion.header 
         className="container mx-auto px-4 py-6"
