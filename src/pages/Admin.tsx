@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User, Clock, CalendarPlus, CalendarX, RotateCcw, MoreHorizontal } from 'lucide-react';
+import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2, Crown, User, Clock, CalendarPlus, CalendarX, RotateCcw, MoreHorizontal, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser, useSetUserRole, useUpdateTrial } from '@/hooks/useAdmin';
+import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser, useSetUserRole, useUpdateTrial, useAutoDeactivateExpired } from '@/hooks/useAdmin';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +44,7 @@ const Admin = () => {
   const deleteUser = useDeleteUser();
   const setUserRole = useSetUserRole();
   const updateTrial = useUpdateTrial();
+  const autoDeactivate = useAutoDeactivateExpired();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
@@ -188,6 +189,33 @@ const Admin = () => {
     }
   };
 
+  const handleAutoDeactivate = async () => {
+    try {
+      const result = await autoDeactivate.mutateAsync();
+      toast({
+        title: 'Desativação automática concluída',
+        description: result.deactivatedCount > 0 
+          ? `${result.deactivatedCount} usuário(s) com trial expirado foram desativados.`
+          : 'Nenhum usuário com trial expirado encontrado.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error?.message || 'Não foi possível executar a desativação automática.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Count users with expired trial that are still active
+  const expiredTrialCount = users?.filter(u => {
+    if (u.is_admin) return false;
+    const trialEndsAt = u.trial_ends_at ? new Date(u.trial_ends_at) : null;
+    const now = new Date();
+    const trialExpired = trialEndsAt && trialEndsAt <= now;
+    return trialExpired && u.is_active;
+  }).length || 0;
+
   return (
     <div className="min-h-screen bg-background">
       <motion.header
@@ -241,25 +269,57 @@ const Admin = () => {
         >
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Gerenciar Usuários
-                  </CardTitle>
-                  <CardDescription>
-                    Ative ou desative contas de usuários
-                  </CardDescription>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Gerenciar Usuários
+                    </CardTitle>
+                    <CardDescription>
+                      Ative ou desative contas de usuários
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-full sm:w-64">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar por nome ou email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por nome ou email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                
+                {/* Auto-deactivate button */}
+                {expiredTrialCount > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-destructive" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-destructive">
+                          {expiredTrialCount} usuário{expiredTrialCount !== 1 ? 's' : ''} com trial expirado
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Clique para desativar automaticamente
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      onClick={handleAutoDeactivate}
+                      disabled={autoDeactivate.isPending}
+                      className="gap-2"
+                    >
+                      <Zap className={`w-4 h-4 ${autoDeactivate.isPending ? 'animate-pulse' : ''}`} />
+                      {autoDeactivate.isPending ? 'Desativando...' : 'Desativar Todos'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent>
