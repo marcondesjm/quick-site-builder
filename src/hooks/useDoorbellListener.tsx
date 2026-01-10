@@ -95,31 +95,32 @@ export const useDoorbellListener = () => {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*', // Listen for both INSERT and UPDATE
           schema: 'public',
           table: 'video_calls',
           filter: `owner_id=eq.${user.id}`,
         },
         async (payload) => {
-          console.log('Doorbell event received:', payload.new.status);
+          const record = payload.new as Record<string, any>;
+          console.log('Doorbell event received:', payload.eventType, record.status);
           
-          if (payload.new.status === 'doorbell_ringing') {
+          if (record.status === 'doorbell_ringing') {
             setDoorbellState(prev => ({
               ...prev,
               isRinging: true,
               isAnswered: false,
-              propertyName: payload.new.property_name || 'Propriedade',
-              roomName: payload.new.room_name || null,
+              propertyName: record.property_name || 'Propriedade',
+              roomName: record.room_name || null,
               visitorAudioResponse: null,
               visitorTextMessage: null,
             }));
             
             // Update property status to online
-            if (payload.new.property_id) {
+            if (record.property_id) {
               await supabase
                 .from('properties')
                 .update({ is_online: true })
-                .eq('id', payload.new.property_id);
+                .eq('id', record.property_id);
             }
             
             // Vibrate phone if supported
@@ -141,13 +142,13 @@ export const useDoorbellListener = () => {
 
             toast({
               title: "🔔 Campainha tocando!",
-              description: `Visitante na porta - ${payload.new.property_name}`,
+              description: `Visitante na porta - ${record.property_name}`,
               duration: 10000,
             });
           }
           
           // Handle not answered - stop doorbell ringing
-          if (payload.new.status === 'not_answered') {
+          if (record.status === 'not_answered') {
             console.log('Call not answered - stopping doorbell');
             setDoorbellState(prev => ({
               ...prev,
@@ -160,7 +161,7 @@ export const useDoorbellListener = () => {
           }
           
           // Handle answered - transition to answered state (keep UI open on dashboard)
-          if (payload.new.status === 'answered') {
+          if (record.status === 'answered') {
             console.log('Call answered - transitioning to answered state');
             // Stop sounds/vibrations but keep state for dashboard
             if (doorbellIntervalRef.current) {
@@ -174,13 +175,13 @@ export const useDoorbellListener = () => {
               ...prev,
               isRinging: false,
               isAnswered: true,
-              propertyName: payload.new.property_name || prev.propertyName,
-              roomName: payload.new.room_name || prev.roomName,
+              propertyName: record.property_name || prev.propertyName,
+              roomName: record.room_name || prev.roomName,
             }));
           }
           
           // Handle ended - close everything
-          if (payload.new.status === 'ended') {
+          if (record.status === 'ended') {
             console.log('Call ended - closing doorbell');
             setDoorbellState(prev => ({
               ...prev,
@@ -196,14 +197,14 @@ export const useDoorbellListener = () => {
           }
           
           // Handle visitor audio response
-          if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
+          if (record.status === 'visitor_audio_response' && record.visitor_audio_url) {
             setDoorbellState(prev => ({
               ...prev,
               isRinging: true,
               isAnswered: true,
-              propertyName: payload.new.property_name || 'Propriedade',
-              roomName: payload.new.room_name || null,
-              visitorAudioResponse: payload.new.visitor_audio_url,
+              propertyName: record.property_name || 'Propriedade',
+              roomName: record.room_name || null,
+              visitorAudioResponse: record.visitor_audio_url,
             }));
             
             // Play notification sound
@@ -240,7 +241,7 @@ export const useDoorbellListener = () => {
               navigator.vibrate([300, 100, 300]);
             }
             
-            const isVideo = isVideoUrl(payload.new.visitor_audio_url);
+            const isVideo = isVideoUrl(record.visitor_audio_url);
             toast({
               title: isVideo ? "🎬 Resposta do visitante!" : "🎤 Resposta do visitante!",
               description: isVideo ? "O visitante enviou uma mensagem de vídeo" : "O visitante enviou uma mensagem de áudio",
@@ -249,14 +250,14 @@ export const useDoorbellListener = () => {
           }
           
           // Handle visitor text message
-          if (payload.new.status === 'visitor_text_message' && payload.new.visitor_text_message) {
+          if (record.status === 'visitor_text_message' && record.visitor_text_message) {
             setDoorbellState(prev => ({
               ...prev,
               isRinging: true,
               isAnswered: true,
-              propertyName: payload.new.property_name || 'Propriedade',
-              roomName: payload.new.room_name || null,
-              visitorTextMessage: payload.new.visitor_text_message,
+              propertyName: record.property_name || 'Propriedade',
+              roomName: record.room_name || null,
+              visitorTextMessage: record.visitor_text_message,
             }));
             
             if ('vibrate' in navigator) {
