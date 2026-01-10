@@ -549,30 +549,13 @@ const VisitorCall = () => {
     };
   }, []);
 
-  // Reset call when page is closed/refreshed to keep visitor panel fresh
+  // Reset call when page is CLOSED (not minimized) to keep visitor panel fresh
+  // IMPORTANT: Only reset on actual page close, not on visibility change (minimizing)
   useEffect(() => {
     if (!roomName) return;
 
-    const resetCallOnClose = async () => {
-      try {
-        // Reset the call status to pending for fresh start next time
-        await supabase
-          .from('video_calls')
-          .update({ 
-            status: 'pending',
-            audio_message_url: null,
-            owner_joined: false,
-            visitor_joined: false
-          })
-          .eq('room_name', roomName);
-        console.log('[VisitorCall] Call reset on page close');
-      } catch (e) {
-        console.error('[VisitorCall] Error resetting call:', e);
-      }
-    };
-
     const handleBeforeUnload = () => {
-      // Use sendBeacon for reliable data sending on page close
+      // Use sendBeacon for reliable data sending on actual page close
       const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/video_calls?room_name=eq.${roomName}`;
       const body = JSON.stringify({ 
         status: 'pending',
@@ -581,24 +564,17 @@ const VisitorCall = () => {
         visitor_joined: false
       });
       
-      navigator.sendBeacon?.(url, body) || resetCallOnClose();
+      navigator.sendBeacon?.(url, body);
+      console.log('[VisitorCall] Call reset on page close');
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        resetCallOnClose();
-      }
-    };
-
-    // Listen for page close/refresh
+    // Only listen for actual page close/refresh, NOT visibility changes
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('pagehide', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('pagehide', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [roomName]);
 
