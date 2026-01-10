@@ -219,7 +219,7 @@ const VisitorCall = () => {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  // Send message to chatbot via n8n webhook
+  // Send message to chatbot via Lovable AI
   const handleSendChatMessage = async () => {
     if (!chatInput.trim() || isSendingChat) return;
 
@@ -230,7 +230,8 @@ const VisitorCall = () => {
       timestamp: Date.now(),
     };
 
-    setChatMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...chatMessages, userMessage];
+    setChatMessages(updatedMessages);
     setChatInput('');
     setIsSendingChat(true);
 
@@ -240,6 +241,7 @@ const VisitorCall = () => {
           message: userMessage.text,
           roomName,
           propertyName: decodeURIComponent(propertyName),
+          conversationHistory: chatMessages, // Send previous messages for context
         },
       });
 
@@ -268,6 +270,27 @@ const VisitorCall = () => {
     } finally {
       setIsSendingChat(false);
     }
+  };
+
+  // Save chat history when dialog closes
+  const handleCloseChatDialog = async (open: boolean) => {
+    if (!open && chatMessages.length > 0) {
+      // Save chat history to database
+      try {
+        await supabase.functions.invoke('save-chat-history', {
+          body: {
+            roomName,
+            propertyName: decodeURIComponent(propertyName),
+            chatHistory: chatMessages,
+            protocolNumber,
+          },
+        });
+        console.log('Chat history saved successfully');
+      } catch (error) {
+        console.error('Error saving chat history:', error);
+      }
+    }
+    setShowChatDialog(open);
   };
 
   // Subscribe to real-time updates for owner join status and meet link
@@ -1245,7 +1268,7 @@ const VisitorCall = () => {
         </motion.div>
 
         {/* Chat Dialog */}
-        <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+        <Dialog open={showChatDialog} onOpenChange={handleCloseChatDialog}>
           <DialogContent className="max-w-md max-h-[80vh] flex flex-col p-0">
             <DialogHeader className="p-4 pb-2 border-b">
               <DialogTitle className="flex items-center gap-2">
