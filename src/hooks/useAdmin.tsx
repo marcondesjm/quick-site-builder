@@ -39,16 +39,20 @@ export interface UserProfile {
 }
 
 export function useAllUsers() {
-  const { data: isAdmin } = useIsAdmin();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   const { session } = useAuth();
   
   return useQuery({
-    queryKey: ['all-users'],
+    queryKey: ['all-users', session?.access_token],
     queryFn: async () => {
+      if (!session?.access_token) {
+        throw new Error('No access token available');
+      }
+      
       // Use edge function to fetch users with admin privileges
       const { data, error } = await supabase.functions.invoke('admin-get-users', {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
       
@@ -64,7 +68,9 @@ export function useAllUsers() {
       
       return data.users as UserProfile[];
     },
-    enabled: isAdmin === true && !!session?.access_token,
+    enabled: isAdmin === true && !!session?.access_token && !isAdminLoading,
+    retry: 1,
+    staleTime: 1000 * 60, // 1 minute
   });
 }
 
