@@ -10,24 +10,22 @@ export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
 
+  // Google Client ID feature is currently disabled
+  // To enable, configure GOOGLE_CLIENT_ID secret and uncomment the fetch below
+  const isGoogleMeetEnabled = false;
+
   // Fetch Google Client ID from edge function (only when authenticated)
+  // Currently disabled - uncomment to enable Google Meet integration
+  /*
   useEffect(() => {
     const fetchClientId = async () => {
-      // First check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('User not authenticated, skipping Google Client ID fetch');
-        return;
-      }
+      if (!session) return;
 
       try {
         const { data, error } = await supabase.functions.invoke('get-google-client-id');
-        if (error) {
-          console.error('Error fetching Google Client ID:', error);
-          return;
-        }
+        if (error) return;
         if (data?.clientId) {
-          console.log('Google Client ID loaded successfully');
           setGoogleClientId(data.clientId);
         }
       } catch (error) {
@@ -36,15 +34,13 @@ export const useGoogleAuth = () => {
     };
     fetchClientId();
 
-    // Re-fetch when auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        fetchClientId();
-      }
+      if (session) fetchClientId();
     });
 
     return () => subscription.unsubscribe();
   }, []);
+  */
 
   const initGoogleAuth = useCallback(() => {
     return new Promise<void>((resolve, reject) => {
