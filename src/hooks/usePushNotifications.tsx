@@ -60,10 +60,15 @@ export function usePushNotifications() {
   };
 
   const subscribe = useCallback(async () => {
-    if (!user || !isSupported) return false;
+    if (!user || !isSupported) {
+      console.log('Push subscription skipped:', { user: !!user, isSupported });
+      return false;
+    }
 
     setLoading(true);
     try {
+      console.log('Starting push notification subscription...');
+      
       // Check if permission was previously denied
       if (Notification.permission === 'denied') {
         toast.error('Notificações bloqueadas. Vá nas configurações do navegador para permitir notificações para este site.');
@@ -72,8 +77,10 @@ export function usePushNotifications() {
       }
       
       // Request notification permission
+      console.log('Requesting notification permission...');
       const newPermission = await Notification.requestPermission();
       setPermission(newPermission);
+      console.log('Permission result:', newPermission);
       
       if (newPermission !== 'granted') {
         if (newPermission === 'denied') {
@@ -85,24 +92,36 @@ export function usePushNotifications() {
       }
 
       // Register service worker
+      console.log('Registering service worker...');
       const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service worker registered:', registration);
       await navigator.serviceWorker.ready;
+      console.log('Service worker ready');
 
       // Get VAPID public key
+      console.log('Getting VAPID public key...');
       const vapidPublicKey = await getVapidPublicKey();
       if (!vapidPublicKey) {
         throw new Error('Failed to get VAPID public key');
       }
+      console.log('VAPID key received:', vapidPublicKey.substring(0, 20) + '...');
 
       // Subscribe to push
+      console.log('Subscribing to push manager...');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
+      console.log('Push subscription created:', subscription.endpoint);
 
       const subscriptionJson = subscription.toJSON();
+      console.log('Subscription JSON:', { 
+        endpoint: subscriptionJson.endpoint?.substring(0, 50), 
+        hasKeys: !!subscriptionJson.keys 
+      });
 
       // Save subscription to database
+      console.log('Saving subscription to database...');
       const { error } = await supabase
         .from('push_subscriptions')
         .upsert({
@@ -111,18 +130,23 @@ export function usePushNotifications() {
           keys: subscriptionJson.keys as any,
           p256dh: subscriptionJson.keys!.p256dh,
           auth: subscriptionJson.keys!.auth,
-        } as any, {
+        }, {
           onConflict: 'endpoint',
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
+      console.log('Subscription saved successfully!');
       setIsSubscribed(true);
       toast.success('Notificações ativadas com sucesso!');
       return true;
     } catch (error) {
       console.error('Error subscribing to push:', error);
-      toast.error('Erro ao ativar notificações');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error(`Erro ao ativar notificações: ${errorMessage}`);
       return false;
     } finally {
       setLoading(false);
