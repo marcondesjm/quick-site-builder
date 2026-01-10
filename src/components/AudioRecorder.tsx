@@ -145,11 +145,13 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false
       console.log('Audio URL:', audioUrl);
 
       // Update video_call with audio message URL
-      console.log('Updating video_call with audio URL...');
+      // Add timestamp to URL to ensure each audio is detected as unique
+      const audioUrlWithTimestamp = `${audioUrl}?t=${Date.now()}`;
+      console.log('Updating video_call with audio URL:', audioUrlWithTimestamp);
       const { data: updateData, error: updateError } = await supabase
         .from('video_calls')
         .update({ 
-          audio_message_url: audioUrl,
+          audio_message_url: audioUrlWithTimestamp,
           status: 'audio_message'
         })
         .eq('room_name', roomName)

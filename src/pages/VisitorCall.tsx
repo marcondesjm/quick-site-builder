@@ -37,6 +37,17 @@ interface AudioMessage {
   timestamp: number;
 }
 
+// Get base URL without timestamp parameter for deduplication
+const getBaseAudioUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.delete('t');
+    return urlObj.toString();
+  } catch {
+    return url.split('?')[0];
+  }
+};
+
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const [searchParams] = useSearchParams();
@@ -209,6 +220,7 @@ const VisitorCall = () => {
             });
           } else if (currentStatus === 'audio_message' && updatedCall.audio_message_url) {
             const audioUrl = updatedCall.audio_message_url;
+            const baseUrl = getBaseAudioUrl(audioUrl);
             
             setCallStatus(prev => {
               if (prev !== 'audio_message') {
@@ -217,24 +229,30 @@ const VisitorCall = () => {
               }
               return 'audio_message';
             });
-            // Add new audio message to the list (with deduplication)
+            // Add new audio message to the list (dedup by full URL with timestamp)
             setAudioMessages(prev => {
+              // Check if this exact URL (with timestamp) already exists
               const exists = prev.some(m => m.url === audioUrl);
               if (!exists) {
-                // Auto-play new audio message
-                setTimeout(() => {
-                  const audio = new Audio(audioUrl);
-                  audio.preload = 'auto';
-                  audio.oncanplaythrough = async () => {
-                    try {
-                      await audio.play();
-                      console.log('[Audio] Auto-playing new message');
-                    } catch (e) {
-                      console.log('[Audio] Autoplay blocked, user interaction needed');
-                    }
-                  };
-                  audio.load();
-                }, 300);
+                console.log('[Audio] New audio message received:', audioUrl);
+                // Auto-play new audio message immediately
+                const audio = new Audio(audioUrl);
+                audio.preload = 'auto';
+                audio.volume = 1.0;
+                audio.oncanplaythrough = async () => {
+                  try {
+                    await audio.play();
+                    console.log('[Audio] Auto-playing new message');
+                    toast.success('Reproduzindo mensagem...');
+                  } catch (e) {
+                    console.log('[Audio] Autoplay blocked, user interaction needed');
+                    toast.info('Toque no áudio para ouvir');
+                  }
+                };
+                audio.onerror = (e) => {
+                  console.error('[Audio] Error loading audio:', e);
+                };
+                audio.load();
                 
                 return [...prev, { url: audioUrl, timestamp: Date.now() }];
               }
@@ -470,6 +488,59 @@ const VisitorCall = () => {
       }
     };
   }, []);
+
+  // Reset call when page is closed/refreshed to keep visitor panel fresh
+  useEffect(() => {
+    if (!roomName) return;
+
+    const resetCallOnClose = async () => {
+      try {
+        // Reset the call status to pending for fresh start next time
+        await supabase
+          .from('video_calls')
+          .update({ 
+            status: 'pending',
+            audio_message_url: null,
+            owner_joined: false,
+            visitor_joined: false
+          })
+          .eq('room_name', roomName);
+        console.log('[VisitorCall] Call reset on page close');
+      } catch (e) {
+        console.error('[VisitorCall] Error resetting call:', e);
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      // Use sendBeacon for reliable data sending on page close
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/video_calls?room_name=eq.${roomName}`;
+      const body = JSON.stringify({ 
+        status: 'pending',
+        audio_message_url: null,
+        owner_joined: false,
+        visitor_joined: false
+      });
+      
+      navigator.sendBeacon?.(url, body) || resetCallOnClose();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        resetCallOnClose();
+      }
+    };
+
+    // Listen for page close/refresh
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [roomName]);
 
   // Auto-ring is disabled - visitor must manually press doorbell button
   // This ensures the visitor always sees the doorbell button first
