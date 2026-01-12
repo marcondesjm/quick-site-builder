@@ -180,7 +180,7 @@ const NotFound = () => {
             size="lg"
             className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 px-8"
           >
-            <Link to="/">
+            <Link to="/dashboard">
               <motion.span
                 className="absolute inset-0 bg-white/20"
                 initial={{ x: '-100%' }}
@@ -188,7 +188,7 @@ const NotFound = () => {
                 transition={{ duration: 0.5 }}
               />
               <Home className="w-5 h-5 mr-2" />
-              Voltar ao Início
+              Voltar ao Dashboard
             </Link>
           </Button>
 
