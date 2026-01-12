@@ -403,6 +403,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_video_calls: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
