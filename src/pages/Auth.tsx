@@ -183,10 +183,10 @@ export default function Auth() {
               }}
             />
             <span 
-              className="absolute -top-2 -right-6 text-lg font-bold"
+              className="absolute -top-3 -right-8 text-3xl font-bold"
               style={{ 
                 color: '#00d4ff',
-                textShadow: '0 0 10px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.5)'
+                textShadow: '0 0 15px rgba(0, 212, 255, 1), 0 0 30px rgba(0, 212, 255, 0.7), 0 0 45px rgba(0, 212, 255, 0.5)'
               }}
             >®</span>
           </div>
