@@ -24,7 +24,9 @@ import {
   Shield, 
   RefreshCw,
   LockKeyholeOpen,
-  ArchiveRestore
+  ArchiveRestore,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 
 const BoxControl = () => {
@@ -41,6 +43,7 @@ const BoxControl = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedBox, setSelectedBox] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   // Get current box (first one or selected)
   const currentBox = boxes?.find(b => b.id === selectedBox) || boxes?.[0];
@@ -78,14 +81,24 @@ const BoxControl = () => {
         },
         () => {
           refetchBoxes();
+          refetchHistory();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setIsConnected(true);
+          refetchBoxes();
+          refetchHistory();
+        } else {
+          setIsConnected(false);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      setIsConnected(false);
     };
-  }, [user?.id, refetchBoxes]);
+  }, [user?.id, refetchBoxes, refetchHistory]);
 
   const handleOpen = async () => {
     if (!currentBox) return;
@@ -278,15 +291,34 @@ const BoxControl = () => {
                 <CardTitle className="text-xl font-bold flex items-center gap-2">
                   <span>📦</span> Painel Inicial
                 </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  className="h-10 w-10 rounded-full hover:bg-primary/10 hover:border-primary transition-all duration-300"
-                >
-                  <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {isConnected ? (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
+                      <div className="relative">
+                        <Wifi className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      </div>
+                      <span className="text-xs font-medium text-green-700 dark:text-green-400">Conectado</span>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleRefresh}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-400 transition-all duration-300"
+                    >
+                      {isLoading ? (
+                        <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+                      ) : (
+                        <WifiOff className="w-4 h-4 text-amber-600" />
+                      )}
+                      <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                        {isLoading ? 'Atualizando...' : 'Reconectar'}
+                      </span>
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6">
