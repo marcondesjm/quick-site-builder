@@ -29,6 +29,7 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -1285,18 +1286,20 @@ const Index = () => {
                     ))}
                   </div>
                 ) : activities && activities.length > 0 ? (
-                  <div className="space-y-1">
-                    {activities.map((activity) => (
-                      <ActivityItem
-                        key={activity.id}
-                        type={activity.type}
-                        title={activity.title}
-                        property={activity.property_name}
-                        time={formatActivityTime(activity.created_at)}
-                        duration={activity.duration || undefined}
-                      />
-                    ))}
-                  </div>
+                  <ScrollArea className="max-h-[320px]">
+                    <div className="space-y-1 pr-4">
+                      {activities.map((activity) => (
+                        <ActivityItem
+                          key={activity.id}
+                          type={activity.type}
+                          title={activity.title}
+                          property={activity.property_name}
+                          time={formatActivityTime(activity.created_at)}
+                          duration={activity.duration || undefined}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
                 ) : (
                   <div className="text-center py-8">
                     <Bell className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
