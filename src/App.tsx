@@ -18,6 +18,7 @@ import Plans from "./pages/Plans";
 import CookiePolicy from "./pages/CookiePolicy";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { CookieConsent } from "./components/CookieConsent";
+import { AppStatusChecker } from "./components/AppStatusChecker";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
           <Sonner />
           <CookieConsent />
           <BrowserRouter>
+            <AppStatusChecker />
             <ConditionalWhatsAppButton />
             <Routes>
               <Route path="/" element={<Home />} />
