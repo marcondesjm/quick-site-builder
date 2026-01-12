@@ -181,7 +181,7 @@ export function InstallAppHeaderButton() {
       </motion.div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden max-h-[90vh]">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
             <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export function InstallAppHeaderButton() {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
             {/* Main Content - Different for mobile vs desktop */}
             {isDesktop ? (
               <div className="space-y-6">
