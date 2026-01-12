@@ -187,7 +187,7 @@ export default function Auth() {
             {!isLogin && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome completo</Label>
+                  <Label htmlFor="name">Nome completo <span className="text-destructive">*</span></Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -197,6 +197,7 @@ export default function Auth() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="pl-10"
+                      required
                     />
                   </div>
                   {errors.name && (
@@ -205,7 +206,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">WhatsApp</Label>
+                  <Label htmlFor="phone">WhatsApp <span className="text-destructive">*</span></Label>
                   <PhoneInput
                     value={phone}
                     onChange={setPhone}
@@ -216,7 +217,7 @@ export default function Auth() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -226,6 +227,7 @@ export default function Auth() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
+                  required
                 />
               </div>
               {errors.email && (
