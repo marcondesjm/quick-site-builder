@@ -1406,11 +1406,77 @@ const VisitorCall = () => {
                 
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[250px] max-h-[350px]">
-                  {chatMessages.length === 0 ? (
+                {chatMessages.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
                       <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
                       <p className="text-sm">Olá{visitorName ? `, ${visitorName.split(' ')[0]}` : ''}! Como posso ajudá-lo?</p>
-                      <p className="text-xs mt-1">Digite sua mensagem abaixo para iniciar.</p>
+                      <p className="text-xs mt-1 mb-4">Clique em uma opção ou digite sua mensagem.</p>
+                      
+                      {/* Quick Reply Suggestions */}
+                      <div className="flex flex-wrap justify-center gap-2 mt-4">
+                        {[
+                          { label: '📦 Tenho uma entrega', message: 'Tenho uma entrega para deixar aqui' },
+                          { label: '🔔 Chamar morador', message: 'Pode chamar o morador por favor?' },
+                          { label: '💬 Deixar recado', message: 'Gostaria de deixar um recado' },
+                          { label: '❓ Como funciona', message: 'Como funciona esse sistema?' },
+                        ].map((suggestion, index) => (
+                          <motion.button
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            type="button"
+                            onClick={() => {
+                              setChatInput(suggestion.message);
+                              // Auto send the message
+                              const userMessage: ChatMessage = {
+                                id: crypto.randomUUID(),
+                                text: suggestion.message,
+                                sender: 'visitor',
+                                timestamp: Date.now(),
+                              };
+                              setChatMessages(prev => [...prev, userMessage]);
+                              setIsSendingChat(true);
+                              
+                              supabase.functions.invoke('chatbot-webhook', {
+                                body: {
+                                  message: suggestion.message,
+                                  roomName,
+                                  propertyName: decodeURIComponent(propertyName),
+                                  conversationHistory: [],
+                                  visitorName: visitorName.trim() || undefined,
+                                  visitorCpf: visitorCpf.replace(/\D/g, '') || undefined,
+                                },
+                              }).then(({ data, error }) => {
+                                if (error) throw error;
+                                const botResponse: ChatMessage = {
+                                  id: crypto.randomUUID(),
+                                  text: data?.response || 'Resposta recebida',
+                                  sender: 'bot',
+                                  timestamp: Date.now(),
+                                };
+                                setChatMessages(prev => [...prev, botResponse]);
+                              }).catch((err) => {
+                                console.error('Error:', err);
+                                const errorMessage: ChatMessage = {
+                                  id: crypto.randomUUID(),
+                                  text: 'Desculpe, não consegui processar. Tente novamente.',
+                                  sender: 'bot',
+                                  timestamp: Date.now(),
+                                };
+                                setChatMessages(prev => [...prev, errorMessage]);
+                              }).finally(() => {
+                                setIsSendingChat(false);
+                                setChatInput('');
+                              });
+                            }}
+                            className="px-3 py-2 text-xs bg-primary/10 hover:bg-primary/20 text-primary rounded-full border border-primary/20 transition-all hover:scale-105 active:scale-95"
+                            disabled={isSendingChat}
+                          >
+                            {suggestion.label}
+                          </motion.button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     chatMessages.map((msg) => (
