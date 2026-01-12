@@ -229,6 +229,20 @@ serve(async (req) => {
     
     console.log('FAQ response:', chatbotResponse);
 
+    // Update video_calls with visitor message for real-time notification in owner dashboard
+    if (roomName) {
+      const visitorInfo = visitorName ? `${visitorName}: ` : '';
+      await supabase
+        .from('video_calls')
+        .update({ 
+          visitor_text_message: `${visitorInfo}${message}`,
+          status: 'assistant_chat' 
+        })
+        .eq('room_name', roomName);
+      
+      console.log('Updated video_calls with visitor message for real-time notification');
+    }
+
     // Check if response should trigger high-priority owner notification
     if (ownerId && shouldNotifyOwner(chatbotResponse)) {
       console.log('Response triggers owner notification, sending push...');

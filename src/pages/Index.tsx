@@ -20,6 +20,7 @@ import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialo
 import { InstallAppDialog } from "@/components/InstallAppDialog";
 import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
 import { NotificationStatusBanner } from "@/components/NotificationStatusBanner";
+import { AssistantMessageAlert } from "@/components/AssistantMessageAlert";
 import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
 import { TrialExpiringWarning } from "@/components/TrialExpiringWarning";
 import { TrialStatusBadge } from "@/components/TrialStatusBadge";
@@ -1127,6 +1128,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <KeepAppOpenAlert />
+      <AssistantMessageAlert />
 
       <main className="container mx-auto px-4 py-8">
         {/* Notification Status Banner - shows if notifications are not enabled */}
