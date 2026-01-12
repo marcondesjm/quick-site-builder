@@ -30,7 +30,7 @@ import {
   WifiOff,
   Loader2,
   X,
-  ArrowLeft
+  Home
 } from "lucide-react";
 import {
   AlertDialog,
@@ -361,7 +361,7 @@ const BoxControl = () => {
                     onClick={() => navigate('/dashboard')}
                     className="h-8 w-8 mr-1"
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <Home className="w-5 h-5" />
                   </Button>
                   <span>📦</span> Painel Inicial
                 </CardTitle>
