@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PhoneInput } from '@/components/PhoneInput';
-import doorviiLogo from '@/assets/doorvii-logo-white.png';
+import doorviiLogo from '@/assets/doorvii-logo-azul.png';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
@@ -167,9 +167,11 @@ export default function Auth() {
           transition={{ delay: 0.1 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent mb-2">
-            DoorVii
-          </h1>
+          <img 
+            src={doorviiLogo} 
+            alt="DoorVii" 
+            className="h-16 mx-auto mb-4"
+          />
           <p className="text-lg text-muted-foreground">Portaria Digital Inteligente</p>
           <p className="text-sm text-muted-foreground/80 mt-3">
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta grátis'}
