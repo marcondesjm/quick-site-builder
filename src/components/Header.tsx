@@ -26,7 +26,8 @@ import {
   Shield,
   ClipboardCheck,
   Sun,
-  Moon
+  Moon,
+  Activity
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -58,6 +59,7 @@ import { WhatsAppConfigDialog } from "./WhatsAppConfigDialog";
 import { RingtoneConfigDialog } from "./RingtoneConfigDialog";
 import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useActivityLog } from "@/hooks/useActivityLog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,6 +89,8 @@ export const Header = () => {
   const [showWhatsAppConfig, setShowWhatsAppConfig] = useState(false);
   const [showRingtoneConfig, setShowRingtoneConfig] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  
+  const { isOpen: showActivityLog, toggle: toggleActivityLog } = useActivityLog();
   
   const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe, permission } = usePushNotifications();
 
@@ -296,6 +300,15 @@ export const Header = () => {
               className="sm:hidden"
             >
               <QrCode className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleActivityLog}
+              title="Log de Atividades"
+              className={showActivityLog ? 'bg-primary/10 text-primary' : ''}
+            >
+              <Activity className="w-5 h-5" />
             </Button>
             <Button 
               variant="ghost" 
