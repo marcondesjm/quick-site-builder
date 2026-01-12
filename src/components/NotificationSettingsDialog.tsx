@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 interface NotificationSettingsDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -25,6 +26,7 @@ export function NotificationSettingsDialog({
   onOpenChange,
   trigger 
 }: NotificationSettingsDialogProps) {
+  const { user } = useAuth();
   const { 
     isSupported, 
     isSubscribed, 
@@ -35,6 +37,7 @@ export function NotificationSettingsDialog({
   } = usePushNotifications();
   
   const [testingSent, setTestingSent] = useState(false);
+  const [testingLoading, setTestingLoading] = useState(false);
 
   const handleToggle = async () => {
     if (isSubscribed) {
@@ -57,28 +60,33 @@ export function NotificationSettingsDialog({
   };
 
   const handleTestNotification = async () => {
-    if (!isSubscribed) {
+    if (!isSubscribed || !user) {
       toast.error('Ative as notificações primeiro');
       return;
     }
 
+    setTestingLoading(true);
     try {
-      // Create a local notification for testing
-      if ('Notification' in window && Notification.permission === 'granted') {
-        const notificationOptions: NotificationOptions = {
+      // Send a real push notification via edge function
+      const { data, error } = await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userId: user.id,
+          title: '🔔 Teste de Notificação',
           body: 'Se você está vendo isso, as notificações estão funcionando!',
-          icon: '/pwa-192x192.png',
-          tag: 'test-notification-' + Date.now(),
-          requireInteraction: true,
-        };
-        new Notification('🔔 Teste de Notificação', notificationOptions);
-        setTestingSent(true);
-        toast.success('Notificação de teste enviada!');
-        setTimeout(() => setTestingSent(false), 3000);
-      }
+          data: { type: 'test' }
+        }
+      });
+
+      if (error) throw error;
+      
+      setTestingSent(true);
+      toast.success('Notificação enviada! Verifique se chegou.');
+      setTimeout(() => setTestingSent(false), 5000);
     } catch (error) {
       console.error('Error sending test notification:', error);
       toast.error('Erro ao enviar notificação de teste');
+    } finally {
+      setTestingLoading(false);
     }
   };
 
@@ -180,10 +188,10 @@ export function NotificationSettingsDialog({
                 variant="outline" 
                 className="w-full"
                 onClick={handleTestNotification}
-                disabled={testingSent}
+                disabled={testingSent || testingLoading}
               >
                 <BellRing className="w-4 h-4 mr-2" />
-                {testingSent ? 'Notificação enviada!' : 'Enviar notificação de teste'}
+                {testingLoading ? 'Enviando...' : testingSent ? 'Verifique seu dispositivo!' : 'Enviar notificação de teste'}
               </Button>
             </motion.div>
           )}
