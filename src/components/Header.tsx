@@ -28,7 +28,8 @@ import {
   Sun,
   Moon,
   Activity,
-  Package
+  Package,
+  Home
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -302,6 +303,24 @@ export const Header = () => {
               title="Atualizar aplicativo"
             >
               <RefreshCw className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => navigate('/')}
+              className="hidden sm:flex"
+            >
+              <Home className="w-4 h-4" />
+              Home
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/')}
+              className="sm:hidden"
+              title="Home"
+            >
+              <Home className="w-5 h-5" />
             </Button>
             <Button 
               variant="secondary" 
