@@ -217,18 +217,22 @@ export function AssistantMessageAlert() {
 
   return (
     <div className="fixed top-20 right-4 z-50 flex gap-2">
-      {/* Activity Log Panel */}
-      {activityLogs.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-48 bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden"
-        >
-          <div className="bg-muted/50 px-3 py-1.5 border-b border-border/50 flex items-center gap-2">
-            <RefreshCw className="w-3 h-3 text-muted-foreground animate-spin" />
-            <span className="text-xs font-medium text-muted-foreground">Atualizações</span>
-          </div>
-          <div className="p-2 space-y-1 max-h-40 overflow-y-auto">
+      {/* Activity Log Panel - Always show when messages exist */}
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="w-52 bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden self-start"
+      >
+        <div className="bg-muted/50 px-3 py-2 border-b border-border/50 flex items-center gap-2">
+          <RefreshCw className={`w-3 h-3 text-primary ${activityLogs.some(l => l.status === 'pending') ? 'animate-spin' : ''}`} />
+          <span className="text-xs font-medium text-foreground">Atualizações em tempo real</span>
+        </div>
+        <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
+          {activityLogs.length === 0 ? (
+            <div className="text-xs text-muted-foreground text-center py-2">
+              Aguardando atividade...
+            </div>
+          ) : (
             <AnimatePresence mode="popLayout">
               {activityLogs.map((log) => (
                 <motion.div
@@ -236,32 +240,34 @@ export function AssistantMessageAlert() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center gap-2 text-xs"
+                  className="flex items-start gap-2 text-xs bg-muted/30 rounded px-2 py-1.5"
                 >
                   {log.status === 'pending' && (
-                    <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0" />
+                    <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0 mt-0.5" />
                   )}
                   {log.status === 'success' && (
-                    <Check className="w-3 h-3 text-green-500 shrink-0" />
+                    <Check className="w-3 h-3 text-green-500 shrink-0 mt-0.5" />
                   )}
                   {log.status === 'error' && (
-                    <AlertCircle className="w-3 h-3 text-destructive shrink-0" />
+                    <AlertCircle className="w-3 h-3 text-destructive shrink-0 mt-0.5" />
                   )}
-                  <span className={`truncate ${
-                    log.status === 'error' ? 'text-destructive' : 
-                    log.status === 'success' ? 'text-green-600' : 'text-muted-foreground'
-                  }`}>
-                    {log.action}
-                  </span>
-                  <span className="text-muted-foreground/50 shrink-0">
-                    {format(log.timestamp, 'HH:mm:ss')}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <span className={`block truncate ${
+                      log.status === 'error' ? 'text-destructive' : 
+                      log.status === 'success' ? 'text-green-600 dark:text-green-400' : 'text-foreground'
+                    }`}>
+                      {log.action}
+                    </span>
+                    <span className="text-muted-foreground/70 text-[10px]">
+                      {format(log.timestamp, 'HH:mm:ss')}
+                    </span>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
-        </motion.div>
-      )}
+          )}
+        </div>
+      </motion.div>
       
       {/* Messages Panel */}
       <div className="w-80 max-w-[calc(100vw-2rem)] space-y-2">
