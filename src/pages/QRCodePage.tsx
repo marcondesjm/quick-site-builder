@@ -1600,25 +1600,25 @@ const QRCodePage = () => {
       </AnimatePresence>
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0 shrink-0">
+            <div className="whitespace-nowrap">
               <h1 className="font-semibold text-lg">QR Code de Acesso</h1>
               <p className="text-xs text-muted-foreground">Personalize e compartilhe</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button variant="default" size="sm" onClick={() => navigate('/dashboard')}>
               <Home className="w-4 h-4" />
-              Início
+              <span className="hidden sm:inline">Início</span>
             </Button>
             <Button variant="secondary" size="sm" onClick={handleCopy}>
               <Copy className="w-4 h-4" />
-              Copiar
+              <span className="hidden sm:inline">Copiar</span>
             </Button>
             <Button variant="secondary" size="sm" onClick={handleShare}>
               <Share2 className="w-4 h-4" />
-              Compartilhar
+              <span className="hidden sm:inline">Compartilhar</span>
             </Button>
           </div>
         </div>
