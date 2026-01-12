@@ -435,6 +435,33 @@ const VisitorCall = () => {
           } else if (currentStatus === 'visitor_audio_response' || currentStatus === 'visitor_text_message') {
             // Visitor response statuses - DON'T change callStatus, just log
             console.log('[VisitorCall] Visitor response status, no state change needed');
+          } else if (currentStatus === 'owner_replied' && updatedCall.owner_text_message) {
+            // Owner replied with a text message - add to chat
+            console.log('[VisitorCall] Owner replied with message:', updatedCall.owner_text_message);
+            
+            // Add owner's message to chat
+            const ownerMessage: ChatMessage = {
+              id: crypto.randomUUID(),
+              text: `🏠 Morador: ${updatedCall.owner_text_message}`,
+              sender: 'bot',
+              timestamp: Date.now(),
+            };
+            
+            setChatMessages(prev => {
+              // Avoid duplicates
+              const exists = prev.some(m => m.text === ownerMessage.text);
+              if (!exists) {
+                return [...prev, ownerMessage];
+              }
+              return prev;
+            });
+            
+            // Show notification
+            toast.success('O morador respondeu sua mensagem!');
+            if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+            
+            // Open chat dialog if not already open
+            setShowChatDialog(true);
           } else if (currentStatus === 'answered') {
             setCallStatus(prev => {
               if (prev !== 'answered' && prev !== 'video_call' && prev !== 'audio_message') {
