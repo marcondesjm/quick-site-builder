@@ -10,8 +10,10 @@ import {
   Palette,
   Camera,
   X,
-  Check
+  Check,
+  Home
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -55,6 +57,7 @@ export const QRCodeAccess = ({
   onRefresh,
 }: QRCodeAccessProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const qrRef = useRef<HTMLDivElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
   const [showCustomize, setShowCustomize] = useState(false);
@@ -267,10 +270,33 @@ export const QRCodeAccess = ({
         className="glass rounded-2xl p-6 text-center"
         style={{ boxShadow: "var(--shadow-card)" }}
       >
-        <h3 className="font-semibold text-lg mb-1">Acesso para Visitantes</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Compartilhe este QR Code com seus visitantes
-        </p>
+        {/* Header with Home button */}
+        <div className="flex items-center gap-3 mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/dashboard')}
+            className="h-9 w-9 shrink-0"
+          >
+            <Home className="w-5 h-5" />
+          </Button>
+          <div className="text-left flex-1">
+            <h3 className="font-semibold text-lg">QR Code de Acesso</h3>
+            <p className="text-sm text-muted-foreground">
+              Personalize e compartilhe
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="default" size="sm" onClick={handleCopy}>
+              <Copy className="w-4 h-4 mr-1" />
+              Copiar
+            </Button>
+            <Button variant="default" size="sm" onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-1" />
+              Compartilhar
+            </Button>
+          </div>
+        </div>
 
         {/* Camera Hint */}
         <motion.div
