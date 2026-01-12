@@ -1608,8 +1608,8 @@ const QRCodePage = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-primary/10">
-              <Home className="w-5 h-5 text-primary" />
+            <Button variant="default" size="icon" onClick={() => navigate('/dashboard')}>
+              <Home className="w-5 h-5" />
             </Button>
             <Button variant="secondary" size="sm" onClick={handleCopy}>
               <Copy className="w-4 h-4" />
