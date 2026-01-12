@@ -95,6 +95,10 @@
     --sidebar-border: 210 30% 25%;
     --sidebar-ring: 210 100% 65%;
   }
+
+  #lovable-badge {
+    display: none !important;
+  }
 }
 
 @layer base {
