@@ -16,6 +16,8 @@ import QRCodePage from "./pages/QRCodePage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
 import CookiePolicy from "./pages/CookiePolicy";
+import TermosDeUso from "./pages/TermosDeUso";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { CookieConsent } from "./components/CookieConsent";
 import { AppStatusChecker } from "./components/AppStatusChecker";
@@ -69,6 +71,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/install" element={<Install />} />
               <Route path="/politica-cookies" element={<CookiePolicy />} />
+              <Route path="/termos" element={<TermosDeUso />} />
+              <Route path="/privacidade" element={<PoliticaPrivacidade />} />
               <Route path="/call/:roomName" element={<VisitorCall />} />
               <Route path="/qrcode" element={
                 <ProtectedRoute>
