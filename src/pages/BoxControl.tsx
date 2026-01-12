@@ -662,7 +662,10 @@ const BoxControl = () => {
                   });
                   setShowExitConfirm(false);
                   await signOut();
-                } finally {
+                  // Force redirect after logout
+                  window.location.href = '/auth';
+                } catch (error) {
+                  console.error('Error during exit:', error);
                   setIsExiting(false);
                 }
               }}
