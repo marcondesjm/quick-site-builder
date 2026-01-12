@@ -28,6 +28,7 @@ import {
   ArchiveRestore,
   Wifi,
   WifiOff,
+  Loader2,
   X,
   ArrowLeft
 } from "lucide-react";
@@ -59,6 +60,7 @@ const BoxControl = () => {
   const [selectedBox, setSelectedBox] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   // Get current box (first one or selected)
   const currentBox = boxes?.find(b => b.id === selectedBox) || boxes?.[0];
@@ -647,20 +649,30 @@ const BoxControl = () => {
           <AlertDialogFooter>
             <Button 
               className="w-full bg-primary hover:bg-primary/90"
+              disabled={isExiting}
               onClick={async () => {
-                await refetchBoxes();
-                await refetchHistory();
-                toast({
-                  title: "✅ Atualizado!",
-                  description: "Saindo do sistema...",
-                  duration: 2000,
-                });
-                setShowExitConfirm(false);
-                await signOut();
+                setIsExiting(true);
+                try {
+                  await refetchBoxes();
+                  await refetchHistory();
+                  toast({
+                    title: "✅ Atualizado!",
+                    description: "Saindo do sistema...",
+                    duration: 2000,
+                  });
+                  setShowExitConfirm(false);
+                  await signOut();
+                } finally {
+                  setIsExiting(false);
+                }
               }}
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Atualizar e Sair
+              {isExiting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {isExiting ? "Processando..." : "Atualizar e Sair"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
