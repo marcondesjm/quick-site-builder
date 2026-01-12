@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Clock, Volume2, VolumeX, Send } from 'lucide-react';
+import { MessageCircle, X, Clock, Volume2, VolumeX, Send, RefreshCw, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,13 +20,40 @@ interface AssistantMessage {
   callId: string;
 }
 
+interface LogEntry {
+  id: string;
+  action: string;
+  status: 'pending' | 'success' | 'error';
+  timestamp: Date;
+}
+
 export function AssistantMessageAlert() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [muted, setMuted] = useState(false);
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [sendingReply, setSendingReply] = useState<Record<string, boolean>>({});
+  const [activityLogs, setActivityLogs] = useState<LogEntry[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Add log entry
+  const addLog = (action: string, status: LogEntry['status'] = 'pending') => {
+    const log: LogEntry = {
+      id: Date.now().toString(),
+      action,
+      status,
+      timestamp: new Date(),
+    };
+    setActivityLogs(prev => [log, ...prev].slice(0, 5));
+    return log.id;
+  };
+
+  // Update log status
+  const updateLogStatus = (logId: string, status: LogEntry['status']) => {
+    setActivityLogs(prev => 
+      prev.map(log => log.id === logId ? { ...log, status } : log)
+    );
+  };
 
   // Send reply to visitor
   const sendReply = async (msg: AssistantMessage) => {
@@ -34,6 +61,7 @@ export function AssistantMessageAlert() {
     if (!replyText) return;
 
     setSendingReply(prev => ({ ...prev, [msg.id]: true }));
+    const logId = addLog('Enviando resposta...');
 
     try {
       // Update video_calls with owner's text message
@@ -47,11 +75,15 @@ export function AssistantMessageAlert() {
 
       if (error) throw error;
 
+      updateLogStatus(logId, 'success');
+      addLog('Resposta enviada!', 'success');
       toast.success('Mensagem enviada ao visitante!');
       setReplyTexts(prev => ({ ...prev, [msg.id]: '' }));
       dismissMessage(msg.id);
     } catch (error) {
       console.error('Error sending reply:', error);
+      updateLogStatus(logId, 'error');
+      addLog('Erro ao enviar', 'error');
       toast.error('Erro ao enviar mensagem');
     } finally {
       setSendingReply(prev => ({ ...prev, [msg.id]: false }));
@@ -140,6 +172,9 @@ export function AssistantMessageAlert() {
                 return [newMessage, ...prev].slice(0, 5); // Keep only last 5
               });
               
+              // Add to activity log
+              addLog(`Nova mensagem: ${message.substring(0, 20)}...`, 'success');
+              
               playNotificationSound();
             }
           }
@@ -181,7 +216,55 @@ export function AssistantMessageAlert() {
   if (messages.length === 0) return null;
 
   return (
-    <div className="fixed top-20 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] space-y-2">
+    <div className="fixed top-20 right-4 z-50 flex gap-2">
+      {/* Activity Log Panel */}
+      {activityLogs.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-48 bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden"
+        >
+          <div className="bg-muted/50 px-3 py-1.5 border-b border-border/50 flex items-center gap-2">
+            <RefreshCw className="w-3 h-3 text-muted-foreground animate-spin" />
+            <span className="text-xs font-medium text-muted-foreground">Atualizações</span>
+          </div>
+          <div className="p-2 space-y-1 max-h-40 overflow-y-auto">
+            <AnimatePresence mode="popLayout">
+              {activityLogs.map((log) => (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  {log.status === 'pending' && (
+                    <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0" />
+                  )}
+                  {log.status === 'success' && (
+                    <Check className="w-3 h-3 text-green-500 shrink-0" />
+                  )}
+                  {log.status === 'error' && (
+                    <AlertCircle className="w-3 h-3 text-destructive shrink-0" />
+                  )}
+                  <span className={`truncate ${
+                    log.status === 'error' ? 'text-destructive' : 
+                    log.status === 'success' ? 'text-green-600' : 'text-muted-foreground'
+                  }`}>
+                    {log.action}
+                  </span>
+                  <span className="text-muted-foreground/50 shrink-0">
+                    {format(log.timestamp, 'HH:mm:ss')}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
+      
+      {/* Messages Panel */}
+      <div className="w-80 max-w-[calc(100vw-2rem)] space-y-2">
       <AnimatePresence mode="popLayout">
         {messages.map((msg, index) => (
           <motion.div
@@ -286,6 +369,7 @@ export function AssistantMessageAlert() {
           </Button>
         </motion.div>
       )}
+      </div>
     </div>
   );
 }
