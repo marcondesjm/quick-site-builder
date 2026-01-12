@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, User, Clock, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, X, Clock, Volume2, VolumeX, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface AssistantMessage {
   id: string;
@@ -15,13 +17,46 @@ interface AssistantMessage {
   propertyName: string;
   timestamp: Date;
   roomName: string;
+  callId: string;
 }
 
 export function AssistantMessageAlert() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [muted, setMuted] = useState(false);
+  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
+  const [sendingReply, setSendingReply] = useState<Record<string, boolean>>({});
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Send reply to visitor
+  const sendReply = async (msg: AssistantMessage) => {
+    const replyText = replyTexts[msg.id]?.trim();
+    if (!replyText) return;
+
+    setSendingReply(prev => ({ ...prev, [msg.id]: true }));
+
+    try {
+      // Update video_calls with owner's text message
+      const { error } = await supabase
+        .from('video_calls')
+        .update({
+          owner_text_message: replyText,
+          status: 'owner_replied'
+        })
+        .eq('id', msg.callId);
+
+      if (error) throw error;
+
+      toast.success('Mensagem enviada ao visitante!');
+      setReplyTexts(prev => ({ ...prev, [msg.id]: '' }));
+      dismissMessage(msg.id);
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast.error('Erro ao enviar mensagem');
+    } finally {
+      setSendingReply(prev => ({ ...prev, [msg.id]: false }));
+    }
+  };
 
   // Play notification sound
   const playNotificationSound = () => {
@@ -94,6 +129,7 @@ export function AssistantMessageAlert() {
                 propertyName: record.property_name || 'Propriedade',
                 timestamp: new Date(),
                 roomName: record.room_name,
+                callId: record.id,
               };
               
               setMessages(prev => {
@@ -197,13 +233,37 @@ export function AssistantMessageAlert() {
             </div>
             
             {/* Content */}
-            <div className="p-4">
+            <div className="p-4 space-y-3">
               <p className="text-sm text-foreground leading-relaxed line-clamp-3">
                 "{msg.message}"
               </p>
-              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 <span>{format(msg.timestamp, 'HH:mm', { locale: ptBR })}</span>
+              </div>
+              
+              {/* Reply input */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Responder ao visitante..."
+                  value={replyTexts[msg.id] || ''}
+                  onChange={(e) => setReplyTexts(prev => ({ ...prev, [msg.id]: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !sendingReply[msg.id]) {
+                      sendReply(msg);
+                    }
+                  }}
+                  className="h-8 text-sm"
+                  disabled={sendingReply[msg.id]}
+                />
+                <Button
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => sendReply(msg)}
+                  disabled={!replyTexts[msg.id]?.trim() || sendingReply[msg.id]}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           </motion.div>
