@@ -337,42 +337,43 @@ const BoxControl = () => {
               <CardTitle className="text-lg font-semibold">Controle de Acesso</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center gap-2 h-auto py-4 hover:bg-primary/5 hover:border-primary"
+                  className="flex flex-col items-center gap-4 h-auto py-8 px-6 border-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group rounded-2xl shadow-sm hover:shadow-lg"
                   onClick={handleOpen}
                   disabled={isLoading || !currentBox?.is_locked}
                 >
-                  <div className="w-14 h-14 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <LockKeyholeOpen className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 flex items-center justify-center shadow-lg group-hover:shadow-green-500/30 transition-all duration-300 group-hover:scale-105">
+                    <LockKeyholeOpen className="w-12 h-12 text-white drop-shadow-md" />
                   </div>
-                  <span className="text-sm font-medium">Abrir</span>
+                  <span className="text-lg font-semibold text-green-700 dark:text-green-400">Abrir Caixa</span>
                 </Button>
 
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center gap-2 h-auto py-4 hover:bg-primary/5 hover:border-primary"
+                  className="flex flex-col items-center gap-4 h-auto py-8 px-6 border-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group rounded-2xl shadow-sm hover:shadow-lg"
                   onClick={handleClose}
                   disabled={isLoading || currentBox?.is_locked}
                 >
-                  <div className="w-14 h-14 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                    <ArchiveRestore className="w-8 h-8 text-red-600 dark:text-red-400" />
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 flex items-center justify-center shadow-lg group-hover:shadow-red-500/30 transition-all duration-300 group-hover:scale-105">
+                    <ArchiveRestore className="w-12 h-12 text-white drop-shadow-md" />
                   </div>
-                  <span className="text-sm font-medium">Fechar</span>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className={`flex flex-col items-center gap-2 h-auto py-4 hover:bg-primary/5 hover:border-primary ${showHistory ? 'bg-primary/10 border-primary' : ''}`}
-                  onClick={() => setShowHistory(!showHistory)}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                    <History className="w-5 h-5 text-foreground" />
-                  </div>
-                  <span className="text-sm font-medium">Histórico</span>
+                  <span className="text-lg font-semibold text-red-700 dark:text-red-400">Fechar Caixa</span>
                 </Button>
               </div>
+
+              {/* History Button */}
+              <Button
+                variant="outline"
+                className={`w-full mt-6 flex items-center justify-center gap-3 h-auto py-4 border-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all duration-300 rounded-xl ${showHistory ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-500' : ''}`}
+                onClick={() => setShowHistory(!showHistory)}
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 flex items-center justify-center shadow-md">
+                  <History className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-base font-semibold text-blue-700 dark:text-blue-400">Ver Histórico</span>
+              </Button>
 
               {/* Lock Status Indicator */}
               <div className="mt-4 flex items-center justify-center gap-2">
