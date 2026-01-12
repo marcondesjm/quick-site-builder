@@ -64,6 +64,7 @@ import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { useVersionCheck } from "@/hooks/useVersionCheck";
+import doorviiHeaderLogo from "@/assets/doorvii-header-logo.png";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -256,32 +257,27 @@ export const Header = () => {
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <img 
-              src="/doorvii-camera.png" 
+              src={doorviiHeaderLogo} 
               alt="DoorVii" 
-              className="w-10 h-10 rounded-xl object-contain"
+              className="h-8 object-contain"
             />
-            <div className="flex flex-col">
-              <span className="text-xl font-bold">
-                Door<span className="text-primary">Vii</span>
-              </span>
-              <div className="flex items-center gap-1.5 -mt-1">
-                <span className="text-[10px] text-muted-foreground">v{APP_VERSION}</span>
-                {versionLoading ? (
-                  <span className="text-[9px] text-muted-foreground">• Verificando...</span>
-                ) : isUpToDate ? (
-                  <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">• Você está atualizado</span>
-                ) : (
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="text-[9px] text-amber-600 dark:text-amber-400 font-medium hover:underline flex items-center gap-0.5"
-                    title={releaseNotes || `Nova versão ${latestVersion} disponível`}
-                  >
-                    • {isCritical ? '⚠️ Atualização crítica!' : `Nova versão ${latestVersion}`}
-                  </button>
-                )}
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground">v{APP_VERSION}</span>
+              {versionLoading ? (
+                <span className="text-[9px] text-muted-foreground">• Verificando...</span>
+              ) : isUpToDate ? (
+                <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">• Você está atualizado</span>
+              ) : (
+                <button
+                  onClick={() => window.location.reload()}
+                  className="text-[9px] text-amber-600 dark:text-amber-400 font-medium hover:underline flex items-center gap-0.5"
+                  title={releaseNotes || `Nova versão ${latestVersion} disponível`}
+                >
+                  • {isCritical ? '⚠️ Atualização crítica!' : `Nova versão ${latestVersion}`}
+                </button>
+              )}
             </div>
           </div>
 
