@@ -147,14 +147,14 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-primary/10 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a2b4a 0%, #243b5e 50%, #1a2b4a 100%)' }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-primary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #1a2b4a 0%, #243b5e 50%, #1a2b4a 100%)' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,8 +172,8 @@ export default function Auth() {
             alt="DoorVii" 
             className="h-24 sm:h-28 mx-auto mb-3 object-contain"
           />
-          <p className="text-lg text-muted-foreground">Portaria Digital Inteligente</p>
-          <p className="text-sm text-muted-foreground/80 mt-3">
+          <p className="text-lg text-white/80">Portaria Digital Inteligente</p>
+          <p className="text-sm text-white/60 mt-3">
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta grátis'}
           </p>
         </motion.div>
