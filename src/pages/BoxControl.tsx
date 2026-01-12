@@ -17,6 +17,7 @@ import {
   useAddBoxHistory 
 } from "@/hooks/useBoxControl";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { 
   Package, 
   History, 
@@ -27,7 +28,8 @@ import {
   ArchiveRestore,
   Wifi,
   WifiOff,
-  X
+  X,
+  ArrowLeft
 } from "lucide-react";
 import {
   AlertDialog,
@@ -43,6 +45,7 @@ import {
 const BoxControl = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { data: properties } = useProperties();
   const { data: boxes, isLoading: boxesLoading, refetch: refetchBoxes } = useBoxControls();
   const { data: history, isLoading: historyLoading, refetch: refetchHistory } = useBoxHistory();
@@ -350,6 +353,14 @@ const BoxControl = () => {
             <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-primary/10">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/dashboard')}
+                    className="h-8 w-8 mr-1"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
                   <span>📦</span> Painel Inicial
                 </CardTitle>
                 <div className="flex items-center gap-2">
