@@ -645,7 +645,7 @@ const BoxControl = () => {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogAction 
+            <Button 
               className="w-full bg-primary hover:bg-primary/90"
               onClick={async () => {
                 await refetchBoxes();
@@ -660,7 +660,7 @@ const BoxControl = () => {
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Atualizar e Fechar
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
