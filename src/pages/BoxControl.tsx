@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const BoxControl = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: properties } = useProperties();
@@ -652,14 +652,15 @@ const BoxControl = () => {
                 await refetchHistory();
                 toast({
                   title: "✅ Atualizado!",
-                  description: "Status sincronizado com sucesso.",
+                  description: "Saindo do sistema...",
                   duration: 2000,
                 });
                 setShowExitConfirm(false);
+                await signOut();
               }}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Atualizar e Fechar
+              Atualizar e Sair
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
