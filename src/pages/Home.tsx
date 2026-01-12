@@ -17,6 +17,7 @@ import {
   Quote
 } from "lucide-react";
 import { ScrollDownIndicator } from "@/components/ScrollDownIndicator";
+import { InstallAppHeaderButton } from "@/components/InstallAppHeaderButton";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -132,6 +133,7 @@ const Home = () => {
             <span className="text-xl font-bold text-foreground">DoorVii Home</span>
           </motion.div>
           <div className="flex items-center gap-3">
+            <InstallAppHeaderButton />
             {user ? (
               (() => {
                 // Auto-redirect logged users to dashboard
