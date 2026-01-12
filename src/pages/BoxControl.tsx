@@ -272,53 +272,85 @@ const BoxControl = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="overflow-hidden border-2 hover:border-primary/30 transition-all duration-300">
+            <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-primary/10">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Painel Inicial</CardTitle>
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <span>📦</span> Painel Inicial
+                </CardTitle>
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="icon" 
                   onClick={handleRefresh}
                   disabled={isLoading}
-                  className="h-8 w-8"
+                  className="h-10 w-10 rounded-full hover:bg-primary/10 hover:border-primary transition-all duration-300"
                 >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Package className="w-6 h-6 text-primary" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-5">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
+                  <Package className="w-10 h-10 text-white" />
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-foreground">{currentBox?.name || 'Caixa DoorVii'}</h3>
+                    <h3 className="font-bold text-xl text-foreground">{currentBox?.name || 'Caixa DoorVii'}</h3>
                     {currentBox?.has_package && currentBox?.package_status === 'delivered' && (
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
+                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                        <span className="text-xs font-medium text-green-700 dark:text-green-400">Entregue</span>
+                      </div>
                     )}
                   </div>
-                  <div className="space-y-0.5 text-sm">
-                    <p>
-                      <span className="text-muted-foreground">Pacote:</span>{' '}
-                      <span className="text-primary font-medium">
-                        {getPackageStatusText(currentBox?.package_status || null)}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Status:</span>{' '}
-                      <span className={`font-medium ${
-                        currentBox?.security_status === 'secure' ? 'text-green-600' : 
-                        currentBox?.security_status === 'warning' ? 'text-amber-600' : 'text-red-600'
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Pacote</p>
+                        <p className="text-sm font-semibold text-primary">
+                          {getPackageStatusText(currentBox?.package_status || null)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        currentBox?.security_status === 'secure' 
+                          ? 'bg-green-100 dark:bg-green-900/30' 
+                          : currentBox?.security_status === 'warning'
+                          ? 'bg-amber-100 dark:bg-amber-900/30'
+                          : 'bg-red-100 dark:bg-red-900/30'
                       }`}>
-                        {getSecurityStatusText(currentBox?.security_status || 'secure')}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Local:</span>{' '}
-                      <span className="text-foreground">{currentBox?.name || 'Caixa DoorVii'}</span>
-                    </p>
+                        <Shield className={`w-4 h-4 ${
+                          currentBox?.security_status === 'secure' 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : currentBox?.security_status === 'warning'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-red-600 dark:text-red-400'
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Status de Segurança</p>
+                        <p className={`text-sm font-semibold ${
+                          currentBox?.security_status === 'secure' ? 'text-green-600 dark:text-green-400' : 
+                          currentBox?.security_status === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          {getSecurityStatusText(currentBox?.security_status || 'secure')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <Package className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Local</p>
+                        <p className="text-sm font-semibold text-foreground">{currentBox?.name || 'Caixa DoorVii'}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
