@@ -83,6 +83,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_versions: {
+        Row: {
+          created_at: string
+          id: string
+          is_critical: boolean | null
+          release_notes: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_critical?: boolean | null
+          release_notes?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_critical?: boolean | null
+          release_notes?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       assistant_responses: {
         Row: {
           created_at: string

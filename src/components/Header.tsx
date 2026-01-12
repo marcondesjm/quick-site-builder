@@ -60,6 +60,7 @@ import { RingtoneConfigDialog } from "./RingtoneConfigDialog";
 import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,6 +92,8 @@ export const Header = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
   const { isOpen: showActivityLog, toggle: toggleActivityLog } = useActivityLog();
+  
+  const { isUpToDate, latestVersion, releaseNotes, isCritical, isLoading: versionLoading } = useVersionCheck();
   
   const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe, permission } = usePushNotifications();
 
@@ -272,7 +275,19 @@ export const Header = () => {
               </span>
               <div className="flex items-center gap-1.5 -mt-1">
                 <span className="text-[10px] text-muted-foreground">v{APP_VERSION}</span>
-                <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">• Você está atualizado</span>
+                {versionLoading ? (
+                  <span className="text-[9px] text-muted-foreground">• Verificando...</span>
+                ) : isUpToDate ? (
+                  <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">• Você está atualizado</span>
+                ) : (
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-[9px] text-amber-600 dark:text-amber-400 font-medium hover:underline flex items-center gap-0.5"
+                    title={releaseNotes || `Nova versão ${latestVersion} disponível`}
+                  >
+                    • {isCritical ? '⚠️ Atualização crítica!' : `Nova versão ${latestVersion}`}
+                  </button>
+                )}
               </div>
             </div>
           </div>
