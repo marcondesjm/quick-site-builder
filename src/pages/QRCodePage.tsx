@@ -1602,15 +1602,15 @@ const QRCodePage = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-primary/10">
-              <Home className="w-5 h-5 text-primary" />
-            </Button>
             <div>
               <h1 className="font-semibold text-lg">QR Code de Acesso</h1>
               <p className="text-xs text-muted-foreground">Personalize e compartilhe</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-primary/10">
+              <Home className="w-5 h-5 text-primary" />
+            </Button>
             <Button variant="secondary" size="sm" onClick={handleCopy}>
               <Copy className="w-4 h-4" />
               Copiar
