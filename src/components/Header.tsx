@@ -29,7 +29,8 @@ import {
   Moon,
   Activity,
   Package,
-  Home
+  Home,
+  Menu
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -296,102 +297,130 @@ export const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => window.location.reload()}
-              title="Atualizar aplicativo"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => navigate('/dashboard')}
-              className="hidden sm:flex"
-            >
-              <Home className="w-4 h-4" />
-              Home
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate('/dashboard')}
-              className="sm:hidden"
-              title="Home"
-            >
-              <Home className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => navigate('/qrcode')}
-              className="hidden sm:flex"
-            >
-              <QrCode className="w-4 h-4" />
-              QR Code
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate('/qrcode')}
-              className="sm:hidden"
-            >
-              <QrCode className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => navigate('/box-control')}
-              className="hidden sm:flex"
-            >
-              <Package className="w-4 h-4" />
-              Caixa
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate('/box-control')}
-              className="sm:hidden"
-              title="Controle da Caixa"
-            >
-              <Package className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleActivityLog}
-              title="Log de Atividades"
-              className={showActivityLog ? 'bg-primary/10 text-primary' : ''}
-            >
-              <Activity className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="relative"
-              onClick={() => setShowNotificationSettings(true)}
-            >
-              <Bell className="w-5 h-5" />
-              {!isSubscribed && isSupported && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
-              )}
-            </Button>
-            
-            {/* Theme Toggle Button */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
-              className="relative"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-yellow-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-slate-700" />
-              )}
-            </Button>
+            {/* Desktop buttons */}
+            <div className="hidden md:flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => window.location.reload()}
+                title="Atualizar aplicativo"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/dashboard')}
+              >
+                <Home className="w-4 h-4" />
+                Home
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/qrcode')}
+              >
+                <QrCode className="w-4 h-4" />
+                QR Code
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/box-control')}
+              >
+                <Package className="w-4 h-4" />
+                Caixa
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleActivityLog}
+                title="Log de Atividades"
+                className={showActivityLog ? 'bg-primary/10 text-primary' : ''}
+              >
+                <Activity className="w-5 h-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => setShowNotificationSettings(true)}
+              >
+                <Bell className="w-5 h-5" />
+                {!isSubscribed && isSupported && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
+                )}
+              </Button>
+              
+              {/* Theme Toggle Button */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                title={theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+                className="relative"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-5 h-5 text-yellow-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-slate-700" />
+                )}
+              </Button>
+            </div>
+
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
+                  <DropdownMenuItem onClick={() => window.location.reload()}>
+                    <RefreshCw className="w-4 h-4 mr-3" />
+                    Atualizar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <Home className="w-4 h-4 mr-3" />
+                    Home
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/qrcode')}>
+                    <QrCode className="w-4 h-4 mr-3" />
+                    QR Code
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/box-control')}>
+                    <Package className="w-4 h-4 mr-3" />
+                    Controle da Caixa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={toggleActivityLog}>
+                    <Activity className="w-4 h-4 mr-3" />
+                    Log de Atividades
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowNotificationSettings(true)}>
+                    <Bell className="w-4 h-4 mr-3" />
+                    Notificações
+                    {!isSubscribed && isSupported && (
+                      <span className="ml-auto w-2 h-2 bg-accent rounded-full" />
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                    {theme === 'dark' ? (
+                      <>
+                        <Sun className="w-4 h-4 mr-3 text-yellow-500" />
+                        Modo Claro
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-4 h-4 mr-3 text-slate-700" />
+                        Modo Escuro
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             
             {/* Settings Menu */}
             <DropdownMenu>
