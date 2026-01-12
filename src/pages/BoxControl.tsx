@@ -65,6 +65,38 @@ const BoxControl = () => {
     }
   }, [boxes, selectedBox]);
 
+  // Auto-refresh when app becomes visible (opening app or returning from background)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('App became visible - refreshing status...');
+        refetchBoxes();
+        refetchHistory();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('Window focused - refreshing status...');
+      refetchBoxes();
+      refetchHistory();
+    };
+
+    // Initial load
+    refetchBoxes();
+    refetchHistory();
+
+    // Listen for visibility changes (mobile app background/foreground)
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Listen for window focus (desktop tab switching)
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refetchBoxes, refetchHistory]);
+
   // Subscribe to realtime updates
   useEffect(() => {
     if (!user?.id) return;
