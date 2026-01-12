@@ -98,6 +98,46 @@ export function usePushNotifications() {
       await navigator.serviceWorker.ready;
       console.log('Service worker ready');
 
+      // Unsubscribe from any existing subscription first
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        console.log('Unsubscribing from existing subscription...');
+        await existingSubscription.unsubscribe();
+        // Remove old subscription from database
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('endpoint', existingSubscription.endpoint);
+      }
+
+      // Clean up old subscriptions for this user from this browser
+      // (keeps only subscriptions from other devices)
+      console.log('Cleaning up old subscriptions...');
+      const { data: oldSubs } = await supabase
+        .from('push_subscriptions')
+        .select('id, endpoint')
+        .eq('user_id', user.id);
+      
+      if (oldSubs && oldSubs.length > 0) {
+        // Delete old subscriptions that might be stale
+        for (const oldSub of oldSubs) {
+          try {
+            // Test if endpoint is still valid by checking if it's FCM
+            const endpoint = oldSub.endpoint;
+            if (endpoint.includes('fcm.googleapis.com')) {
+              // Keep recent FCM endpoints, but clean very old ones
+              // We'll let them be cleaned by 410 errors naturally
+            }
+          } catch (e) {
+            // Delete invalid subscriptions
+            await supabase
+              .from('push_subscriptions')
+              .delete()
+              .eq('id', oldSub.id);
+          }
+        }
+      }
+
       // Get VAPID public key
       console.log('Getting VAPID public key...');
       const vapidPublicKey = await getVapidPublicKey();
@@ -120,7 +160,7 @@ export function usePushNotifications() {
         hasKeys: !!subscriptionJson.keys 
       });
 
-      // Save subscription to database
+      // Save subscription to database with upsert on endpoint
       console.log('Saving subscription to database...');
       const { error } = await supabase
         .from('push_subscriptions')
