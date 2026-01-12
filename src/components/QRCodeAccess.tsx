@@ -276,9 +276,9 @@ export const QRCodeAccess = ({
             variant="ghost"
             size="icon"
             onClick={() => navigate('/dashboard')}
-            className="h-9 w-9 shrink-0"
+            className="h-9 w-9 shrink-0 hover:bg-primary/10"
           >
-            <Home className="w-5 h-5" />
+            <Home className="w-5 h-5 text-primary" />
           </Button>
           <div className="text-left flex-1">
             <h3 className="font-semibold text-lg">QR Code de Acesso</h3>
