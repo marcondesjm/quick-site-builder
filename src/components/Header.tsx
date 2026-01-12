@@ -307,7 +307,7 @@ export const Header = () => {
             <Button 
               variant="secondary" 
               size="sm" 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               className="hidden sm:flex"
             >
               <Home className="w-4 h-4" />
@@ -316,7 +316,7 @@ export const Header = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               className="sm:hidden"
               title="Home"
             >
