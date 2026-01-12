@@ -63,24 +63,48 @@ export function InstallAppHeaderButton() {
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.origin);
-    toast.success('Link copiado!');
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin);
+      toast.success('Link copiado!');
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.origin;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast.success('Link copiado!');
+    }
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
+    // Check if Web Share API is available and we're in a secure context
+    if (navigator.share && navigator.canShare && navigator.canShare({ url: window.location.origin })) {
       try {
         await navigator.share({
           title: 'DoorVii Home',
           text: 'Confira o DoorVii Home - Sua campainha inteligente',
           url: window.location.origin,
         });
-      } catch (err) {
-        // User cancelled sharing
+        toast.success('Compartilhado!');
+      } catch (err: any) {
+        // User cancelled or error - fallback to copy
+        if (err.name !== 'AbortError') {
+          handleCopyLink();
+        }
       }
     } else {
-      handleCopyLink();
+      // Fallback: open share options or just copy
+      const shareUrl = window.location.origin;
+      const shareText = encodeURIComponent('Confira o DoorVii Home - Sua campainha inteligente');
+      const shareTitle = encodeURIComponent('DoorVii Home');
+      
+      // Try to open WhatsApp Web as a common share option
+      const whatsappUrl = `https://wa.me/?text=${shareText}%20${encodeURIComponent(shareUrl)}`;
+      window.open(whatsappUrl, '_blank');
+      toast.success('Abrindo WhatsApp para compartilhar...');
     }
   };
 
