@@ -644,13 +644,9 @@ const BoxControl = () => {
               </Badge>
             </div>
           </div>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="w-full sm:w-auto">
-              <X className="w-4 h-4 mr-2" />
-              Fechar
-            </AlertDialogCancel>
+          <AlertDialogFooter>
             <AlertDialogAction 
-              className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+              className="w-full bg-primary hover:bg-primary/90"
               onClick={async () => {
                 await refetchBoxes();
                 await refetchHistory();
@@ -663,7 +659,7 @@ const BoxControl = () => {
               }}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Atualizar Status
+              Atualizar e Fechar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
