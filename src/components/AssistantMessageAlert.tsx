@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useActivityLog } from '@/hooks/useActivityLog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ interface LogEntry {
 
 export function AssistantMessageAlert() {
   const { user } = useAuth();
+  const { isOpen: showLogPanel, close: closeLogPanel } = useActivityLog();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [muted, setMuted] = useState(false);
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
@@ -213,61 +215,69 @@ export function AssistantMessageAlert() {
     setMessages([]);
   };
 
-  if (messages.length === 0) return null;
+  // Show log panel if button toggled OR if there are messages
+  if (!showLogPanel && messages.length === 0) return null;
 
   return (
     <div className="fixed top-20 right-4 z-50 flex gap-2">
-      {/* Activity Log Panel - Always show when messages exist */}
-      <motion.div
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="w-52 bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden self-start"
-      >
-        <div className="bg-muted/50 px-3 py-2 border-b border-border/50 flex items-center gap-2">
-          <RefreshCw className={`w-3 h-3 text-primary ${activityLogs.some(l => l.status === 'pending') ? 'animate-spin' : ''}`} />
-          <span className="text-xs font-medium text-foreground">Atualizações em tempo real</span>
-        </div>
-        <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
-          {activityLogs.length === 0 ? (
-            <div className="text-xs text-muted-foreground text-center py-2">
-              Aguardando atividade...
+      {/* Activity Log Panel - Show when button clicked or has messages */}
+      <AnimatePresence>
+        {showLogPanel && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="w-52 bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg overflow-hidden self-start"
+          >
+            <div className="bg-muted/50 px-3 py-2 border-b border-border/50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <RefreshCw className={`w-3 h-3 text-primary ${activityLogs.some(l => l.status === 'pending') ? 'animate-spin' : ''}`} />
+                <span className="text-xs font-medium text-foreground">Atualizações</span>
+              </div>
+              <Button size="icon" variant="ghost" className="h-5 w-5" onClick={closeLogPanel}>
+                <X className="w-3 h-3" />
+              </Button>
             </div>
-          ) : (
-            <AnimatePresence mode="popLayout">
-              {activityLogs.map((log) => (
-                <motion.div
-                  key={log.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="flex items-start gap-2 text-xs bg-muted/30 rounded px-2 py-1.5"
-                >
-                  {log.status === 'pending' && (
-                    <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0 mt-0.5" />
-                  )}
-                  {log.status === 'success' && (
-                    <Check className="w-3 h-3 text-green-500 shrink-0 mt-0.5" />
-                  )}
-                  {log.status === 'error' && (
-                    <AlertCircle className="w-3 h-3 text-destructive shrink-0 mt-0.5" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <span className={`block truncate ${
-                      log.status === 'error' ? 'text-destructive' : 
-                      log.status === 'success' ? 'text-green-600 dark:text-green-400' : 'text-foreground'
-                    }`}>
-                      {log.action}
-                    </span>
-                    <span className="text-muted-foreground/70 text-[10px]">
-                      {format(log.timestamp, 'HH:mm:ss')}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          )}
-        </div>
-      </motion.div>
+            <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
+              {activityLogs.length === 0 ? (
+                <div className="text-xs text-muted-foreground text-center py-3">
+                  Aguardando atividade...
+                </div>
+              ) : (
+                activityLogs.map((log) => (
+                  <motion.div
+                    key={log.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-2 text-xs bg-muted/30 rounded px-2 py-1.5"
+                  >
+                    {log.status === 'pending' && (
+                      <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0 mt-0.5" />
+                    )}
+                    {log.status === 'success' && (
+                      <Check className="w-3 h-3 text-green-500 shrink-0 mt-0.5" />
+                    )}
+                    {log.status === 'error' && (
+                      <AlertCircle className="w-3 h-3 text-destructive shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <span className={`block truncate ${
+                        log.status === 'error' ? 'text-destructive' : 
+                        log.status === 'success' ? 'text-green-600 dark:text-green-400' : 'text-foreground'
+                      }`}>
+                        {log.action}
+                      </span>
+                      <span className="text-muted-foreground/70 text-[10px]">
+                        {format(log.timestamp, 'HH:mm:ss')}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Messages Panel */}
       <div className="w-80 max-w-[calc(100vw-2rem)] space-y-2">
