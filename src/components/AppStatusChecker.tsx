@@ -8,18 +8,13 @@ export const AppStatusChecker = () => {
   const { refetch: refetchHistory } = useBoxHistory();
   const [hasCheckedOnLoad, setHasCheckedOnLoad] = useState(false);
 
-  // Auto-refresh when app becomes visible
+  // Auto-refresh when app becomes visible (silently, without toast)
   useEffect(() => {
     const performStatusCheck = async () => {
       console.log('Performing global status check...');
       await refetchBoxes();
       await refetchHistory();
-      
-      toast({
-        title: "✅ Verificação concluída",
-        description: "Status da caixa atualizado. Tudo OK!",
-        duration: 3000,
-      });
+      // Removed toast notification to reduce visual clutter
     };
 
     const handleVisibilityChange = () => {

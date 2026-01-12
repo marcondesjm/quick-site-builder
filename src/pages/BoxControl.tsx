@@ -88,13 +88,7 @@ const BoxControl = () => {
       console.log('Performing status check...');
       await refetchBoxes();
       await refetchHistory();
-      
-      // Show status notification
-      toast({
-        title: "✅ Verificação concluída",
-        description: "Status da caixa atualizado. Tudo OK!",
-        duration: 3000,
-      });
+      // Removed toast notification to reduce visual clutter
     };
 
     const handleVisibilityChange = () => {
