@@ -344,8 +344,8 @@ const BoxControl = () => {
                   onClick={handleOpen}
                   disabled={isLoading || !currentBox?.is_locked}
                 >
-                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
-                    <LockKeyholeOpen className="w-8 h-8 text-foreground" />
+                  <div className="w-14 h-14 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <LockKeyholeOpen className="w-8 h-8 text-green-600 dark:text-green-400" />
                   </div>
                   <span className="text-sm font-medium">Abrir</span>
                 </Button>
@@ -356,8 +356,8 @@ const BoxControl = () => {
                   onClick={handleClose}
                   disabled={isLoading || currentBox?.is_locked}
                 >
-                  <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
-                    <ArchiveRestore className="w-8 h-8 text-foreground" />
+                  <div className="w-14 h-14 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <ArchiveRestore className="w-8 h-8 text-red-600 dark:text-red-400" />
                   </div>
                   <span className="text-sm font-medium">Fechar</span>
                 </Button>
