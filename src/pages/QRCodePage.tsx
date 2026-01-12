@@ -1602,8 +1602,8 @@ const QRCodePage = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-primary/10">
+              <Home className="w-5 h-5 text-primary" />
             </Button>
             <div>
               <h1 className="font-semibold text-lg">QR Code de Acesso</h1>
