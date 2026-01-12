@@ -67,23 +67,35 @@ const BoxControl = () => {
 
   // Auto-refresh when app becomes visible (opening app or returning from background)
   useEffect(() => {
+    const performStatusCheck = async () => {
+      console.log('Performing status check...');
+      await refetchBoxes();
+      await refetchHistory();
+      
+      // Show status notification
+      toast({
+        title: "✅ Verificação concluída",
+        description: "Status da caixa atualizado. Tudo OK!",
+        duration: 3000,
+      });
+    };
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('App became visible - refreshing status...');
-        refetchBoxes();
-        refetchHistory();
+        performStatusCheck();
       }
     };
 
     const handleFocus = () => {
       console.log('Window focused - refreshing status...');
-      refetchBoxes();
-      refetchHistory();
+      performStatusCheck();
     };
 
-    // Initial load
-    refetchBoxes();
-    refetchHistory();
+    // Initial load with delay to avoid duplicate toasts
+    const initialTimeout = setTimeout(() => {
+      performStatusCheck();
+    }, 500);
 
     // Listen for visibility changes (mobile app background/foreground)
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -92,10 +104,11 @@ const BoxControl = () => {
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      clearTimeout(initialTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [refetchBoxes, refetchHistory]);
+  }, [refetchBoxes, refetchHistory, toast]);
 
   // Subscribe to realtime updates
   useEffect(() => {
