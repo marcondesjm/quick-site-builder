@@ -182,7 +182,13 @@ export default function Auth() {
                 filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 150, 255, 0.3))',
               }}
             />
-            <span className="absolute -top-1 -right-4 text-white/80 text-xs font-medium">®</span>
+            <span 
+              className="absolute -top-2 -right-6 text-lg font-bold"
+              style={{ 
+                color: '#00d4ff',
+                textShadow: '0 0 10px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.5)'
+              }}
+            >®</span>
           </div>
           <p className="text-lg text-white/80">Portaria Digital Inteligente</p>
           <p className="text-sm text-white/60 mt-3">
