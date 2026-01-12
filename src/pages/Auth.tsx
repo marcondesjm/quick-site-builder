@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +26,8 @@ export default function Auth() {
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string; phone?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string; phone?: string; terms?: string }>({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +61,10 @@ export default function Auth() {
       const phoneResult = phoneSchema.safeParse(phone);
       if (!phoneResult.success) {
         newErrors.phone = phoneResult.error.errors[0].message;
+      }
+
+      if (!acceptedTerms) {
+        newErrors.terms = 'Você deve aceitar os Termos de Uso e Privacidade';
       }
     }
 
@@ -259,6 +265,34 @@ export default function Auth() {
                 <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                  />
+                  <label 
+                    htmlFor="terms" 
+                    className="text-sm text-muted-foreground leading-tight cursor-pointer"
+                  >
+                    Eu concordo com os{' '}
+                    <a href="/termos" target="_blank" className="text-primary hover:underline">
+                      Termos de Uso
+                    </a>{' '}
+                    e{' '}
+                    <a href="/privacidade" target="_blank" className="text-primary hover:underline">
+                      Privacidade
+                    </a>.
+                  </label>
+                </div>
+                {errors.terms && (
+                  <p className="text-sm text-destructive">{errors.terms}</p>
+                )}
+              </div>
+            )}
 
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
               {isLoading ? (
