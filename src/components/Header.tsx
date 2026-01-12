@@ -27,7 +27,8 @@ import {
   ClipboardCheck,
   Sun,
   Moon,
-  Activity
+  Activity,
+  Package
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -318,6 +319,24 @@ export const Header = () => {
               className="sm:hidden"
             >
               <QrCode className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => navigate('/box-control')}
+              className="hidden sm:flex"
+            >
+              <Package className="w-4 h-4" />
+              Caixa
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/box-control')}
+              className="sm:hidden"
+              title="Controle da Caixa"
+            >
+              <Package className="w-5 h-5" />
             </Button>
             <Button 
               variant="ghost" 

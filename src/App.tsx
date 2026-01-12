@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import BoxControl from "./pages/BoxControl";
 import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
@@ -85,6 +86,11 @@ const App = () => (
               <Route path="/admin" element={
                 <ProtectedRoute>
                   <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="/box-control" element={
+                <ProtectedRoute>
+                  <BoxControl />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
