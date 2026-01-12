@@ -140,6 +140,91 @@ export type Database = {
         }
         Relationships: []
       }
+      box_controls: {
+        Row: {
+          created_at: string
+          has_package: boolean
+          id: string
+          is_locked: boolean
+          last_update: string
+          name: string
+          package_status: string | null
+          property_id: string | null
+          security_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          has_package?: boolean
+          id?: string
+          is_locked?: boolean
+          last_update?: string
+          name?: string
+          package_status?: string | null
+          property_id?: string | null
+          security_status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          has_package?: boolean
+          id?: string
+          is_locked?: boolean
+          last_update?: string
+          name?: string
+          package_status?: string | null
+          property_id?: string | null
+          security_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_controls_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      box_history: {
+        Row: {
+          action: string
+          box_id: string | null
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          box_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          box_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_history_box_id_fkey"
+            columns: ["box_id"]
+            isOneToOne: false
+            referencedRelation: "box_controls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_icons: {
         Row: {
           created_at: string
