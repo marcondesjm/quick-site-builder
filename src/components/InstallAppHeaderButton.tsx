@@ -207,25 +207,40 @@ export function InstallAppHeaderButton() {
                     )}
                   </AnimatePresence>
 
-                  <div className="flex gap-2 mt-3">
+                  {!showInstructions && (
                     <Button 
-                      variant="outline" 
+                      variant="link" 
                       size="sm" 
-                      className="flex-1 gap-2"
-                      onClick={() => setShowInstructions(!showInstructions)}
+                      className="text-muted-foreground p-0 h-auto mt-2"
+                      onClick={() => setShowInstructions(true)}
                     >
-                      {showInstructions ? 'Ocultar' : 'Ver Instruções'}
+                      Ver Instruções Detalhadas
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 gap-2"
-                      onClick={handleShare}
-                    >
-                      <Link2 className="w-4 h-4" />
-                      Compartilhar Link
-                    </Button>
-                  </div>
+                  )}
+                </motion.div>
+
+                {/* Share and Copy Buttons */}
+                <motion.div 
+                  className="flex flex-col gap-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button 
+                    className="w-full gap-2 h-11"
+                    onClick={handleShare}
+                  >
+                    <Share className="w-4 h-4" />
+                    Compartilhar Link
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2 h-11"
+                    onClick={handleCopyLink}
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copiar Link
+                  </Button>
                 </motion.div>
               </div>
             ) : (
