@@ -170,7 +170,10 @@ export default function Auth() {
           <img 
             src={doorviiLogo} 
             alt="DoorVii" 
-            className="h-24 sm:h-28 mx-auto mb-3 object-contain"
+            className="h-28 sm:h-36 mx-auto mb-4 object-contain drop-shadow-[0_0_25px_rgba(0,200,255,0.6)] animate-pulse-soft"
+            style={{ 
+              filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 150, 255, 0.3))',
+            }}
           />
           <p className="text-lg text-white/80">Portaria Digital Inteligente</p>
           <p className="text-sm text-white/60 mt-3">
