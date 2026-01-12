@@ -88,7 +88,8 @@ const VisitorCall = () => {
   const [isSendingChat, setIsSendingChat] = useState(false);
   const [showChatDialog, setShowChatDialog] = useState(false);
   const [visitorName, setVisitorName] = useState('');
-  const [visitorCpf, setVisitorCpf] = useState('');
+  const [deliveryCompany, setDeliveryCompany] = useState('');
+  const [otherCompanyName, setOtherCompanyName] = useState('');
   const [hasIdentified, setHasIdentified] = useState(false);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -247,7 +248,7 @@ const VisitorCall = () => {
           propertyName: decodeURIComponent(propertyName),
           conversationHistory: chatMessages,
           visitorName: visitorName.trim() || undefined,
-          visitorCpf: visitorCpf.replace(/\D/g, '') || undefined,
+          deliveryCompany: deliveryCompany === 'outros' ? otherCompanyName : deliveryCompany || undefined,
         },
       });
 
@@ -290,7 +291,7 @@ const VisitorCall = () => {
             chatHistory: chatMessages,
             protocolNumber,
             visitorName: visitorName.trim() || undefined,
-            visitorCpf: visitorCpf.replace(/\D/g, '') || undefined,
+            deliveryCompany: deliveryCompany === 'outros' ? otherCompanyName : deliveryCompany || undefined,
           },
         });
         console.log('Chat history saved successfully');
@@ -1358,50 +1359,100 @@ const VisitorCall = () => {
                   <User className="w-12 h-12 mx-auto mb-3 text-primary opacity-60" />
                   <p className="text-sm font-medium">Identificação do Entregador</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Informe seus dados conforme cadastro no painel do fornecedor
+                    Informe seus dados para iniciar o atendimento
                   </p>
                 </div>
                 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">Nome Completo</label>
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Nome Completo <span className="text-destructive">*</span>
+                    </label>
                     <input
                       type="text"
                       value={visitorName}
                       onChange={(e) => setVisitorName(e.target.value)}
-                      placeholder="Digite seu nome..."
+                      placeholder="Digite seu nome completo..."
                       className="w-full px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                       maxLength={100}
+                      required
                     />
+                    {!visitorName.trim() && (
+                      <p className="text-[10px] text-destructive mt-1">Campo obrigatório</p>
+                    )}
                   </div>
                   
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">CPF</label>
-                    <input
-                      type="text"
-                      value={visitorCpf}
-                      onChange={(e) => {
-                        // Format CPF as user types
-                        const value = e.target.value.replace(/\D/g, '');
-                        if (value.length <= 11) {
-                          const formatted = value
-                            .replace(/(\d{3})(\d)/, '$1.$2')
-                            .replace(/(\d{3})(\d)/, '$1.$2')
-                            .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                          setVisitorCpf(formatted);
-                        }
-                      }}
-                      placeholder="000.000.000-00"
-                      className="w-full px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      maxLength={14}
-                    />
+                    <label className="text-xs text-muted-foreground mb-1 block">
+                      Empresa de Entrega <span className="text-destructive">*</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: 'shopee', label: 'Shopee', icon: '/shopee-logo.png' },
+                        { value: 'mercadolivre', label: 'Mercado Livre', icon: '/mercadolivre-logo.png' },
+                        { value: 'correios', label: 'Correios', icon: '/correios-logo.png' },
+                        { value: 'uber', label: 'Uber', icon: '/uber-logo.png' },
+                        { value: 'ifood', label: 'iFood', icon: '/ifood-logo.png' },
+                        { value: 'aliexpress', label: 'Aliexpress', icon: '/aliexpress-logo.jpg' },
+                      ].map((company) => (
+                        <button
+                          key={company.value}
+                          type="button"
+                          onClick={() => {
+                            setDeliveryCompany(company.value);
+                            setOtherCompanyName('');
+                          }}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${
+                            deliveryCompany === company.value
+                              ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                              : 'border-input bg-background hover:bg-muted/50'
+                          }`}
+                        >
+                          <img 
+                            src={company.icon} 
+                            alt={company.label} 
+                            className="w-8 h-8 object-contain rounded"
+                          />
+                          <span className="text-[10px] text-center leading-tight">{company.label}</span>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryCompany('outros')}
+                        className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border transition-all ${
+                          deliveryCompany === 'outros'
+                            ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                            : 'border-input bg-background hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded bg-muted flex items-center justify-center">
+                          <span className="text-lg">📦</span>
+                        </div>
+                        <span className="text-[10px] text-center leading-tight">Outros</span>
+                      </button>
+                    </div>
+                    
+                    {deliveryCompany === 'outros' && (
+                      <input
+                        type="text"
+                        value={otherCompanyName}
+                        onChange={(e) => setOtherCompanyName(e.target.value)}
+                        placeholder="Informe o nome da empresa..."
+                        className="w-full mt-2 px-4 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        maxLength={50}
+                      />
+                    )}
+                    
+                    {!deliveryCompany && (
+                      <p className="text-[10px] text-destructive mt-1">Selecione uma empresa</p>
+                    )}
                   </div>
                 </div>
                 
                 <Button
                   className="w-full mt-4"
                   onClick={() => setHasIdentified(true)}
-                  disabled={!visitorName.trim()}
+                  disabled={!visitorName.trim() || !deliveryCompany || (deliveryCompany === 'outros' && !otherCompanyName.trim())}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Iniciar Conversa
@@ -1422,10 +1473,12 @@ const VisitorCall = () => {
                   <div className="px-4 py-2 bg-muted/50 border-b flex items-center gap-2 text-xs">
                     <User className="w-3 h-3 text-muted-foreground" />
                     <span className="font-medium">{visitorName}</span>
-                    {visitorCpf && (
+                    {deliveryCompany && (
                       <>
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">CPF: {visitorCpf}</span>
+                        <span className="text-muted-foreground capitalize">
+                          {deliveryCompany === 'outros' ? otherCompanyName : deliveryCompany}
+                        </span>
                       </>
                     )}
                   </div>
@@ -1472,7 +1525,7 @@ const VisitorCall = () => {
                                   propertyName: decodeURIComponent(propertyName),
                                   conversationHistory: [],
                                   visitorName: visitorName.trim() || undefined,
-                                  visitorCpf: visitorCpf.replace(/\D/g, '') || undefined,
+                                  deliveryCompany: deliveryCompany === 'outros' ? otherCompanyName : deliveryCompany || undefined,
                                 },
                               }).then(({ data, error }) => {
                                 if (error) throw error;
