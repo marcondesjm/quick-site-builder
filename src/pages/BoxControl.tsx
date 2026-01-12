@@ -19,15 +19,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Package, 
-  Lock, 
-  Unlock, 
   History, 
   CheckCircle2, 
   Shield, 
-  Box,
-  AlertCircle,
   RefreshCw,
-  Plus
+  LockKeyholeOpen,
+  ArchiveRestore
 } from "lucide-react";
 
 const BoxControl = () => {
@@ -348,7 +345,7 @@ const BoxControl = () => {
                   disabled={isLoading || !currentBox?.is_locked}
                 >
                   <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                    <Unlock className="w-5 h-5 text-foreground" />
+                    <LockKeyholeOpen className="w-5 h-5 text-foreground" />
                   </div>
                   <span className="text-sm font-medium">Abrir</span>
                 </Button>
@@ -360,7 +357,7 @@ const BoxControl = () => {
                   disabled={isLoading || currentBox?.is_locked}
                 >
                   <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-foreground" />
+                    <ArchiveRestore className="w-5 h-5 text-foreground" />
                   </div>
                   <span className="text-sm font-medium">Fechar</span>
                 </Button>
