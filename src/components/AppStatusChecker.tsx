@@ -8,31 +8,39 @@ export const AppStatusChecker = () => {
   const { refetch: refetchHistory } = useBoxHistory();
   const [hasCheckedOnLoad, setHasCheckedOnLoad] = useState(false);
 
-  // Auto-refresh when app becomes visible (silently, without toast)
+  // Auto-refresh when app becomes visible
   useEffect(() => {
-    const performStatusCheck = async () => {
+    const performStatusCheck = async (showToast = false) => {
       console.log('Performing global status check...');
       await refetchBoxes();
       await refetchHistory();
-      // Removed toast notification to reduce visual clutter
+      
+      // Only show toast on first load
+      if (showToast) {
+        toast({
+          title: "✅ Verificação concluída",
+          description: "Status da caixa atualizado. Tudo OK!",
+          duration: 3000,
+        });
+      }
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('App became visible - refreshing status...');
-        performStatusCheck();
+        performStatusCheck(false); // Silent refresh
       }
     };
 
     const handleFocus = () => {
       console.log('Window focused - refreshing status...');
-      performStatusCheck();
+      performStatusCheck(false); // Silent refresh
     };
 
-    // Initial load check (only once)
+    // Initial load check (only once, with toast)
     if (!hasCheckedOnLoad) {
       const initialTimeout = setTimeout(() => {
-        performStatusCheck();
+        performStatusCheck(true); // Show toast only on first load
         setHasCheckedOnLoad(true);
       }, 1000);
 
