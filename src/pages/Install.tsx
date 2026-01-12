@@ -257,11 +257,11 @@ const Install = () => {
               <p className="font-medium mb-1">Dúvidas ou sugestões?</p>
               <p className="text-sm text-muted-foreground mb-2">Entre em contato com nosso suporte:</p>
               <a 
-                href="mailto:suporte@doorvii.com" 
+                href="mailto:suporte.doorvii@gmail.com" 
                 className="text-primary hover:underline flex items-center justify-center gap-1"
               >
                 <Mail className="w-4 h-4" />
-                suporte@doorvii.com
+                suporte.doorvii@gmail.com
               </a>
             </div>
 
