@@ -16,7 +16,8 @@ import {
   Check,
   Download,
   Upload,
-  Trash2
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -43,6 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCallHistory, CallHistoryItem, useDeleteCall, useDeleteAllCalls } from "@/hooks/useCallHistory";
 import { useToast } from "@/hooks/use-toast";
 
@@ -331,6 +333,20 @@ export function CallHistoryDialog() {
             Excluir tudo
           </Button>
         </div>
+
+        {/* Retention alert */}
+        <Alert className="bg-amber-500/10 border-amber-500/30">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-sm text-amber-700 dark:text-amber-400">
+            Os registros são excluídos automaticamente após 7 dias. 
+            <button 
+              onClick={handleExport}
+              className="ml-1 underline hover:no-underline font-medium"
+            >
+              Baixe o histórico
+            </button> para manter uma cópia.
+          </AlertDescription>
+        </Alert>
 
         {/* Search bar */}
         <div className="relative">
