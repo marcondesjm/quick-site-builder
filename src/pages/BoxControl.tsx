@@ -356,7 +356,7 @@ const BoxControl = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-bold flex items-center gap-2">
                   <Button
-                    variant="ghost"
+                    variant="default"
                     size="icon"
                     onClick={() => navigate('/dashboard')}
                     className="h-8 w-8 mr-1"
