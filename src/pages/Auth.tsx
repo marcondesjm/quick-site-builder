@@ -170,7 +170,7 @@ export default function Auth() {
           <img 
             src={doorviiLogo} 
             alt="DoorVii" 
-            className="h-40 sm:h-48 mx-auto mb-8 object-contain"
+            className="h-24 sm:h-28 mx-auto mb-3 object-contain"
           />
           <p className="text-lg text-muted-foreground">Portaria Digital Inteligente</p>
           <p className="text-sm text-muted-foreground/80 mt-3">
