@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PhoneInput } from '@/components/PhoneInput';
-import doorviiLogo from '@/assets/doorvii-logo-azul.png';
+import doorviiLogo from '@/assets/doorvii-logo-new.png';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
