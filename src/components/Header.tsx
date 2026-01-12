@@ -270,7 +270,10 @@ export const Header = () => {
               <span className="text-xl font-bold">
                 Door<span className="text-primary">Vii</span> Home
               </span>
-              <span className="text-[10px] text-muted-foreground -mt-1">v{APP_VERSION}</span>
+              <div className="flex items-center gap-1.5 -mt-1">
+                <span className="text-[10px] text-muted-foreground">v{APP_VERSION}</span>
+                <span className="text-[9px] text-green-600 dark:text-green-400 font-medium">• Você está atualizado</span>
+              </div>
             </div>
           </div>
 
