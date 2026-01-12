@@ -173,14 +173,17 @@ export default function Auth() {
           transition={{ delay: 0.1 }}
           className="text-center mb-8"
         >
-          <img 
-            src={doorviiLogo} 
-            alt="DoorVii" 
-            className="h-28 sm:h-36 mx-auto mb-4 object-contain drop-shadow-[0_0_25px_rgba(0,200,255,0.6)] animate-pulse-soft"
-            style={{ 
-              filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 150, 255, 0.3))',
-            }}
-          />
+          <div className="relative inline-block">
+            <img 
+              src={doorviiLogo} 
+              alt="DoorVii" 
+              className="h-20 sm:h-24 mx-auto mb-4 object-contain drop-shadow-[0_0_25px_rgba(0,200,255,0.6)] animate-pulse-soft"
+              style={{ 
+                filter: 'drop-shadow(0 0 20px rgba(0, 200, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 150, 255, 0.3))',
+              }}
+            />
+            <span className="absolute -top-1 -right-4 text-white/80 text-xs font-medium">®</span>
+          </div>
           <p className="text-lg text-white/80">Portaria Digital Inteligente</p>
           <p className="text-sm text-white/60 mt-3">
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta grátis'}
