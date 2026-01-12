@@ -376,10 +376,20 @@ const BoxControl = () => {
               </Button>
 
               {/* Lock Status Indicator */}
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${currentBox?.is_locked ? 'bg-green-500' : 'bg-amber-500'}`} />
-                <span className="text-sm text-muted-foreground">
-                  {currentBox?.is_locked ? 'Caixa trancada' : 'Caixa destrancada'}
+              <div className={`mt-8 p-4 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 ${
+                currentBox?.is_locked 
+                  ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 border-2 border-green-200 dark:border-green-800' 
+                  : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-2 border-amber-200 dark:border-amber-800'
+              }`}>
+                <div className={`relative w-4 h-4 rounded-full ${currentBox?.is_locked ? 'bg-green-500' : 'bg-amber-500'}`}>
+                  <div className={`absolute inset-0 rounded-full animate-ping ${currentBox?.is_locked ? 'bg-green-400' : 'bg-amber-400'} opacity-75`} />
+                </div>
+                <span className={`text-base font-semibold ${
+                  currentBox?.is_locked 
+                    ? 'text-green-700 dark:text-green-400' 
+                    : 'text-amber-700 dark:text-amber-400'
+                }`}>
+                  {currentBox?.is_locked ? '🔒 Caixa Trancada e Segura' : '🔓 Caixa Destrancada'}
                 </span>
               </div>
             </CardContent>
