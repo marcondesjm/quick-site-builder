@@ -253,17 +253,6 @@ export default function Auth() {
                 filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.6)) drop-shadow(0 0 60px rgba(0, 150, 255, 0.4))',
               }}
             />
-            <motion.span 
-              className="absolute -top-2 -right-7 text-3xl font-bold text-cyan-400"
-              animate={{ 
-                textShadow: [
-                  '0 0 20px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 212, 255, 0.6)',
-                  '0 0 30px rgba(0, 212, 255, 1), 0 0 60px rgba(0, 212, 255, 0.8)',
-                  '0 0 20px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 212, 255, 0.6)',
-                ]
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >®</motion.span>
           </div>
           <motion.p 
             initial={{ opacity: 0 }}
