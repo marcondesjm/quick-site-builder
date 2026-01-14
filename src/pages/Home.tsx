@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ import {
 } from "lucide-react";
 import { ScrollDownIndicator } from "@/components/ScrollDownIndicator";
 import { InstallAppHeaderButton } from "@/components/InstallAppHeaderButton";
-
+import doorviiHomeLogo from "@/assets/doorvii-home-logo.png";
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -124,13 +123,14 @@ const Home = () => {
       >
         <nav className="flex items-center justify-between">
           <motion.div 
-            className="flex items-center gap-2"
+            className="flex items-center"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <HomeIcon className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">DoorVII</span>
+            <img 
+              src={doorviiHomeLogo} 
+              alt="DoorVII" 
+              className="h-8 object-contain"
+            />
           </motion.div>
           <div className="flex items-center gap-3">
             <InstallAppHeaderButton />
@@ -391,11 +391,12 @@ const Home = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <HomeIcon className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-foreground">DoorVII</span>
+          <div className="flex items-center">
+            <img 
+              src={doorviiHomeLogo} 
+              alt="DoorVII" 
+              className="h-6 object-contain"
+            />
           </div>
           <p className="text-sm text-muted-foreground">
             © 2024 DoorVII. Todos os direitos reservados.
