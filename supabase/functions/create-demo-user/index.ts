@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
           user_id: data.user.id,
           name: "Casa Demo",
           address: "Rua Exemplo, 123 - São Paulo, SP",
+          visitor_always_connected: true,
         });
 
       if (propertyError) {
