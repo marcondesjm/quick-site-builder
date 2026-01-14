@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, TestTube } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,6 +24,7 @@ import { AssistantMessageAlert } from "@/components/AssistantMessageAlert";
 import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
 import { TrialExpiringWarning } from "@/components/TrialExpiringWarning";
 import { TrialStatusBadge } from "@/components/TrialStatusBadge";
+import { CallSimulationPanel } from "@/components/CallSimulationPanel";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -94,6 +95,7 @@ const Index = () => {
   const [connectedVisitors, setConnectedVisitors] = useState<Record<string, string>>({}); // propertyId -> roomName
   const [lastProtocolNumber, setLastProtocolNumber] = useState<string | null>(null);
   const [showProtocolDialog, setShowProtocolDialog] = useState(false);
+  const [showSimulationPanel, setShowSimulationPanel] = useState(false);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -1814,6 +1816,27 @@ const Index = () => {
       
       {/* Install App Dialog */}
       <InstallAppDialog />
+      
+      {/* Call Simulation Panel */}
+      <CallSimulationPanel
+        isOpen={showSimulationPanel}
+        onClose={() => setShowSimulationPanel(false)}
+        propertyId={properties?.[0]?.id}
+        propertyName={properties?.[0]?.name || 'Teste de Simulação'}
+      />
+      
+      {/* Floating Simulation Button */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setShowSimulationPanel(true)}
+        className="fixed bottom-6 left-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+        title="Simulador de Chamadas"
+      >
+        <TestTube className="w-6 h-6" />
+      </motion.button>
     </div>
   );
 };
