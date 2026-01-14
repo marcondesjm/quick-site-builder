@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Sparkles, Shield, Zap } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Sparkles, Shield, Zap, Play } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ export default function Auth() {
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string; phone?: string; terms?: string }>({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -147,6 +148,28 @@ export default function Auth() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    try {
+      const { error } = await signIn('demo@doorvii.com', 'demo123456');
+      if (error) {
+        toast({
+          title: 'Conta demo não encontrada',
+          description: 'A conta demo ainda não foi criada. Por favor, crie uma conta com: demo@doorvii.com e senha: demo123456',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Modo Demo',
+          description: 'Bem-vindo ao modo demonstração!'
+        });
+      }
+    } finally {
+      setIsDemoLoading(false);
+    }
+  
   };
 
   if (loading) {
@@ -447,6 +470,44 @@ export default function Auth() {
                 </Button>
               </motion.div>
             </form>
+
+            {/* Demo Login Button */}
+            {isLogin && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mt-4"
+              >
+                <div className="relative flex items-center justify-center my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
+                  </div>
+                  <div className="relative px-4 text-xs text-white/40 bg-transparent">ou</div>
+                </div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button 
+                    type="button"
+                    onClick={handleDemoLogin}
+                    className="w-full h-11 text-sm font-medium rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/50 transition-all"
+                    disabled={isDemoLoading || isLoading}
+                  >
+                    {isDemoLoading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-400/30 border-t-amber-400"></div>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Play className="w-4 h-4" />
+                        Entrar como Demo
+                      </span>
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
 
             <div className="mt-6 text-center">
               <button
