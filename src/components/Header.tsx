@@ -362,49 +362,86 @@ export const Header = () => {
             <div className="md:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="w-5 h-5" />
+                  <Button variant="ghost" size="icon" className="h-10 w-10">
+                    <Menu className="w-6 h-6" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-popover z-50">
-                  <DropdownMenuItem onClick={() => window.location.reload()}>
-                    <RefreshCw className="w-4 h-4 mr-3" />
-                    Atualizar
+                <DropdownMenuContent align="end" className="w-64 bg-popover z-50 p-2">
+                  <DropdownMenuItem 
+                    onClick={() => window.location.reload()}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3">
+                      <RefreshCw className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">Atualizar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    <Home className="w-4 h-4 mr-3" />
-                    Home
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/dashboard')}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3">
+                      <Home className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">Home</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/qrcode')}>
-                    <QrCode className="w-4 h-4 mr-3" />
-                    QR Code
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/qrcode')}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3">
+                      <QrCode className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">QR Code</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/box-control')}>
-                    <Package className="w-4 h-4 mr-3" />
-                    Controle da Caixa
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/box-control')}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3">
+                      <Package className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">Controle da Caixa</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={toggleActivityLog}>
-                    <Activity className="w-4 h-4 mr-3" />
-                    Log de Atividades
+                  <DropdownMenuItem 
+                    onClick={toggleActivityLog}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3">
+                      <Activity className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="font-medium">Log de Atividades</span>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShowNotificationSettings(true)}>
-                    <Bell className="w-4 h-4 mr-3" />
-                    Notificações
-                    {!isSubscribed && isSupported && (
-                      <span className="ml-auto w-2 h-2 bg-accent rounded-full" />
-                    )}
+                  <DropdownMenuSeparator className="my-2" />
+                  <DropdownMenuItem 
+                    onClick={() => setShowNotificationSettings(true)}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 mr-3 relative">
+                      <Bell className="w-5 h-5 text-primary" />
+                      {!isSubscribed && isSupported && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-popover" />
+                      )}
+                    </div>
+                    <span className="font-medium">Notificações</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                  <DropdownMenuItem 
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    className="py-3 px-4 rounded-lg hover:bg-primary/10"
+                  >
                     {theme === 'dark' ? (
                       <>
-                        <Sun className="w-4 h-4 mr-3 text-yellow-500" />
-                        Modo Claro
+                        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-yellow-500/20 mr-3">
+                          <Sun className="w-5 h-5 text-yellow-500" />
+                        </div>
+                        <span className="font-medium">Modo Claro</span>
                       </>
                     ) : (
                       <>
-                        <Moon className="w-4 h-4 mr-3 text-slate-700" />
-                        Modo Escuro
+                        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-200 mr-3">
+                          <Moon className="w-5 h-5 text-slate-700" />
+                        </div>
+                        <span className="font-medium">Modo Escuro</span>
                       </>
                     )}
                   </DropdownMenuItem>
