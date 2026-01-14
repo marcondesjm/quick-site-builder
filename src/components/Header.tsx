@@ -258,10 +258,14 @@ export const Header = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img 
+            <motion.img 
               src={doorviiHeaderLogo} 
               alt="DoorVII" 
-              className="h-8 object-contain"
+              className="h-8 object-contain cursor-pointer"
+              whileHover={{ scale: 1.05, filter: "drop-shadow(0 0 8px rgba(0, 212, 255, 0.6))" }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              onClick={() => navigate('/dashboard')}
             />
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-muted-foreground">v{APP_VERSION}</span>
