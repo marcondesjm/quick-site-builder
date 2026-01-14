@@ -20,7 +20,7 @@ export default function TermosDeUso() {
               Voltar
             </Button>
           </Link>
-          <img src={doorviiLogo} alt="DoorVii" className="h-10 object-contain" />
+          <img src={doorviiLogo} alt="DoorVII" className="h-10 object-contain" />
         </motion.div>
 
         {/* Content */}

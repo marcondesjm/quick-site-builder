@@ -1,4 +1,4 @@
-// Service Worker for DoorVii PWA - Complete Offline Support
+// Service Worker for DoorVII PWA - Complete Offline Support
 const SW_VERSION = '4.1.0';
 const CACHE = 'doorvii-pwa-v4.1';
 

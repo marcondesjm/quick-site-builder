@@ -148,7 +148,7 @@ const Install = () => {
         >
           <h1 className="text-2xl font-bold mb-1">Instalação do App</h1>
           <p className="text-muted-foreground">
-            Instale o DoorVii Home como um aplicativo nativo no seu dispositivo.
+            Instale o DoorVII como um aplicativo nativo no seu dispositivo.
           </p>
         </motion.div>
 

@@ -82,7 +82,7 @@ const CookiePolicy = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <p className="text-muted-foreground leading-relaxed">
-              Esta Política de Cookies explica o que são cookies, como os utilizamos no site DoorVii, 
+              Esta Política de Cookies explica o que são cookies, como os utilizamos no site DoorVII, 
               os tipos de cookies que utilizamos e como você pode gerenciar suas preferências de cookies. 
               Ao continuar a navegar em nosso site, você concorda com o uso de cookies conforme descrito 
               nesta política.
