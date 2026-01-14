@@ -60,7 +60,7 @@ const Home = () => {
     {
       name: "Maria Silva",
       role: "Moradora - São Paulo",
-      content: "O DoorVii Home mudou completamente a forma como gerencio a segurança da minha casa. Agora consigo ver quem está na porta mesmo quando estou no trabalho!",
+      content: "O DoorVII mudou completamente a forma como gerencio a segurança da minha casa. Agora consigo ver quem está na porta mesmo quando estou no trabalho!",
       rating: 5
     },
     {
@@ -130,7 +130,7 @@ const Home = () => {
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <HomeIcon className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">DoorVii Home</span>
+            <span className="text-xl font-bold text-foreground">DoorVII</span>
           </motion.div>
           <div className="flex items-center gap-3">
             <InstallAppHeaderButton />
@@ -184,7 +184,7 @@ const Home = () => {
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
             variants={itemVariants}
           >
-            DoorVii Home transforma sua campainha em uma central de segurança inteligente. 
+            DoorVII transforma sua campainha em uma central de segurança inteligente. 
             Atenda visitantes, gerencie acessos e proteja sua família com tecnologia de ponta.
           </motion.p>
           <motion.div 
@@ -302,7 +302,7 @@ const Home = () => {
             O que nossos usuários dizem
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Milhares de famílias já confiam no DoorVii Home
+            Milhares de famílias já confiam no DoorVII
           </p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -361,7 +361,7 @@ const Home = () => {
               Pronto para começar?
             </h2>
             <p className="text-primary-foreground/80 mb-6 max-w-xl mx-auto relative z-10">
-              Junte-se a milhares de famílias que já usam DoorVii Home para proteger suas casas.
+              Junte-se a milhares de famílias que já usam DoorVII para proteger suas casas.
             </p>
             <motion.div 
               whileHover={{ scale: 1.05 }} 
@@ -395,10 +395,10 @@ const Home = () => {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <HomeIcon className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-foreground">DoorVii Home</span>
+            <span className="font-semibold text-foreground">DoorVII</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 DoorVii Home. Todos os direitos reservados.
+            © 2024 DoorVII. Todos os direitos reservados.
           </p>
         </div>
       </motion.footer>

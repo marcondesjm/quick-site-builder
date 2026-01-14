@@ -42,7 +42,7 @@ export default function PoliticaPrivacidade() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold">1. Introdução</h2>
             <p className="text-muted-foreground leading-relaxed">
-              A DoorVii está comprometida em proteger sua privacidade. Esta Política de Privacidade explica 
+              A DoorVII está comprometida em proteger sua privacidade. Esta Política de Privacidade explica 
               como coletamos, usamos, armazenamos e protegemos suas informações pessoais quando você usa 
               nossa plataforma de portaria digital inteligente.
             </p>
@@ -159,7 +159,7 @@ export default function PoliticaPrivacidade() {
 
           <div className="pt-6 border-t">
             <p className="text-sm text-muted-foreground text-center">
-              © {new Date().getFullYear()} DoorVii - Portaria Digital Inteligente. Todos os direitos reservados.
+              © {new Date().getFullYear()} DoorVII - Portaria Digital Inteligente. Todos os direitos reservados.
             </p>
           </div>
         </motion.div>

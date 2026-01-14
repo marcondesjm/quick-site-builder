@@ -42,7 +42,7 @@ const Plans = () => {
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <HomeIcon className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">DoorVii Home</span>
+            <span className="text-xl font-bold text-foreground">DoorVII</span>
           </motion.div>
           <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
@@ -321,10 +321,10 @@ const Plans = () => {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <HomeIcon className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-foreground">DoorVii Home</span>
+            <span className="font-semibold text-foreground">DoorVII</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 DoorVii Home. Todos os direitos reservados.
+            © 2024 DoorVII. Todos os direitos reservados.
           </p>
         </div>
       </motion.footer>

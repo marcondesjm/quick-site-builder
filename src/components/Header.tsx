@@ -133,8 +133,8 @@ export const Header = () => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'DoorVii Home - Portaria Inteligente',
-        text: 'Confira o DoorVii Home, o melhor app de portaria inteligente!',
+        title: 'DoorVII - Portaria Inteligente',
+        text: 'Confira o DoorVII, o melhor app de portaria inteligente!',
         url: window.location.origin,
       });
     } else {
@@ -260,7 +260,7 @@ export const Header = () => {
           <div className="flex items-center gap-2">
             <img 
               src={doorviiHeaderLogo} 
-              alt="DoorVii" 
+              alt="DoorVII" 
               className="h-8 object-contain"
             />
             <div className="flex items-center gap-1.5">
@@ -448,7 +448,7 @@ export const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleRefer}>
                   <Gift className="w-4 h-4 mr-3" />
-                  Indique o DoorVii Home aos amigos
+                  Indique o DoorVII aos amigos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowNotificationSettings(true)}>

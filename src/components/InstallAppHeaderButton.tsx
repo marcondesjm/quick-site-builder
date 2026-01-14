@@ -86,7 +86,7 @@ export function InstallAppHeaderButton() {
   };
 
   const shareUrl = window.location.origin;
-  const shareText = 'Confira o DoorVii Home - Sua campainha inteligente';
+  const shareText = 'Confira o DoorVII - Sua campainha inteligente';
 
   const socialShareOptions = [
     {
@@ -189,7 +189,7 @@ export function InstallAppHeaderButton() {
                 <QrCode className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <DialogTitle className="text-base font-semibold">Instalar DoorVii Home</DialogTitle>
+                <DialogTitle className="text-base font-semibold">Instalar DoorVII</DialogTitle>
                 <p className="text-xs text-muted-foreground">App gratuito para seu dispositivo</p>
               </div>
             </div>
