@@ -247,8 +247,8 @@ export default function Auth() {
             />
             <img 
               src={doorviiLogo} 
-              alt="DoorVii" 
-              className="h-16 sm:h-20 mx-auto mb-4 object-contain relative z-10"
+              alt="DoorVII" 
+              className="h-64 sm:h-80 mx-auto mb-4 object-contain relative z-10"
               style={{ 
                 filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.6)) drop-shadow(0 0 60px rgba(0, 150, 255, 0.4))',
               }}
