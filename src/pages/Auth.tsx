@@ -268,10 +268,19 @@ export default function Auth() {
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             />
-            <img 
+            <motion.img 
               src={doorviiLogo} 
               alt="DoorVII" 
               className="h-20 sm:h-24 mx-auto mb-4 object-contain relative z-10"
+              initial={{ opacity: 0, scale: 0.5, y: -30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                type: "spring", 
+                stiffness: 100, 
+                damping: 15,
+                delay: 0.1 
+              }}
               style={{ 
                 filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.6)) drop-shadow(0 0 60px rgba(0, 150, 255, 0.4))',
               }}
