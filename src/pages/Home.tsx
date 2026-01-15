@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { 
   Video, 
   Bell, 
@@ -21,6 +24,29 @@ import doorviiHomeLogo from "@/assets/doorvii-home-logo.png";
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: "demo@doorvii.com",
+        password: "demo123456",
+      });
+
+      if (error) {
+        toast.error("Erro ao acessar conta demo: " + error.message);
+        return;
+      }
+
+      toast.success("Login demo realizado com sucesso!");
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error("Erro inesperado ao fazer login demo");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const features = [
     {
@@ -194,10 +220,11 @@ const Home = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 size="lg" 
-                onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                onClick={user ? () => navigate("/dashboard") : handleDemoLogin}
+                disabled={isLoading}
                 className="gap-2 text-lg px-8"
               >
-                {user ? "Ir para o Painel" : "Conta Teste"}
+                {isLoading ? "Entrando..." : user ? "Ir para o Painel" : "Conta Teste"}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </motion.div>
