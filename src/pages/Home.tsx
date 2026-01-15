@@ -129,7 +129,7 @@ const Home = () => {
             <img 
               src={doorviiHomeLogo} 
               alt="DoorVII" 
-              className="h-8 object-contain"
+              className="h-10 object-contain"
             />
           </motion.div>
           <div className="flex items-center gap-3">
