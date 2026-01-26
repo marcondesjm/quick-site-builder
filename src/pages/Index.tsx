@@ -96,9 +96,32 @@ const Index = () => {
   const [lastProtocolNumber, setLastProtocolNumber] = useState<string | null>(null);
   const [showProtocolDialog, setShowProtocolDialog] = useState(false);
   const [showDashboardTour, setShowDashboardTour] = useState(false);
+  const [hasSeenTour, setHasSeenTour] = useState(() => {
+    return localStorage.getItem('doorvii_dashboard_tour_seen') === 'true';
+  });
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
+  
+  // Show tour on first visit
+  useEffect(() => {
+    if (!hasSeenTour && user && !propertiesLoading) {
+      // Small delay to let the page load first
+      const timer = setTimeout(() => {
+        setShowDashboardTour(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasSeenTour, user, propertiesLoading]);
+  
+  const handleTourComplete = () => {
+    localStorage.setItem('doorvii_dashboard_tour_seen', 'true');
+    setHasSeenTour(true);
+    toast({
+      title: "Tour concluído! 🎉",
+      description: "Agora você conhece todas as funcionalidades do DoorVII",
+    });
+  };
   
   // Fetch owner phone from profile
   useEffect(() => {
@@ -1828,13 +1851,15 @@ const Index = () => {
       {/* Dashboard Tour */}
       <DashboardTour 
         isOpen={showDashboardTour} 
-        onClose={() => setShowDashboardTour(false)}
-        onComplete={() => {
-          toast({
-            title: "Tour concluído! 🎉",
-            description: "Agora você conhece todas as funcionalidades do DoorVII",
-          });
+        onClose={() => {
+          setShowDashboardTour(false);
+          // Mark as seen even if closed early
+          if (!hasSeenTour) {
+            localStorage.setItem('doorvii_dashboard_tour_seen', 'true');
+            setHasSeenTour(true);
+          }
         }}
+        onComplete={handleTourComplete}
       />
     </div>
   );
