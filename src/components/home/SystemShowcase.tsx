@@ -16,6 +16,7 @@ import {
   Play,
   Pause,
   Circle,
+  Bike,
 } from "lucide-react";
 
 interface ShowcaseItem {
@@ -223,6 +224,37 @@ const showcaseItems: ShowcaseItem[] = [
             </div>
           </motion.div>
         ))}
+      </div>
+    ),
+  },
+  {
+    id: 7,
+    icon: Bike,
+    title: "MotoVii - Adesivo para Motos",
+    description: "Adesivo NFC especial para motociclistas. Programe e cole no baú ou carenagem para receber entregas com segurança.",
+    features: ["Adesivo NFC resistente", "Design exclusivo para motos", "Múltiplos tamanhos", "Ideal para motoboys e entregadores"],
+    gradient: "from-teal-500 to-cyan-500",
+    mockup: (
+      <div className="relative w-full h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden flex items-center justify-center">
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="relative"
+        >
+          <div className="w-32 h-32 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+            <Bike className="w-16 h-16 text-white" />
+          </div>
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute inset-0 border-4 border-teal-400 rounded-full"
+          />
+        </motion.div>
+        <div className="absolute bottom-4 left-4 right-4">
+          <Badge className="bg-teal-500/20 text-teal-400">
+            🏍️ Adesivo NFC para Moto
+          </Badge>
+        </div>
       </div>
     ),
   },
