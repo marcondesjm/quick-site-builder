@@ -1375,7 +1375,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/motovii")}
-                  className="border-teal-500/50 text-teal-600 hover:bg-teal-500/10"
+                  className="bg-teal-500 text-white hover:bg-teal-600 border-teal-500"
                 >
                   <Bike className="w-4 h-4" />
                   MotoVii
@@ -1383,7 +1383,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/carvii")}
-                  className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-500/10"
+                  className="bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500"
                 >
                   <Car className="w-4 h-4" />
                   CarVii
@@ -1391,7 +1391,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/malavii")}
-                  className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                  className="bg-amber-500 text-white hover:bg-amber-600 border-amber-500"
                 >
                   <Luggage className="w-4 h-4" />
                   MalaVii
