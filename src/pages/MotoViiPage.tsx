@@ -28,7 +28,8 @@ import {
   Car,
   Shield,
   Phone,
-  MapPin
+  MapPin,
+  ShoppingCart
 } from "lucide-react";
 import {
   Dialog,
@@ -62,6 +63,29 @@ const MotoViiPage = () => {
   // Preview dialog state
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("medium");
+  
+  // Purchase links state
+  interface PurchaseLink {
+    id: string;
+    name: string;
+    url: string;
+  }
+  
+  const defaultLinks: PurchaseLink[] = [
+    {
+      id: "shopee-default",
+      name: "Shopee - Kit 10 a 50 Etiquetas NFC",
+      url: "https://shopee.com.br/Kit-10-a-50-Etiqueta-Nfc-Ntag215-Leitura-13-56mhz-Tag-Regrav%C3%A1vel-i.1333477191.23694368772"
+    }
+  ];
+  
+  const [purchaseLinks, setPurchaseLinks] = useState<PurchaseLink[]>(() => {
+    const saved = localStorage.getItem("nfc-purchase-links");
+    return saved ? JSON.parse(saved) : defaultLinks;
+  });
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [newLinkName, setNewLinkName] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
   
   const stickerSizes = [
     { id: "small", name: "Pequeno", dimensions: "6x3 cm (2.4x1.2\")", pixels: { w: 240, h: 135 } },
@@ -177,6 +201,58 @@ const MotoViiPage = () => {
     } finally {
       setNfcWriting(false);
     }
+  };
+  
+  // Purchase links management
+  const handleAddPurchaseLink = () => {
+    if (!newLinkName.trim() || !newLinkUrl.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate URL
+    try {
+      new URL(newLinkUrl);
+    } catch {
+      toast({
+        title: "URL inválida",
+        description: "Digite uma URL válida começando com http:// ou https://",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newLink: PurchaseLink = {
+      id: Date.now().toString(),
+      name: newLinkName.trim(),
+      url: newLinkUrl.trim(),
+    };
+    
+    const updated = [...purchaseLinks, newLink];
+    setPurchaseLinks(updated);
+    localStorage.setItem("nfc-purchase-links", JSON.stringify(updated));
+    
+    setNewLinkName("");
+    setNewLinkUrl("");
+    setShowAddLink(false);
+    
+    toast({
+      title: "Link adicionado!",
+      description: "O link de compra foi salvo.",
+    });
+  };
+  
+  const handleRemovePurchaseLink = (id: string) => {
+    const updated = purchaseLinks.filter(link => link.id !== id);
+    setPurchaseLinks(updated);
+    localStorage.setItem("nfc-purchase-links", JSON.stringify(updated));
+    
+    toast({
+      title: "Link removido",
+    });
   };
   
   const handleDownloadSticker = () => {
@@ -614,6 +690,103 @@ const MotoViiPage = () => {
                 <span>Pessoas podem tocar o celular para ligar para você!</span>
               </li>
             </ol>
+          </CardContent>
+        </Card>
+        
+        {/* Purchase Links Section */}
+        <Card className="mb-6 border-orange-500/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-orange-500" />
+              Onde Comprar Etiquetas NFC
+            </CardTitle>
+            <CardDescription>
+              Links para compra de etiquetas NFC compatíveis
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowAddLink(!showAddLink)}
+              className="w-full gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Adicionar Link de Compra
+            </Button>
+            
+            <AnimatePresence>
+              {showAddLink && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 p-4 bg-muted/50 rounded-lg border"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="linkName">Nome da Loja</Label>
+                    <Input
+                      id="linkName"
+                      value={newLinkName}
+                      onChange={(e) => setNewLinkName(e.target.value)}
+                      placeholder="Ex: AliExpress - Etiquetas NFC"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="linkUrl">URL do Produto</Label>
+                    <Input
+                      id="linkUrl"
+                      value={newLinkUrl}
+                      onChange={(e) => setNewLinkUrl(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddPurchaseLink} className="flex-1 bg-teal-600 hover:bg-teal-700">
+                      Salvar
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowAddLink(false)}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            <div className="space-y-2">
+              {purchaseLinks.length > 0 ? (
+                purchaseLinks.map((link) => (
+                  <div
+                    key={link.id}
+                    className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{link.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{link.url}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open(link.url, '_blank')}
+                      className="shrink-0 text-teal-600 hover:text-teal-700 hover:bg-teal-100"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemovePurchaseLink(link.id)}
+                      className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-100"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhum link cadastrado. Adicione links de lojas para comprar etiquetas NFC.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </main>
