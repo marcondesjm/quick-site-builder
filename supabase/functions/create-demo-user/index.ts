@@ -29,8 +29,17 @@ Deno.serve(async (req) => {
     const demoUser = existingUsers?.users?.find(u => u.email === demoEmail);
 
     if (demoUser) {
+      // Update existing demo user to have never-expiring trial
+      const neverExpireDate = new Date();
+      neverExpireDate.setFullYear(neverExpireDate.getFullYear() + 100);
+      
+      await supabaseAdmin
+        .from("profiles")
+        .update({ trial_ends_at: neverExpireDate.toISOString() })
+        .eq("user_id", demoUser.id);
+
       return new Response(
-        JSON.stringify({ success: true, message: "Demo user already exists", userId: demoUser.id }),
+        JSON.stringify({ success: true, message: "Demo user already exists (trial updated)", userId: demoUser.id }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -53,8 +62,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create a demo property for the user
+    // Create a demo property for the user and set trial to never expire
     if (data.user) {
+      // Set trial_ends_at to 100 years from now (effectively never expires)
+      const neverExpireDate = new Date();
+      neverExpireDate.setFullYear(neverExpireDate.getFullYear() + 100);
+      
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          trial_ends_at: neverExpireDate.toISOString(),
+          full_name: "Usuário Demo",
+        })
+        .eq("user_id", data.user.id);
+
+      if (profileError) {
+        console.error("Error updating demo profile:", profileError);
+      }
+
       const { error: propertyError } = await supabaseAdmin
         .from("properties")
         .insert({
