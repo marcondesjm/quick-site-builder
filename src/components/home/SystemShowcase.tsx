@@ -231,6 +231,7 @@ const showcaseItems: ShowcaseItem[] = [
 export const SystemShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
   const [progress, setProgress] = useState(0);
   const AUTOPLAY_INTERVAL = 5000; // 5 seconds
 
@@ -258,7 +259,7 @@ export const SystemShowcase = () => {
 
   // Auto-play effect
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || isHovering) return;
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
@@ -277,7 +278,15 @@ export const SystemShowcase = () => {
       clearInterval(progressInterval);
       clearInterval(slideInterval);
     };
-  }, [isPlaying, nextSlide]);
+  }, [isPlaying, isHovering, nextSlide]);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovering(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovering(false);
+  }, []);
 
   return (
     <section className="container mx-auto px-4 py-20">
@@ -298,8 +307,12 @@ export const SystemShowcase = () => {
         </p>
       </motion.div>
 
-      <div className="max-w-5xl mx-auto">
-        <Card className="overflow-hidden border-2">
+      <div 
+        className="max-w-5xl mx-auto"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Card className="overflow-hidden border-2 transition-shadow hover:shadow-lg">
           <CardContent className="p-0">
             <div className="grid md:grid-cols-2 gap-0">
               {/* Mockup Side */}
