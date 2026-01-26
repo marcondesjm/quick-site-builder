@@ -312,6 +312,79 @@ const tourSteps: TourStep[] = [
       </div>
     ),
   },
+  {
+    id: 9,
+    icon: Settings,
+    title: "Painel de Controle",
+    description: "Controle sua caixa de entregas remotamente. Tranque, destranque e monitore o status de segurança em tempo real.",
+    tips: ["Tranque/destranque remotamente", "Sensor de pacotes", "Histórico de acessos"],
+    gradient: "from-slate-600 to-zinc-700",
+    visual: (
+      <div className="space-y-4">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="bg-white/10 rounded-xl p-4"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-zinc-600 rounded-lg flex items-center justify-center">
+                <span className="text-xl">📦</span>
+              </div>
+              <div>
+                <p className="text-white font-medium text-sm">Caixa de Entregas</p>
+                <p className="text-white/60 text-xs">Casa Principal</p>
+              </div>
+            </div>
+            <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+              Seguro
+            </Badge>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/5 rounded-lg p-3 text-center"
+            >
+              <motion.div
+                animate={{ rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                className="text-2xl mb-1"
+              >
+                🔒
+              </motion.div>
+              <p className="text-white/80 text-xs">Trancado</p>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/5 rounded-lg p-3 text-center"
+            >
+              <motion.div
+                animate={{ y: [0, -3, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="text-2xl mb-1"
+              >
+                📬
+              </motion.div>
+              <p className="text-white/80 text-xs">1 Pacote</p>
+            </motion.div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex gap-2"
+        >
+          <div className="flex-1 bg-green-500/20 rounded-lg p-2 text-center">
+            <span className="text-white text-xs">🔓 Destrancar</span>
+          </div>
+          <div className="flex-1 bg-red-500/20 rounded-lg p-2 text-center">
+            <span className="text-white text-xs">🔒 Trancar</span>
+          </div>
+        </motion.div>
+      </div>
+    ),
+  },
 ];
 
 interface DashboardTourProps {
