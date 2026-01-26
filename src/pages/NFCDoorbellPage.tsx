@@ -22,7 +22,11 @@ import {
   Nfc,
   QrCode,
   Pencil,
-  Sparkles
+  Sparkles,
+  ShoppingCart,
+  Plus,
+  Trash2,
+  ExternalLink
 } from "lucide-react";
 import { 
   Select,
@@ -51,6 +55,29 @@ const NFCDoorbellPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Purchase links state
+  interface PurchaseLink {
+    id: string;
+    name: string;
+    url: string;
+  }
+  
+  const defaultLinks: PurchaseLink[] = [
+    {
+      id: "shopee-default",
+      name: "Shopee - Kit 10 a 50 Etiquetas NFC",
+      url: "https://shopee.com.br/Kit-10-a-50-Etiqueta-Nfc-Ntag215-Leitura-13-56mhz-Tag-Regrav%C3%A1vel-i.1333477191.23694368772"
+    }
+  ];
+  
+  const [purchaseLinks, setPurchaseLinks] = useState<PurchaseLink[]>(() => {
+    const saved = localStorage.getItem("nfc-purchase-links");
+    return saved ? JSON.parse(saved) : defaultLinks;
+  });
+  const [showAddLink, setShowAddLink] = useState(false);
+  const [newLinkName, setNewLinkName] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
   const propertyAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId);
@@ -166,6 +193,58 @@ const NFCDoorbellPage = () => {
     } finally {
       setNfcWriting(false);
     }
+  };
+  
+  // Purchase links management
+  const handleAddPurchaseLink = () => {
+    if (!newLinkName.trim() || !newLinkUrl.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate URL
+    try {
+      new URL(newLinkUrl);
+    } catch {
+      toast({
+        title: "URL inválida",
+        description: "Digite uma URL válida começando com http:// ou https://",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newLink: PurchaseLink = {
+      id: Date.now().toString(),
+      name: newLinkName.trim(),
+      url: newLinkUrl.trim(),
+    };
+    
+    const updated = [...purchaseLinks, newLink];
+    setPurchaseLinks(updated);
+    localStorage.setItem("nfc-purchase-links", JSON.stringify(updated));
+    
+    setNewLinkName("");
+    setNewLinkUrl("");
+    setShowAddLink(false);
+    
+    toast({
+      title: "Link adicionado!",
+      description: "O link de compra foi salvo.",
+    });
+  };
+  
+  const handleRemovePurchaseLink = (id: string) => {
+    const updated = purchaseLinks.filter(link => link.id !== id);
+    setPurchaseLinks(updated);
+    localStorage.setItem("nfc-purchase-links", JSON.stringify(updated));
+    
+    toast({
+      title: "Link removido",
+    });
   };
   
   const handleDownloadSticker = () => {
@@ -695,6 +774,136 @@ const NFCDoorbellPage = () => {
                 </div>
               </li>
             </ol>
+          </CardContent>
+        </Card>
+        
+        {/* Purchase Links Section */}
+        <Card className="mb-6 border-green-500/30 bg-gradient-to-r from-green-500/5 to-emerald-500/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-green-500" />
+                  Onde Comprar Etiquetas NFC
+                </CardTitle>
+                <CardDescription>
+                  Links para comprar etiquetas NFC compatíveis
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAddLink(!showAddLink)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar Link
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Add new link form */}
+            <AnimatePresence>
+              {showAddLink && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-3 border border-dashed border-muted-foreground/30">
+                    <div className="space-y-2">
+                      <Label htmlFor="linkName">Nome da Loja / Produto</Label>
+                      <Input
+                        id="linkName"
+                        value={newLinkName}
+                        onChange={(e) => setNewLinkName(e.target.value)}
+                        placeholder="Ex: AliExpress - Tags NFC 10 unidades"
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="linkUrl">URL do Produto</Label>
+                      <Input
+                        id="linkUrl"
+                        value={newLinkUrl}
+                        onChange={(e) => setNewLinkUrl(e.target.value)}
+                        placeholder="https://..."
+                        type="url"
+                        maxLength={500}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleAddPurchaseLink}
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <Check className="h-4 w-4" />
+                        Salvar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setShowAddLink(false);
+                          setNewLinkName("");
+                          setNewLinkUrl("");
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Purchase links list */}
+            <div className="space-y-2">
+              {purchaseLinks.map((link) => (
+                <motion.div
+                  key={link.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3 p-3 bg-background rounded-lg border hover:border-green-500/50 transition-colors group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center shrink-0">
+                    <ShoppingCart className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{link.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{link.url}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => window.open(link.url, "_blank")}
+                      className="h-8 w-8 hover:bg-green-500/10"
+                    >
+                      <ExternalLink className="h-4 w-4 text-green-600" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemovePurchaseLink(link.id)}
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+              
+              {purchaseLinks.length === 0 && (
+                <div className="text-center py-6 text-muted-foreground">
+                  <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum link cadastrado</p>
+                  <p className="text-xs">Clique em "Adicionar Link" para começar</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </main>
