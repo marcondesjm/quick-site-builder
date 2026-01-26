@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,12 @@ import {
   Shield,
   QrCode,
   Users,
-  Smartphone,
   Package,
-  MessageSquare,
   History,
   ChevronLeft,
   ChevronRight,
   Play,
+  Pause,
   Circle,
 } from "lucide-react";
 
@@ -231,25 +230,54 @@ const showcaseItems: ShowcaseItem[] = [
 
 export const SystemShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const AUTOPLAY_INTERVAL = 5000; // 5 seconds
 
   const currentItem = showcaseItems[currentIndex];
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % showcaseItems.length);
-  };
+    setProgress(0);
+  }, []);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length);
-  };
+    setProgress(0);
+  }, []);
 
-  // Auto-play
-  useState(() => {
-    if (isPlaying) {
-      const interval = setInterval(nextSlide, 5000);
-      return () => clearInterval(interval);
-    }
-  });
+  const goToSlide = useCallback((index: number) => {
+    setCurrentIndex(index);
+    setProgress(0);
+  }, []);
+
+  const toggleAutoplay = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+    setProgress(0);
+  }, []);
+
+  // Auto-play effect
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          return 0;
+        }
+        return prev + (100 / (AUTOPLAY_INTERVAL / 100));
+      });
+    }, 100);
+
+    const slideInterval = setInterval(() => {
+      nextSlide();
+    }, AUTOPLAY_INTERVAL);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(slideInterval);
+    };
+  }, [isPlaying, nextSlide]);
 
   return (
     <section className="container mx-auto px-4 py-20">
@@ -334,21 +362,39 @@ export const SystemShowcase = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mt-6">
-          <Button variant="outline" size="icon" onClick={prevSlide}>
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={prevSlide}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={toggleAutoplay}
+              className={isPlaying ? "text-primary border-primary" : ""}
+            >
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </Button>
+          </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {showcaseItems.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  i === currentIndex
-                    ? "w-8 bg-primary"
-                    : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                }`}
-              />
+                onClick={() => goToSlide(i)}
+                className="relative h-2 rounded-full overflow-hidden transition-all"
+                style={{ width: i === currentIndex ? '2rem' : '0.5rem' }}
+              >
+                <div className="absolute inset-0 bg-muted-foreground/30" />
+                {i === currentIndex && isPlaying && (
+                  <motion.div
+                    className="absolute inset-0 bg-primary origin-left"
+                    style={{ scaleX: progress / 100 }}
+                  />
+                )}
+                {i === currentIndex && !isPlaying && (
+                  <div className="absolute inset-0 bg-primary" />
+                )}
+              </button>
             ))}
           </div>
 
