@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ScrollDownIndicator } from "@/components/ScrollDownIndicator";
 import { InstallAppHeaderButton } from "@/components/InstallAppHeaderButton";
+import { SystemShowcase } from "@/components/home/SystemShowcase";
 import doorviiHomeLogo from "@/assets/doorvii-home-logo.png";
 const Home = () => {
   const navigate = useNavigate();
@@ -242,6 +243,9 @@ const Home = () => {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* System Showcase */}
+      <SystemShowcase />
 
       {/* Pricing CTA Section */}
       <section className="container mx-auto px-4 py-16">
