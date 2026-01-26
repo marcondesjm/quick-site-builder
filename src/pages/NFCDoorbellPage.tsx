@@ -271,7 +271,7 @@ const NFCDoorbellPage = () => {
     const size = stickerSizes.find(s => s.id === selectedSize);
     const pixels = customPixels || size?.pixels || 320;
     
-    // Create canvas to resize
+    // Create canvas to resize - download only the base image without property name
     const canvas = document.createElement('canvas');
     canvas.width = pixels;
     canvas.height = pixels;
@@ -281,7 +281,7 @@ const NFCDoorbellPage = () => {
       // Fallback to direct download
       const link = document.createElement('a');
       link.href = nfcStickerImage;
-      link.download = `campainha-nfc-${selectedProperty?.name || 'doorvii'}-${size?.dimensions || '8x8cm'}.png`;
+      link.download = `campainha-nfc-doorvii-${size?.dimensions || '8x8cm'}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -291,11 +291,12 @@ const NFCDoorbellPage = () => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      // Draw only the base image - no property name overlay
       ctx.drawImage(img, 0, 0, pixels, pixels);
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `campainha-nfc-${selectedProperty?.name || 'doorvii'}-${size?.dimensions || '8x8cm'}.png`;
+      link.download = `campainha-nfc-doorvii-${size?.dimensions || '8x8cm'}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -310,8 +311,17 @@ const NFCDoorbellPage = () => {
     img.src = nfcStickerImage;
   };
   
-  // Generate personalized sticker with property name
+  // Generate personalized sticker with property name (optional feature)
   const generatePersonalizedSticker = async () => {
+    if (!customPropertyName.trim()) {
+      toast({
+        title: "Digite um nome",
+        description: "Digite o nome da propriedade para personalizar o adesivo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsGenerating(true);
     
     try {
@@ -403,7 +413,7 @@ const NFCDoorbellPage = () => {
     }
   };
   
-  // Update preview canvas - show sticker without property name banner by default
+  // Update preview canvas - show sticker without property name banner
   useEffect(() => {
     const updatePreview = async () => {
       const canvas = previewCanvasRef.current;
@@ -420,44 +430,15 @@ const NFCDoorbellPage = () => {
         canvas.width = 256;
         canvas.height = (img.height / img.width) * 256;
         
-        // Draw the base image without property name
+        // Draw only the base image - no property name overlay
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Only add property name banner if user has typed a custom name
-        if (customPropertyName && customPropertyName !== selectedProperty?.name) {
-          const bannerHeight = 32;
-          const bannerY = canvas.height - bannerHeight - 16;
-          
-          // Draw semi-transparent banner background
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-          ctx.beginPath();
-          ctx.roundRect(8, bannerY, canvas.width - 16, bannerHeight, 6);
-          ctx.fill();
-          
-          // Draw property name
-          ctx.fillStyle = '#ffffff';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          
-          // Calculate font size to fit
-          let fontSize = 14;
-          ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
-          
-          const maxWidth = canvas.width - 32;
-          while (ctx.measureText(customPropertyName).width > maxWidth && fontSize > 8) {
-            fontSize -= 1;
-            ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
-          }
-          
-          ctx.fillText(customPropertyName, canvas.width / 2, bannerY + bannerHeight / 2);
-        }
       };
       
       img.src = nfcStickerImage;
     };
     
     updatePreview();
-  }, [customPropertyName, selectedProperty?.name]);
+  }, []);
 
   if (propertiesLoading) {
     return (
