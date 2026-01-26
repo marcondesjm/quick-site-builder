@@ -16,6 +16,7 @@ import QRCodePage from "./pages/QRCodePage";
 import NFCDoorbellPage from "./pages/NFCDoorbellPage";
 import MotoViiPage from "./pages/MotoViiPage";
 import CarViiPage from "./pages/CarViiPage";
+import MalaViiPage from "./pages/MalaViiPage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -117,6 +118,16 @@ const App = () => (
               <Route path="/carvii/:propertyId" element={
                 <ProtectedRoute>
                   <CarViiPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/malavii" element={
+                <ProtectedRoute>
+                  <MalaViiPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/malavii/:propertyId" element={
+                <ProtectedRoute>
+                  <MalaViiPage />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
