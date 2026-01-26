@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
 import NFCDoorbellPage from "./pages/NFCDoorbellPage";
+import MotoViiPage from "./pages/MotoViiPage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -95,6 +96,16 @@ const App = () => (
               <Route path="/nfc/:propertyId" element={
                 <ProtectedRoute>
                   <NFCDoorbellPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/motovii" element={
+                <ProtectedRoute>
+                  <MotoViiPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/motovii/:propertyId" element={
+                <ProtectedRoute>
+                  <MotoViiPage />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
