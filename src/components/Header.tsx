@@ -30,7 +30,8 @@ import {
   Activity,
   Package,
   Home,
-  Menu
+  Menu,
+  Bike
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -322,6 +323,15 @@ export const Header = () => {
                 Caixa
               </Button>
               <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/motovii')}
+                className="border-teal-500/50 text-teal-600 hover:bg-teal-500/10"
+              >
+                <Bike className="w-4 h-4" />
+                MotoVii
+              </Button>
+              <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleActivityLog}
@@ -402,6 +412,15 @@ export const Header = () => {
                       <Package className="w-5 h-5 text-primary" />
                     </div>
                     <span className="font-medium">Controle da Caixa</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/motovii')}
+                    className="py-3 px-4 rounded-lg hover:bg-teal-500/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-teal-500/15 mr-3">
+                      <Bike className="w-5 h-5 text-teal-500" />
+                    </div>
+                    <span className="font-medium text-teal-600">MotoVii</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={toggleActivityLog}
