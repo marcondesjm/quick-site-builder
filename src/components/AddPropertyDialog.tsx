@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { useAddProperty } from '@/hooks/useProperties';
 import { useToast } from '@/hooks/use-toast';
+import defaultCarImage from '@/assets/default-car.jpg';
+import defaultMotoImage from '@/assets/default-moto.jpg';
 
 type PropertyType = 'property' | 'car' | 'moto';
 
@@ -30,6 +32,7 @@ const typeConfig = {
     namePlaceholder: 'Ex: Apartamento Centro',
     addressLabel: 'Endereço',
     addressPlaceholder: 'Ex: Av. Paulista, 1000 - Apto 42',
+    defaultImage: null,
   },
   car: {
     icon: Car,
@@ -38,6 +41,7 @@ const typeConfig = {
     namePlaceholder: 'Ex: Honda Civic Preto',
     addressLabel: 'Placa',
     addressPlaceholder: 'Ex: ABC-1234',
+    defaultImage: defaultCarImage,
   },
   moto: {
     icon: Bike,
@@ -46,9 +50,9 @@ const typeConfig = {
     namePlaceholder: 'Ex: Honda CB 500',
     addressLabel: 'Placa',
     addressPlaceholder: 'Ex: XYZ-5678',
+    defaultImage: defaultMotoImage,
   },
 };
-
 export function AddPropertyDialog({ 
   open: controlledOpen, 
   onOpenChange: controlledOnOpenChange,
@@ -80,7 +84,8 @@ export function AddPropertyDialog({
     }
 
     try {
-      await addProperty.mutateAsync({ name, address });
+      const imageUrl = config.defaultImage || undefined;
+      await addProperty.mutateAsync({ name, address, image_url: imageUrl });
       const successMessage = type === 'property' ? 'Propriedade adicionada!' : 
                             type === 'car' ? 'Carro adicionado!' : 'Moto adicionada!';
       toast({
