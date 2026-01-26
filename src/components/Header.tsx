@@ -32,7 +32,8 @@ import {
   Home,
   Menu,
   Bike,
-  Car
+  Car,
+  Luggage
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -342,6 +343,15 @@ export const Header = () => {
                 CarVii
               </Button>
               <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/malavii')}
+                className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+              >
+                <Luggage className="w-4 h-4" />
+                MalaVii
+              </Button>
+              <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleActivityLog}
@@ -440,6 +450,15 @@ export const Header = () => {
                       <Car className="w-5 h-5 text-indigo-500" />
                     </div>
                     <span className="font-medium text-indigo-600">CarVii</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => navigate('/malavii')}
+                    className="py-3 px-4 rounded-lg hover:bg-amber-500/10"
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500/15 mr-3">
+                      <Luggage className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <span className="font-medium text-amber-600">MalaVii</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={toggleActivityLog}
