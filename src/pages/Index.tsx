@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,6 +24,7 @@ import { AssistantMessageAlert } from "@/components/AssistantMessageAlert";
 import { TrialExpiredBlock } from "@/components/TrialExpiredBlock";
 import { TrialExpiringWarning } from "@/components/TrialExpiringWarning";
 import { TrialStatusBadge } from "@/components/TrialStatusBadge";
+import { DashboardTour } from "@/components/dashboard/DashboardTour";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -94,6 +95,7 @@ const Index = () => {
   const [connectedVisitors, setConnectedVisitors] = useState<Record<string, string>>({}); // propertyId -> roomName
   const [lastProtocolNumber, setLastProtocolNumber] = useState<string | null>(null);
   const [showProtocolDialog, setShowProtocolDialog] = useState(false);
+  const [showDashboardTour, setShowDashboardTour] = useState(false);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -1156,10 +1158,18 @@ const Index = () => {
               Sua portaria na{" "}
               <span className="gradient-text">palma da mão</span>
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-4">
               Gerencie múltiplos endereços, atenda visitantes de qualquer lugar
               e mantenha sua casa segura com videochamadas instantâneas.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDashboardTour(true)}
+              className="gap-2"
+            >
+              <Play className="w-4 h-4" /> Ver tour do sistema
+            </Button>
           </motion.section>
 
           {/* Stats */}
@@ -1814,6 +1824,18 @@ const Index = () => {
       
       {/* Install App Dialog */}
       <InstallAppDialog />
+      
+      {/* Dashboard Tour */}
+      <DashboardTour 
+        isOpen={showDashboardTour} 
+        onClose={() => setShowDashboardTour(false)}
+        onComplete={() => {
+          toast({
+            title: "Tour concluído! 🎉",
+            description: "Agora você conhece todas as funcionalidades do DoorVII",
+          });
+        }}
+      />
     </div>
   );
 };
