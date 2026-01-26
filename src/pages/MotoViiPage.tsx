@@ -46,6 +46,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import nfcMotoStickerImage from "@/assets/nfc-moto-sticker.png";
+import nfcMotoStickerRoundImage from "@/assets/nfc-moto-sticker-round.png";
 
 const MotoViiPage = () => {
   const { toast } = useToast();
@@ -63,6 +64,7 @@ const MotoViiPage = () => {
   // Preview dialog state
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("medium");
+  const [selectedStickerType, setSelectedStickerType] = useState<"rectangular" | "round">("rectangular");
   
   // Purchase links state
   interface PurchaseLink {
@@ -87,12 +89,22 @@ const MotoViiPage = () => {
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
   
-  const stickerSizes = [
+  const rectangularStickerSizes = [
     { id: "small", name: "Pequeno", dimensions: "6x3 cm (2.4x1.2\")", pixels: { w: 240, h: 135 } },
     { id: "medium", name: "Médio", dimensions: "10x5 cm (3.9x2\")", pixels: { w: 400, h: 225 } },
     { id: "large", name: "Grande", dimensions: "14x7 cm (5.5x2.8\")", pixels: { w: 560, h: 315 } },
     { id: "xlarge", name: "Extra Grande", dimensions: "20x10 cm (7.9x3.9\")", pixels: { w: 800, h: 450 } },
   ];
+  
+  const roundStickerSizes = [
+    { id: "small", name: "Pequeno", dimensions: "5x5 cm (2x2\")", pixels: { w: 200, h: 200 } },
+    { id: "medium", name: "Médio", dimensions: "8x8 cm (3.1x3.1\")", pixels: { w: 320, h: 320 } },
+    { id: "large", name: "Grande", dimensions: "10x10 cm (3.9x3.9\")", pixels: { w: 400, h: 400 } },
+    { id: "xlarge", name: "Extra Grande", dimensions: "15x15 cm (5.9x5.9\")", pixels: { w: 600, h: 600 } },
+  ];
+  
+  const stickerSizes = selectedStickerType === "round" ? roundStickerSizes : rectangularStickerSizes;
+  const currentStickerImage = selectedStickerType === "round" ? nfcMotoStickerRoundImage : nfcMotoStickerImage;
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
   const propertyAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId);
@@ -258,6 +270,7 @@ const MotoViiPage = () => {
   const handleDownloadSticker = () => {
     const size = stickerSizes.find(s => s.id === selectedSize);
     const pixels = size?.pixels || { w: 400, h: 225 };
+    const stickerTypeLabel = selectedStickerType === "round" ? "redondo" : "retangular";
     
     // Create canvas to resize
     const canvas = document.createElement('canvas');
@@ -268,8 +281,8 @@ const MotoViiPage = () => {
     if (!ctx) {
       // Fallback to direct download
       const link = document.createElement('a');
-      link.href = nfcMotoStickerImage;
-      link.download = `motovii-${selectedProperty?.name || 'veiculo'}-${size?.dimensions || '10x5cm'}.png`;
+      link.href = currentStickerImage;
+      link.download = `motovii-${stickerTypeLabel}-${selectedProperty?.name || 'veiculo'}-${size?.dimensions || '10x5cm'}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -283,19 +296,19 @@ const MotoViiPage = () => {
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `motovii-${selectedProperty?.name || 'veiculo'}-${size?.dimensions || '10x5cm'}.png`;
+      link.download = `motovii-${stickerTypeLabel}-${selectedProperty?.name || 'veiculo'}-${size?.dimensions || '10x5cm'}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
       toast({
         title: "Imagem baixada!",
-        description: `Adesivo MotoVii ${size?.dimensions || ''} salvo com sucesso.`,
+        description: `Adesivo MotoVii ${stickerTypeLabel} ${size?.dimensions || ''} salvo com sucesso.`,
       });
       
       setShowPreviewDialog(false);
     };
-    img.src = nfcMotoStickerImage;
+    img.src = currentStickerImage;
   };
 
   if (propertiesLoading) {
@@ -445,20 +458,53 @@ const MotoViiPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
+            {/* Sticker Type Selector */}
+            <div className="flex gap-2 mb-6 w-full max-w-xs">
+              <button
+                onClick={() => {
+                  setSelectedStickerType("rectangular");
+                  setSelectedSize("medium");
+                }}
+                className={`flex-1 p-3 rounded-lg border-2 transition-all text-center ${
+                  selectedStickerType === "rectangular"
+                    ? 'border-teal-500 bg-teal-500/10'
+                    : 'border-border hover:border-teal-500/50'
+                }`}
+              >
+                <div className="w-12 h-6 mx-auto mb-1 bg-gradient-to-r from-blue-900 to-teal-500 rounded" />
+                <p className="text-xs font-medium">Retangular</p>
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedStickerType("round");
+                  setSelectedSize("medium");
+                }}
+                className={`flex-1 p-3 rounded-lg border-2 transition-all text-center ${
+                  selectedStickerType === "round"
+                    ? 'border-teal-500 bg-teal-500/10'
+                    : 'border-border hover:border-teal-500/50'
+                }`}
+              >
+                <div className="w-8 h-8 mx-auto mb-1 bg-gradient-to-br from-blue-900 to-teal-500 rounded-full" />
+                <p className="text-xs font-medium">Redondo</p>
+              </button>
+            </div>
+            
             <motion.div
+              key={selectedStickerType}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="relative mb-6"
             >
               <img
-                src={nfcMotoStickerImage}
+                src={currentStickerImage}
                 alt="Adesivo MotoVii NFC"
-                className="w-80 h-auto rounded-2xl shadow-2xl shadow-teal-500/30"
+                className={`${selectedStickerType === "round" ? "w-64 rounded-full" : "w-80 rounded-2xl"} h-auto shadow-2xl shadow-teal-500/30`}
               />
               
               {/* Animated NFC waves */}
               <motion.div
-                className="absolute left-12 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none"
+                className={`absolute ${selectedStickerType === "round" ? "left-1/2 top-1/2 -translate-x-1/2" : "left-12 top-1/2"} -translate-y-1/2 flex items-center justify-center pointer-events-none`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -514,22 +560,52 @@ const MotoViiPage = () => {
                 </DialogHeader>
                 
                 <div className="space-y-6">
+                  {/* Sticker Type Selector in Dialog */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedStickerType("rectangular");
+                        setSelectedSize("medium");
+                      }}
+                      className={`flex-1 p-2 rounded-lg border-2 transition-all text-center ${
+                        selectedStickerType === "rectangular"
+                          ? 'border-teal-500 bg-teal-500/10'
+                          : 'border-border hover:border-teal-500/50'
+                      }`}
+                    >
+                      <p className="text-sm font-medium">Retangular</p>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedStickerType("round");
+                        setSelectedSize("medium");
+                      }}
+                      className={`flex-1 p-2 rounded-lg border-2 transition-all text-center ${
+                        selectedStickerType === "round"
+                          ? 'border-teal-500 bg-teal-500/10'
+                          : 'border-border hover:border-teal-500/50'
+                      }`}
+                    >
+                      <p className="text-sm font-medium">Redondo</p>
+                    </button>
+                  </div>
+                  
                   {/* Size Preview */}
                   <div className="flex justify-center">
                     <motion.div
-                      key={selectedSize}
+                      key={`${selectedStickerType}-${selectedSize}`}
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       className="relative"
                     >
                       <img
-                        src={nfcMotoStickerImage}
+                        src={currentStickerImage}
                         alt="Preview do Adesivo MotoVii"
                         style={{
-                          width: Math.min((stickerSizes.find(s => s.id === selectedSize)?.pixels.w || 400) / 2, 280),
+                          width: Math.min((stickerSizes.find(s => s.id === selectedSize)?.pixels.w || 400) / 2, 200),
                           height: 'auto'
                         }}
-                        className="rounded-xl shadow-lg border-2 border-dashed border-muted"
+                        className={`${selectedStickerType === "round" ? "rounded-full" : "rounded-xl"} shadow-lg border-2 border-dashed border-muted`}
                       />
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-teal-600 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
                         {stickerSizes.find(s => s.id === selectedSize)?.dimensions}
