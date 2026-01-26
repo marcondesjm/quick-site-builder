@@ -29,13 +29,13 @@ Deno.serve(async (req) => {
     const demoUser = existingUsers?.users?.find(u => u.email === demoEmail);
 
     if (demoUser) {
-      // Update existing demo user to have never-expiring trial
-      const neverExpireDate = new Date();
-      neverExpireDate.setFullYear(neverExpireDate.getFullYear() + 100);
+      // Update existing demo user to have 45-day trial period
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 45);
       
       await supabaseAdmin
         .from("profiles")
-        .update({ trial_ends_at: neverExpireDate.toISOString() })
+        .update({ trial_ends_at: trialEndDate.toISOString() })
         .eq("user_id", demoUser.id);
 
       return new Response(
@@ -62,16 +62,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create a demo property for the user and set trial to never expire
+    // Create a demo property for the user and set trial to 45 days
     if (data.user) {
-      // Set trial_ends_at to 100 years from now (effectively never expires)
-      const neverExpireDate = new Date();
-      neverExpireDate.setFullYear(neverExpireDate.getFullYear() + 100);
+      // Set trial_ends_at to 45 days from now
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 45);
       
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
         .update({
-          trial_ends_at: neverExpireDate.toISOString(),
+          trial_ends_at: trialEndDate.toISOString(),
           full_name: "Usuário Demo",
         })
         .eq("user_id", data.user.id);
