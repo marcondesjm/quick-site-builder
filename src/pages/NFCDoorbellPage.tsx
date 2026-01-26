@@ -26,8 +26,17 @@ import {
   ShoppingCart,
   Plus,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Eye,
+  Maximize2
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { 
   Select,
   SelectContent,
@@ -78,6 +87,17 @@ const NFCDoorbellPage = () => {
   const [showAddLink, setShowAddLink] = useState(false);
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
+  
+  // Preview dialog state
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>("medium");
+  
+  const stickerSizes = [
+    { id: "small", name: "Pequeno", dimensions: "5x5 cm", pixels: 200 },
+    { id: "medium", name: "Médio", dimensions: "8x8 cm", pixels: 320 },
+    { id: "large", name: "Grande", dimensions: "10x10 cm", pixels: 400 },
+    { id: "xlarge", name: "Extra Grande", dimensions: "15x15 cm", pixels: 600 },
+  ];
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
   const propertyAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId);
@@ -247,18 +267,47 @@ const NFCDoorbellPage = () => {
     });
   };
   
-  const handleDownloadSticker = () => {
-    const link = document.createElement('a');
-    link.href = nfcStickerImage;
-    link.download = `campainha-nfc-${selectedProperty?.name || 'doorvii'}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadSticker = (customPixels?: number) => {
+    const size = stickerSizes.find(s => s.id === selectedSize);
+    const pixels = customPixels || size?.pixels || 320;
     
-    toast({
-      title: "Imagem baixada!",
-      description: "Use esta imagem para criar seu adesivo NFC.",
-    });
+    // Create canvas to resize
+    const canvas = document.createElement('canvas');
+    canvas.width = pixels;
+    canvas.height = pixels;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      // Fallback to direct download
+      const link = document.createElement('a');
+      link.href = nfcStickerImage;
+      link.download = `campainha-nfc-${selectedProperty?.name || 'doorvii'}-${size?.dimensions || '8x8cm'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, pixels, pixels);
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `campainha-nfc-${selectedProperty?.name || 'doorvii'}-${size?.dimensions || '8x8cm'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Imagem baixada!",
+        description: `Adesivo ${size?.dimensions || ''} salvo com sucesso.`,
+      });
+      
+      setShowPreviewDialog(false);
+    };
+    img.src = nfcStickerImage;
   };
   
   // Generate personalized sticker with property name
@@ -547,11 +596,11 @@ const NFCDoorbellPage = () => {
             
             <div className="flex flex-wrap gap-3 justify-center mb-6">
               <Button
-                onClick={handleDownloadSticker}
+                onClick={() => setShowPreviewDialog(true)}
                 className="gap-2 bg-blue-600 hover:bg-blue-700"
               >
-                <Download className="h-4 w-4" />
-                Baixar Padrão
+                <Eye className="h-4 w-4" />
+                Preview e Download
               </Button>
               
               <Button
@@ -563,6 +612,80 @@ const NFCDoorbellPage = () => {
                 Compartilhar
               </Button>
             </div>
+            
+            {/* Preview Dialog */}
+            <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Maximize2 className="h-5 w-5 text-blue-500" />
+                    Preview do Adesivo
+                  </DialogTitle>
+                  <DialogDescription>
+                    Escolha o tamanho desejado para impressão
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Size Preview */}
+                  <div className="flex justify-center">
+                    <motion.div
+                      key={selectedSize}
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="relative"
+                    >
+                      <img
+                        src={nfcStickerImage}
+                        alt="Preview do Adesivo NFC"
+                        style={{
+                          width: stickerSizes.find(s => s.id === selectedSize)?.pixels 
+                            ? Math.min(stickerSizes.find(s => s.id === selectedSize)!.pixels / 2, 200) 
+                            : 160,
+                          height: 'auto'
+                        }}
+                        className="rounded-xl shadow-lg border-2 border-dashed border-muted"
+                      />
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                        {stickerSizes.find(s => s.id === selectedSize)?.dimensions}
+                      </div>
+                    </motion.div>
+                  </div>
+                  
+                  {/* Size Selector */}
+                  <div className="space-y-2">
+                    <Label>Tamanho do Adesivo</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {stickerSizes.map((size) => (
+                        <button
+                          key={size.id}
+                          onClick={() => setSelectedSize(size.id)}
+                          className={`p-3 rounded-lg border-2 transition-all text-left ${
+                            selectedSize === size.id
+                              ? 'border-blue-500 bg-blue-500/10'
+                              : 'border-border hover:border-blue-500/50'
+                          }`}
+                        >
+                          <p className="font-medium">{size.name}</p>
+                          <p className="text-xs text-muted-foreground">{size.dimensions}</p>
+                          <p className="text-xs text-muted-foreground">{size.pixels}x{size.pixels}px</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Download Button */}
+                  <Button
+                    onClick={() => handleDownloadSticker()}
+                    className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                    size="lg"
+                  >
+                    <Download className="h-5 w-5" />
+                    Baixar Adesivo ({stickerSizes.find(s => s.id === selectedSize)?.dimensions})
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             
             {/* Personalized Sticker Section */}
             <div className="w-full border-t pt-6">
