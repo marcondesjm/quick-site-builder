@@ -29,7 +29,8 @@ import {
   ChevronUp,
   ChevronDown,
   FileText,
-  Nfc
+  Nfc,
+  Bike
 } from "lucide-react";
 import { IncomingCall } from "@/components/IncomingCall";
 import { useDoorbellListener } from "@/hooks/useDoorbellListener";
@@ -1612,6 +1613,10 @@ const QRCodePage = () => {
             <Button variant="outline" size="sm" onClick={() => navigate('/nfc')} className="gap-1 border-blue-500/50 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950">
               <Nfc className="w-4 h-4" />
               <span className="hidden sm:inline">NFC</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/motovii')} className="gap-1 border-teal-500/50 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-950">
+              <Bike className="w-4 h-4" />
+              <span className="hidden sm:inline">MotoVii</span>
             </Button>
             <Button variant="default" size="sm" onClick={() => navigate('/dashboard')}>
               <Home className="w-4 h-4" />
