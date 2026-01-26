@@ -18,6 +18,7 @@ import {
   Circle,
   Bike,
   Car,
+  Luggage,
 } from "lucide-react";
 
 interface ShowcaseItem {
@@ -285,6 +286,37 @@ const showcaseItems: ShowcaseItem[] = [
         <div className="absolute bottom-4 left-4 right-4">
           <Badge className="bg-indigo-500/20 text-indigo-400">
             🚗 Adesivo NFC para Carro
+          </Badge>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 9,
+    icon: Luggage,
+    title: "MalaVii - Adesivo para Bagagens",
+    description: "Proteja sua mala de viagem com MalaVii. Em caso de extravio, qualquer pessoa pode ligar para você aproximando o celular.",
+    features: ["Recupere malas perdidas", "Funciona em aeroportos", "Privacidade total", "Contato instantâneo"],
+    gradient: "from-amber-500 to-orange-500",
+    mockup: (
+      <div className="relative w-full h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden flex items-center justify-center">
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="relative"
+        >
+          <div className="w-32 h-32 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+            <Luggage className="w-16 h-16 text-white" />
+          </div>
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute inset-0 border-4 border-amber-400 rounded-full"
+          />
+        </motion.div>
+        <div className="absolute bottom-4 left-4 right-4">
+          <Badge className="bg-amber-500/20 text-amber-400">
+            🧳 Adesivo NFC para Mala
           </Badge>
         </div>
       </div>

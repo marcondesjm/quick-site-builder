@@ -19,6 +19,7 @@ import {
   Package,
   Smartphone,
   CheckCircle,
+  Luggage,
 } from "lucide-react";
 
 interface TourStep {
@@ -381,6 +382,66 @@ const tourSteps: TourStep[] = [
           <div className="flex-1 bg-red-500/20 rounded-lg p-2 text-center">
             <span className="text-white text-xs">🔒 Trancar</span>
           </div>
+        </motion.div>
+      </div>
+    ),
+  },
+  {
+    id: 10,
+    icon: Luggage,
+    title: "MalaVii - Bagagens de Viagem",
+    description: "Cole um adesivo NFC na sua mala. Em caso de extravio, qualquer pessoa pode ligar para você aproximando o celular.",
+    tips: ["Recupere malas perdidas", "Funciona em aeroportos do mundo todo", "Privacidade do seu número protegida"],
+    gradient: "from-amber-500 to-orange-500",
+    visual: (
+      <div className="space-y-4">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="flex justify-center"
+        >
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="relative"
+          >
+            <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+              <Luggage className="w-14 h-14 text-white" />
+            </div>
+            <motion.div
+              animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="absolute inset-0 border-4 border-amber-400 rounded-full"
+            />
+          </motion.div>
+        </motion.div>
+        <div className="grid grid-cols-2 gap-2">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white/10 rounded-lg p-3 text-center"
+          >
+            <span className="text-2xl mb-1 block">✈️</span>
+            <p className="text-white/80 text-xs">Aeroportos</p>
+          </motion.div>
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white/10 rounded-lg p-3 text-center"
+          >
+            <span className="text-2xl mb-1 block">🏨</span>
+            <p className="text-white/80 text-xs">Hotéis</p>
+          </motion.div>
+        </div>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="bg-amber-500/20 rounded-lg p-2 text-center"
+        >
+          <span className="text-white text-xs">📱 Aproxime o celular → Ligue para o dono</span>
         </motion.div>
       </div>
     ),
