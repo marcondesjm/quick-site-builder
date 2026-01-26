@@ -17,6 +17,7 @@ import {
   Pause,
   Circle,
   Bike,
+  Car,
 } from "lucide-react";
 
 interface ShowcaseItem {
@@ -253,6 +254,37 @@ const showcaseItems: ShowcaseItem[] = [
         <div className="absolute bottom-4 left-4 right-4">
           <Badge className="bg-teal-500/20 text-teal-400">
             🏍️ Adesivo NFC para Moto
+          </Badge>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 8,
+    icon: Car,
+    title: "CarVii - Adesivo para Carros",
+    description: "Videochamadas seguras para seu carro. Ideal para estacionamento, acidentes ou assistência na estrada. Proteja seu veículo com privacidade total.",
+    features: ["Contato em estacionamento", "Notificação de acidentes", "Privacidade do número", "Assistência na estrada"],
+    gradient: "from-indigo-500 to-purple-500",
+    mockup: (
+      <div className="relative w-full h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl overflow-hidden flex items-center justify-center">
+        <motion.div
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="relative"
+        >
+          <div className="w-32 h-32 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+            <Car className="w-16 h-16 text-white" />
+          </div>
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute inset-0 border-4 border-indigo-400 rounded-full"
+          />
+        </motion.div>
+        <div className="absolute bottom-4 left-4 right-4">
+          <Badge className="bg-indigo-500/20 text-indigo-400">
+            🚗 Adesivo NFC para Carro
           </Badge>
         </div>
       </div>
