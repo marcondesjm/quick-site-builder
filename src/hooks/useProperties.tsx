@@ -45,7 +45,7 @@ export function useAddProperty() {
           name: property.name,
           address: property.address,
           image_url: property.image_url || null,
-          is_online: false
+          is_online: true
         })
         .select()
         .single();
