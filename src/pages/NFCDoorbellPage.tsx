@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useProperties } from "@/hooks/useProperties";
 import { useAccessCodes } from "@/hooks/useAccessCodes";
@@ -18,7 +20,9 @@ import {
   Check,
   AlertCircle,
   Nfc,
-  QrCode
+  QrCode,
+  Pencil,
+  Sparkles
 } from "lucide-react";
 import { 
   Select,
@@ -43,9 +47,20 @@ const NFCDoorbellPage = () => {
   const [copied, setCopied] = useState(false);
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [nfcWriting, setNfcWriting] = useState(false);
+  const [customPropertyName, setCustomPropertyName] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
   const propertyAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId);
+  
+  // Update custom property name when property changes
+  useEffect(() => {
+    if (selectedProperty?.name) {
+      setCustomPropertyName(selectedProperty.name);
+    }
+  }, [selectedProperty?.name]);
   
   // Check NFC support
   useEffect(() => {
@@ -167,6 +182,153 @@ const NFCDoorbellPage = () => {
     });
   };
   
+  // Generate personalized sticker with property name
+  const generatePersonalizedSticker = async () => {
+    setIsGenerating(true);
+    
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // Load the base sticker image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = nfcStickerImage;
+      });
+      
+      // Set canvas size (high resolution)
+      const scale = 2;
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      
+      // Draw the base image
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Add property name banner at the bottom
+      const bannerHeight = 80 * scale;
+      const bannerY = canvas.height - bannerHeight - 40 * scale;
+      
+      // Draw semi-transparent banner background
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.beginPath();
+      ctx.roundRect(20 * scale, bannerY, canvas.width - 40 * scale, bannerHeight, 16 * scale);
+      ctx.fill();
+      
+      // Draw property name
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Calculate font size to fit
+      let fontSize = 32 * scale;
+      ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+      
+      const maxWidth = canvas.width - 80 * scale;
+      while (ctx.measureText(customPropertyName).width > maxWidth && fontSize > 16 * scale) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+      }
+      
+      // Add text shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 4 * scale;
+      ctx.shadowOffsetX = 2 * scale;
+      ctx.shadowOffsetY = 2 * scale;
+      
+      ctx.fillText(customPropertyName, canvas.width / 2, bannerY + bannerHeight / 2);
+      
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Download the personalized sticker
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `campainha-nfc-${customPropertyName.replace(/\s+/g, '-').toLowerCase()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Adesivo personalizado criado!",
+        description: `Adesivo com "${customPropertyName}" foi baixado.`,
+      });
+    } catch (error) {
+      console.error('Error generating sticker:', error);
+      toast({
+        title: "Erro ao gerar adesivo",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  
+  // Update preview canvas
+  useEffect(() => {
+    const updatePreview = async () => {
+      const canvas = previewCanvasRef.current;
+      if (!canvas || !customPropertyName) return;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        // Set canvas size for preview
+        canvas.width = 256;
+        canvas.height = (img.height / img.width) * 256;
+        
+        // Draw the base image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Add property name banner at the bottom
+        const bannerHeight = 32;
+        const bannerY = canvas.height - bannerHeight - 16;
+        
+        // Draw semi-transparent banner background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.beginPath();
+        ctx.roundRect(8, bannerY, canvas.width - 16, bannerHeight, 6);
+        ctx.fill();
+        
+        // Draw property name
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Calculate font size to fit
+        let fontSize = 14;
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+        
+        const maxWidth = canvas.width - 32;
+        while (ctx.measureText(customPropertyName).width > maxWidth && fontSize > 8) {
+          fontSize -= 1;
+          ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+        }
+        
+        ctx.fillText(customPropertyName, canvas.width / 2, bannerY + bannerHeight / 2);
+      };
+      
+      img.src = nfcStickerImage;
+    };
+    
+    updatePreview();
+  }, [customPropertyName]);
+
   if (propertiesLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-background flex items-center justify-center">
@@ -264,7 +426,7 @@ const NFCDoorbellPage = () => {
               Adesivo NFC
             </CardTitle>
             <CardDescription>
-              Baixe o adesivo e cole na sua porta com uma tag NFC por trás
+              Baixe o adesivo padrão ou crie um personalizado com o nome da propriedade
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
@@ -304,13 +466,13 @@ const NFCDoorbellPage = () => {
               </motion.div>
             </motion.div>
             
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center mb-6">
               <Button
                 onClick={handleDownloadSticker}
                 className="gap-2 bg-blue-600 hover:bg-blue-700"
               >
                 <Download className="h-4 w-4" />
-                Baixar Adesivo
+                Baixar Padrão
               </Button>
               
               <Button
@@ -322,6 +484,81 @@ const NFCDoorbellPage = () => {
                 Compartilhar
               </Button>
             </div>
+            
+            {/* Personalized Sticker Section */}
+            <div className="w-full border-t pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 text-amber-500" />
+                <h3 className="font-semibold text-lg">Adesivo Personalizado</h3>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Customization Form */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="propertyName" className="flex items-center gap-2">
+                      <Pencil className="h-4 w-4" />
+                      Nome da Propriedade
+                    </Label>
+                    <Input
+                      id="propertyName"
+                      value={customPropertyName}
+                      onChange={(e) => setCustomPropertyName(e.target.value)}
+                      placeholder="Ex: Casa da Praia"
+                      className="text-lg"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      O nome aparecerá no adesivo para identificar a propriedade
+                    </p>
+                  </div>
+                  
+                  <Button
+                    onClick={generatePersonalizedSticker}
+                    disabled={isGenerating || !customPropertyName.trim()}
+                    className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                    size="lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Sparkles className="h-5 w-5" />
+                        </motion.div>
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5" />
+                        Gerar Adesivo Personalizado
+                      </>
+                    )}
+                  </Button>
+                </div>
+                
+                {/* Preview */}
+                <div className="flex flex-col items-center">
+                  <p className="text-sm text-muted-foreground mb-2">Pré-visualização:</p>
+                  <div className="relative rounded-xl overflow-hidden shadow-lg border-2 border-dashed border-muted">
+                    <canvas
+                      ref={previewCanvasRef}
+                      className="w-48 h-auto"
+                    />
+                    {!customPropertyName && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
+                        <p className="text-sm text-muted-foreground text-center px-4">
+                          Digite o nome da propriedade para ver a prévia
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Hidden canvas for generation */}
+            <canvas ref={canvasRef} className="hidden" />
           </CardContent>
         </Card>
         
