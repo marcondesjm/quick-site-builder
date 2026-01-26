@@ -93,10 +93,10 @@ const NFCDoorbellPage = () => {
   const [selectedSize, setSelectedSize] = useState<string>("medium");
   
   const stickerSizes = [
-    { id: "small", name: "Pequeno", dimensions: "5x5 cm", pixels: 200 },
-    { id: "medium", name: "Médio", dimensions: "8x8 cm", pixels: 320 },
-    { id: "large", name: "Grande", dimensions: "10x10 cm", pixels: 400 },
-    { id: "xlarge", name: "Extra Grande", dimensions: "15x15 cm", pixels: 600 },
+    { id: "small", name: "Pequeno", dimensions: "5x5 cm (2x2\")", pixels: 200 },
+    { id: "medium", name: "Médio", dimensions: "8x8 cm (3.1x3.1\")", pixels: 320 },
+    { id: "large", name: "Grande", dimensions: "10x10 cm (3.9x3.9\")", pixels: 400 },
+    { id: "xlarge", name: "Extra Grande", dimensions: "15x15 cm (5.9x5.9\")", pixels: 600 },
   ];
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
