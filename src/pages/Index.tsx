@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play, Smartphone } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play, Smartphone, Bike } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -1371,6 +1371,14 @@ const Index = () => {
                 >
                   <Smartphone className="w-4 h-4" />
                   NFC
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/motovii")}
+                  className="border-teal-500/50 text-teal-600 hover:bg-teal-500/10"
+                >
+                  <Bike className="w-4 h-4" />
+                  MotoVii
                 </Button>
               </div>
             </div>
