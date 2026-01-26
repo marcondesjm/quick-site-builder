@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -75,6 +76,7 @@ const isVideoUrl = (url: string): boolean => {
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: trialStatus, isLoading: trialLoading } = useTrialStatus();
   const { toast } = useToast();
   const [showQRCode, setShowQRCode] = useState(false);
@@ -1354,14 +1356,23 @@ const Index = () => {
                   Compartilhe QR Codes para visitantes acessarem facilmente
                 </p>
               </div>
-              <Button 
-                variant="default" 
-                onClick={handleGenerateQR}
-                disabled={generateCode.isPending}
-              >
-                <QrCode className="w-4 h-4" />
-                {showQRCode ? "Ocultar QR Code" : "Gerar QR Code"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="default" 
+                  onClick={handleGenerateQR}
+                  disabled={generateCode.isPending}
+                >
+                  <QrCode className="w-4 h-4" />
+                  {showQRCode ? "Ocultar QR Code" : "Gerar QR Code"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/nfc")}
+                >
+                  <Smartphone className="w-4 h-4" />
+                  NFC
+                </Button>
+              </div>
             </div>
 
             <AnimatePresence>
