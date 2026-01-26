@@ -499,7 +499,7 @@ const MotoViiPage = () => {
               <img
                 src={currentStickerImage}
                 alt="Adesivo MotoVii NFC"
-                className={`${selectedStickerType === "round" ? "w-64 rounded-full" : "w-80 rounded-2xl"} h-auto shadow-2xl shadow-teal-500/30`}
+                className={`${selectedStickerType === "round" ? "w-72 rounded-full" : "w-80 rounded-2xl"} h-auto shadow-2xl shadow-teal-500/30`}
               />
               
               {/* Animated NFC waves */}
