@@ -13,6 +13,7 @@ import BoxControl from "./pages/BoxControl";
 import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
+import NFCDoorbellPage from "./pages/NFCDoorbellPage";
 import Install from "./pages/Install";
 import Plans from "./pages/Plans";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -84,6 +85,16 @@ const App = () => (
               <Route path="/qrcode/:propertyId" element={
                 <ProtectedRoute>
                   <QRCodePage />
+                </ProtectedRoute>
+              } />
+              <Route path="/nfc" element={
+                <ProtectedRoute>
+                  <NFCDoorbellPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/nfc/:propertyId" element={
+                <ProtectedRoute>
+                  <NFCDoorbellPage />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
