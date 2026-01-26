@@ -80,17 +80,34 @@ Deno.serve(async (req) => {
         console.error("Error updating demo profile:", profileError);
       }
 
-      const { error: propertyError } = await supabaseAdmin
-        .from("properties")
-        .insert({
+      // Create multiple demo properties
+      const demoProperties = [
+        {
           user_id: data.user.id,
           name: "Casa Demo",
           address: "Rua Exemplo, 123 - São Paulo, SP",
           visitor_always_connected: true,
-        });
+        },
+        {
+          user_id: data.user.id,
+          name: "Apartamento Centro",
+          address: "Av. Paulista, 1000, Apto 501 - São Paulo, SP",
+          visitor_always_connected: false,
+        },
+        {
+          user_id: data.user.id,
+          name: "Escritório Comercial",
+          address: "Rua Augusta, 500, Sala 302 - São Paulo, SP",
+          visitor_always_connected: true,
+        },
+      ];
+
+      const { error: propertyError } = await supabaseAdmin
+        .from("properties")
+        .insert(demoProperties);
 
       if (propertyError) {
-        console.error("Error creating demo property:", propertyError);
+        console.error("Error creating demo properties:", propertyError);
       }
     }
 
