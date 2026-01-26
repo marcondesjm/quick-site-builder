@@ -260,22 +260,22 @@ export default function Auth() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-center mb-10"
+          className="text-center mb-6"
         >
           <div className="relative inline-block">
             <motion.div
-              className="absolute -inset-8 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-2xl"
+              className="absolute -inset-4 rounded-full bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 blur-xl"
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             />
             <motion.img 
               src={doorviiLogo} 
               alt="DoorVII" 
-              className="h-20 sm:h-24 mx-auto mb-4 object-contain relative z-10"
-              initial={{ opacity: 0, scale: 0.5, y: -30 }}
+              className="h-14 sm:h-16 mx-auto mb-2 object-contain relative z-10"
+              initial={{ opacity: 0, scale: 0.5, y: -20 }}
               animate={{ 
                 opacity: 1, 
-                scale: [1, 1.03, 1], 
+                scale: [1, 1.02, 1], 
                 y: 0,
               }}
               transition={{ 
@@ -289,7 +289,7 @@ export default function Auth() {
                 }
               }}
               style={{ 
-                filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.6)) drop-shadow(0 0 60px rgba(0, 150, 255, 0.4))',
+                filter: 'drop-shadow(0 0 20px rgba(0, 212, 255, 0.5)) drop-shadow(0 0 40px rgba(0, 150, 255, 0.3))',
               }}
             />
           </div>
@@ -297,7 +297,7 @@ export default function Auth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-xl font-light tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-white bg-clip-text text-transparent"
+            className="text-base font-light tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-white bg-clip-text text-transparent"
           >
             Portaria Digital Inteligente
           </motion.p>
@@ -305,7 +305,7 @@ export default function Auth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-sm text-white/50 mt-3"
+            className="text-xs text-white/50 mt-2"
           >
             {isLogin ? 'Bem-vindo de volta! Entre na sua conta' : 'Comece agora! Crie sua conta grátis'}
           </motion.p>
@@ -322,35 +322,35 @@ export default function Auth() {
           <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-75" />
           
           <div 
-            className="relative rounded-3xl p-8 backdrop-blur-xl border border-white/10"
+            className="relative rounded-2xl p-6 backdrop-blur-xl border border-white/10"
             style={{ 
               background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+              boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
             }}
           >
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-5"
+                  className="space-y-4"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-white/80 text-sm font-medium">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-white/80 text-xs font-medium">
                       Nome completo <span className="text-cyan-400">*</span>
                     </Label>
                     <div className="relative group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-lg blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400/60" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/60" />
                         <Input
                           id="name"
                           type="text"
                           placeholder="Seu nome"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          className="pl-12 h-12 bg-white/5 border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
+                          className="pl-10 h-10 text-sm bg-white/5 border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
                           required
                         />
                       </div>
@@ -360,8 +360,8 @@ export default function Auth() {
                     )}
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-white/80 text-sm font-medium">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="text-white/80 text-xs font-medium">
                       WhatsApp <span className="text-cyan-400">*</span>
                     </Label>
                     <PhoneInput
@@ -373,21 +373,21 @@ export default function Auth() {
                 </motion.div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/80 text-sm font-medium">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-white/80 text-xs font-medium">
                   Email <span className="text-cyan-400">*</span>
                 </Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-lg blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400/60" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/60" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-12 bg-white/5 border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
+                      className="pl-10 h-10 text-sm bg-white/5 border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
                       required
                     />
                   </div>
@@ -397,29 +397,29 @@ export default function Auth() {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-white/80 text-sm font-medium">
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-white/80 text-xs font-medium">
                   Senha <span className="text-cyan-400">*</span>
                 </Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-xl blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 rounded-lg blur opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300" />
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400/60" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400/60" />
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-12 bg-white/5 border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
+                      className="pl-10 pr-10 h-10 text-sm bg-white/5 border-white/10 rounded-lg text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:ring-cyan-500/20 transition-all"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-cyan-400 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-cyan-400 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -467,20 +467,20 @@ export default function Auth() {
               >
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-base font-semibold rounded-xl relative overflow-hidden group"
+                  className="w-full h-10 text-sm font-semibold rounded-lg relative overflow-hidden group"
                   style={{
                     background: 'linear-gradient(135deg, #00d4ff 0%, #0099ff 50%, #0066ff 100%)',
-                    boxShadow: '0 10px 30px -10px rgba(0, 212, 255, 0.5)'
+                    boxShadow: '0 8px 24px -8px rgba(0, 212, 255, 0.5)'
                   }}
                   disabled={isLoading}
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                   {isLoading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
                   ) : (
                     <span className="flex items-center gap-2">
                       {isLogin ? 'Entrar' : 'Criar conta'}
-                      <Sparkles className="w-4 h-4" />
+                      <Sparkles className="w-3.5 h-3.5" />
                     </span>
                   )}
                 </Button>
@@ -493,9 +493,9 @@ export default function Auth() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="mt-4"
+                className="mt-3"
               >
-                <div className="relative flex items-center justify-center my-4">
+                <div className="relative flex items-center justify-center my-3">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/10"></div>
                   </div>
@@ -509,14 +509,14 @@ export default function Auth() {
                   <Button 
                     type="button"
                     onClick={handleDemoLogin}
-                    className="w-full h-11 text-sm font-medium rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/50 transition-all"
+                    className="w-full h-9 text-xs font-medium rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:border-amber-500/50 transition-all"
                     disabled={isDemoLoading || isLoading}
                   >
                     {isDemoLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-400/30 border-t-amber-400"></div>
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-amber-400/30 border-t-amber-400"></div>
                     ) : (
                       <span className="flex items-center gap-2">
-                        <Play className="w-4 h-4" />
+                        <Play className="w-3.5 h-3.5" />
                         Entrar como Demo
                       </span>
                     )}
@@ -525,13 +525,13 @@ export default function Auth() {
               </motion.div>
             )}
 
-            <div className="mt-6 text-center">
+            <div className="mt-4 text-center">
               <button
                 onClick={() => {
                   setIsLogin(!isLogin);
                   setErrors({});
                 }}
-                className="text-sm text-white/50 hover:text-white transition-colors"
+                className="text-xs text-white/50 hover:text-white transition-colors"
               >
                 {isLogin ? (
                   <>Não tem conta? <span className="text-cyan-400 font-medium">Cadastre-se grátis</span></>
