@@ -403,11 +403,11 @@ const NFCDoorbellPage = () => {
     }
   };
   
-  // Update preview canvas
+  // Update preview canvas - show sticker without property name banner by default
   useEffect(() => {
     const updatePreview = async () => {
       const canvas = previewCanvasRef.current;
-      if (!canvas || !customPropertyName) return;
+      if (!canvas) return;
       
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -420,42 +420,44 @@ const NFCDoorbellPage = () => {
         canvas.width = 256;
         canvas.height = (img.height / img.width) * 256;
         
-        // Draw the base image
+        // Draw the base image without property name
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // Add property name banner at the bottom
-        const bannerHeight = 32;
-        const bannerY = canvas.height - bannerHeight - 16;
-        
-        // Draw semi-transparent banner background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.beginPath();
-        ctx.roundRect(8, bannerY, canvas.width - 16, bannerHeight, 6);
-        ctx.fill();
-        
-        // Draw property name
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Calculate font size to fit
-        let fontSize = 14;
-        ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
-        
-        const maxWidth = canvas.width - 32;
-        while (ctx.measureText(customPropertyName).width > maxWidth && fontSize > 8) {
-          fontSize -= 1;
+        // Only add property name banner if user has typed a custom name
+        if (customPropertyName && customPropertyName !== selectedProperty?.name) {
+          const bannerHeight = 32;
+          const bannerY = canvas.height - bannerHeight - 16;
+          
+          // Draw semi-transparent banner background
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.beginPath();
+          ctx.roundRect(8, bannerY, canvas.width - 16, bannerHeight, 6);
+          ctx.fill();
+          
+          // Draw property name
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // Calculate font size to fit
+          let fontSize = 14;
           ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+          
+          const maxWidth = canvas.width - 32;
+          while (ctx.measureText(customPropertyName).width > maxWidth && fontSize > 8) {
+            fontSize -= 1;
+            ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+          }
+          
+          ctx.fillText(customPropertyName, canvas.width / 2, bannerY + bannerHeight / 2);
         }
-        
-        ctx.fillText(customPropertyName, canvas.width / 2, bannerY + bannerHeight / 2);
       };
       
       img.src = nfcStickerImage;
     };
     
     updatePreview();
-  }, [customPropertyName]);
+  }, [customPropertyName, selectedProperty?.name]);
 
   if (propertiesLoading) {
     return (
