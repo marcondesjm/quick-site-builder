@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play, Smartphone, Bike } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown, Copy, Check, FileText, Play, Smartphone, Bike, Car, Luggage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -1379,6 +1379,22 @@ const Index = () => {
                 >
                   <Bike className="w-4 h-4" />
                   MotoVii
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/carvii")}
+                  className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-500/10"
+                >
+                  <Car className="w-4 h-4" />
+                  CarVii
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/malavii")}
+                  className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                >
+                  <Luggage className="w-4 h-4" />
+                  MalaVii
                 </Button>
               </div>
             </div>
